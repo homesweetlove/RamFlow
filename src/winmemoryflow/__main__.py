@@ -89,6 +89,7 @@ def main() -> None:
     sub = ap.add_subparsers(dest="cmd")
     ui = sub.add_parser("ui", help="GUI/트레이 실행 (기본값)")
     ui.add_argument("--tray", action="store_true", help="트레이에서 시작")
+    ui.add_argument("--smoke-test", action="store_true", help=argparse.SUPPRESS)
     sub.add_parser("service", help="관리자 권한 서비스 실행")
     m = sub.add_parser("monitor", help="콘솔 실시간 모니터")
     m.add_argument("--count", type=int, default=10)
@@ -136,7 +137,7 @@ def main() -> None:
         print(json.dumps(scan_models(args.folder), ensure_ascii=False, indent=2))
     else:
         from .ui.app import run_ui
-        run_ui(start_hidden=getattr(args, "tray", False))
+        run_ui(start_hidden=getattr(args, "tray", False), smoke_test=getattr(args, "smoke_test", False))
 
 
 if __name__ == "__main__":

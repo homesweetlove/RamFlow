@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import sys
 
-from PySide6.QtWidgets import QApplication, QMessageBox
-from PySide6.QtCore import QLockFile
+from PySide6.QtWidgets import QApplication, QMessageBox, QLabel
+from PySide6.QtCore import QLockFile, QTimer
 from ..config.settings import data_dir
 
 from .backend import create_backend
@@ -13,12 +13,17 @@ from .tray import Tray
 from .widgets import STYLE, configure_fonts
 
 
-def run_ui(start_hidden: bool = False) -> None:
+def run_ui(start_hidden: bool = False, smoke_test: bool = False) -> None:
     app = QApplication(sys.argv)
     configure_fonts(app)
     app.setApplicationName("RamFlow")
     app.setQuitOnLastWindowClosed(False)    # 창을 닫아도 트레이에서 계속 동작
     app.setStyleSheet(STYLE)
+    if smoke_test:
+        label = QLabel("RamFlow GUI 시작 검증")
+        label.show()
+        QTimer.singleShot(150, app.quit)
+        sys.exit(app.exec())
     lock = QLockFile(str(data_dir() / "ui.lock"))
     lock.setStaleLockTime(0)
     if not lock.tryLock(0):

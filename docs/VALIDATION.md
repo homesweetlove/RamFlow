@@ -19,6 +19,8 @@
 
 `scripts/smoke_ui.py`는 Mock 상태로 8개 페이지를 렌더링합니다. `artifacts` 결과는 Git에 포함하지 않습니다.
 
+`scripts/verify_packaged.py`는 빌드된 GUI/CLI 실행파일에서 실제 Qt 창 생성 및 정상 종료를 확인합니다. 빌드 스크립트에서 필수 실행하며 시스템 변경을 수행하지 않습니다. System32를 빌드 DLL 검색 경로의 앞에 두어 다른 도구의 ICU DLL 혼입을 방지합니다.
+
 ## 실사용에서 추가 확인할 항목
 
 동일 작업을 대상으로 Dry Run, 실제 실행을 각각 여러 번 측정하세요. 8GB에서 Chrome + IDE + AI, 16GB에서 Docker + IDE + 브라우저, 게임 중 업데이트, 대용량 복사 등은 Mock 회귀가 있지만 모든 조합의 실제 하드웨어 성능을 검증한 것은 아닙니다.

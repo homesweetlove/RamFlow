@@ -1,6 +1,9 @@
 param([switch]$SkipTests)
 $ErrorActionPreference = 'Stop'
 $ramRoot = Split-Path -Parent $PSScriptRoot
+$ramBuildPath = $env:PATH
+# 타 도구(Poppler 등)의 ICU DLL이 Windows ICU를 가리지 않게 한다.
+$env:PATH = "$env:SystemRoot\System32;$ramBuildPath"
 Push-Location $ramRoot
 try {
     $env:RAMFLOW_HOME = Join-Path $ramRoot '.test-data'
@@ -12,8 +15,14 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'GUI build failed' }
     python -m PyInstaller --noconfirm --onedir --console --name RamFlow-cli --paths src --hidden-import win32timezone --hidden-import win32security --hidden-import win32pipe --hidden-import win32file --exclude-module tkinter --exclude-module matplotlib --exclude-module numpy scripts/cli.py
     if ($LASTEXITCODE -ne 0) { throw 'CLI build failed' }
+    $env:QT_QPA_PLATFORM = 'offscreen'
+    python scripts/verify_packaged.py
+    if ($LASTEXITCODE -ne 0) { throw 'Packaged GUI verification failed' }
+    python scripts/bundle_licenses.py dist/RamFlow dist/RamFlow-cli
+    if ($LASTEXITCODE -ne 0) { throw 'License bundling failed' }
     Copy-Item -LiteralPath README.md -Destination dist/RamFlow/README.md -Force
     Compress-Archive -Path dist/RamFlow,dist/RamFlow-cli -DestinationPath dist/RamFlow-0.2.0-windows-x64.zip -Force
 } finally {
+    $env:PATH = $ramBuildPath
     Pop-Location
 }
