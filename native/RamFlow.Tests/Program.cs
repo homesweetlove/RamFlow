@@ -130,10 +130,19 @@ if (args.Contains("--ipc")) {
             do { if (await fake.ReadAsync(buffer, timeout.Token) == 0) throw new IOException("Identity probe disconnected"); } while (!fake.IsMessageComplete);
             TokenImpersonationLevel observed = TokenImpersonationLevel.None;
             fake.RunAsClient(() => { using var identity = WindowsIdentity.GetCurrent(); observed = identity.ImpersonationLevel; });
+            await Task.Delay(100, timeout.Token); // Force an asynchronous read, matching the real WPF startup race.
             await fake.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(new { Ok = true, Data = true }), timeout.Token);
             return observed;
         });
-        Check(EnginePipe.Request<bool>(new("ping")), "Fake identity probe failed");
+        var blockedContext = new NonPumpingContext();
+        bool ping = await Task.Run(() => {
+            var previousContext = SynchronizationContext.Current;
+            SynchronizationContext.SetSynchronizationContext(blockedContext);
+            try { return EnginePipe.Request<bool>(new("ping")); }
+            finally { SynchronizationContext.SetSynchronizationContext(previousContext); }
+        }).WaitAsync(TimeSpan.FromSeconds(5));
+        Check(ping, "Fake identity probe failed");
+        Check(blockedContext.Posts == 0, "Synchronous IPC captured the UI context and would deadlock");
         Check(await reading == TokenImpersonationLevel.Identification, "Client delegated impersonation token to server");
     }
     using var mock = new MockResourceProvider(); using var engine = new Engine(mock, persist: false); engine.Tick();
@@ -155,4 +164,10 @@ if (args.Contains("--ipc")) {
         await server.WaitAsync(TimeSpan.FromSeconds(5));
     } finally { lifetime.Cancel(); }
     Console.WriteLine($"Native IPC verification: {passed} assertions passed.");
+}
+
+sealed class NonPumpingContext : SynchronizationContext
+{
+    public int Posts;
+    public override void Post(SendOrPostCallback callback, object? state) => Interlocked.Increment(ref Posts);
 }

@@ -37,6 +37,7 @@ public sealed class Engine : IDisposable
             if (!remote && File.Exists(helper)) {
                 var info = new System.Diagnostics.ProcessStartInfo(helper) { UseShellExecute = false, CreateNoWindow = true };
                 info.ArgumentList.Add("--serve"); info.ArgumentList.Add("--data-root"); info.ArgumentList.Add(root);
+                if (EnginePipe.VerificationNamespace is string scope) { info.ArgumentList.Add("--ipc-namespace"); info.ArgumentList.Add(scope); }
                 using var child = System.Diagnostics.Process.Start(info);
                 for (int attempt = 0; attempt < 40 && !remote; attempt++) { try { remote = EnginePipe.Request<bool>(new("ping"), 200); } catch { Thread.Sleep(50); } }
                 if (!remote) throw new IOException("분리 엔진 시작 실패. 로그를 확인하세요.");

@@ -18,6 +18,7 @@ def run(args, timeout=30):
         raise RuntimeError(result.stderr.decode(errors='replace') + result.stdout.decode(errors='replace'))
     return result.stdout
 run([app/'RamFlow.exe', '--smoke-test', '--screenshot', root/'artifacts'/'native-dashboard.png'])
+run([app/'RamFlow.exe', '--startup-check', '--data-root', data/'startup'], timeout=45)
 state = json.loads(run([app/'RamFlow.Service.exe', '--simulate']))
 assert state['Snapshot']['RamTotal'] > 0
 child = subprocess.Popen([str(app/'RamFlow.Service.exe'), '--serve', '--data-root', str(data/'engine')],

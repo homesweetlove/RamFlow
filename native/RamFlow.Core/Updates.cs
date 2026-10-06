@@ -8,7 +8,7 @@ namespace RamFlow.Core;
 public sealed record ReleaseInfo(string Version, string Page, string? Zip, string? Checksums);
 public static class Updates
 {
-    public const string CurrentVersion = "0.3.1";
+    public const string CurrentVersion = "0.3.2";
     public static async Task<ReleaseInfo> CheckAsync(CancellationToken token = default)
     {
         using var client = Client();
@@ -80,5 +80,5 @@ public static class Updates
         if (!File.Exists(Path.Combine(app, "RamFlow.exe")) || !File.Exists(Path.Combine(app, "Install.ps1"))) throw new IOException("업데이트 배포 구조 오류");
         return app;
     }
-    private static HttpClient Client() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(5) }; client.DefaultRequestHeaders.UserAgent.ParseAdd("RamFlow/0.3.1"); return client; }
+    private static HttpClient Client() { var client = new HttpClient { Timeout = TimeSpan.FromMinutes(5) }; client.DefaultRequestHeaders.UserAgent.ParseAdd("RamFlow/0.3.2"); return client; }
 }

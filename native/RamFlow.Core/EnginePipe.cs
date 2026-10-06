@@ -14,7 +14,17 @@ public static class EnginePipe
     [DllImport("kernel32.dll")] private static extern IntPtr LocalFree(IntPtr pointer);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] private static extern SafePipeHandle CreateNamedPipe(string name, uint openMode, uint mode, uint instances, uint output, uint input, uint timeout, ref SecurityAttributes security);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateFileW")] private static extern SafePipeHandle OpenPipe(string name, uint access, uint share, IntPtr security, uint creation, uint flags, IntPtr template);
-    public static string Name => "RamFlow.Native." + WindowsIdentity.GetCurrent().User!.Value;
+    public static string? VerificationNamespace { get; private set; }
+    private static string NamespaceSuffix => VerificationNamespace is string value ? ".Test." + value : "";
+    public static string Name => "RamFlow.Native." + WindowsIdentity.GetCurrent().User!.Value + NamespaceSuffix;
+    public static string EngineMutexName => "Local\\RamFlow.Native.Engine." + WindowsIdentity.GetCurrent().User!.Value + NamespaceSuffix;
+    public static void ConfigureVerificationNamespace(Guid value)
+    {
+        if (value == Guid.Empty) throw new ArgumentException("Verification namespace cannot be empty.");
+        string next = value.ToString("N");
+        if (VerificationNamespace is not null && VerificationNamespace != next) throw new InvalidOperationException("Verification namespace already configured.");
+        VerificationNamespace = next;
+    }
     private const int Limit = 1048576;
     public static T Request<T>(PipeRequest request, int milliseconds = 3000)
     {
@@ -104,7 +114,8 @@ public static class EnginePipe
     private static async Task<byte[]> Read(PipeStream pipe, CancellationToken token)
     {
         using var memory = new MemoryStream(); byte[] buffer = new byte[16384];
-        do { int count = await pipe.ReadAsync(buffer, token); if (count == 0) throw new EndOfStreamException(); if (memory.Length + count > Limit) throw new IOException("IPC 크기 제한 초과"); memory.Write(buffer, 0, count); } while (!pipe.IsMessageComplete);
+        // Request is synchronous on WPF's UI thread: the read continuation must never wait for that thread.
+        do { int count = await pipe.ReadAsync(buffer, token).ConfigureAwait(false); if (count == 0) throw new EndOfStreamException(); if (memory.Length + count > Limit) throw new IOException("IPC 크기 제한 초과"); memory.Write(buffer, 0, count); } while (!pipe.IsMessageComplete);
         return memory.ToArray();
     }
 }

@@ -77,6 +77,7 @@ public sealed class MainWindow : Window
         MinWidth = 900;
         MinHeight = 650;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        ShowInTaskbar = true;
         Background = UiTheme.Background;
         Foreground = UiTheme.Text;
         FontFamily = new FontFamily("Malgun Gothic");
@@ -633,7 +634,7 @@ public sealed class MainWindow : Window
     {
         if (AllowClose) { StopRefresh(); return; }
         e.Cancel = true;
-        Hide();
+        WindowState = WindowState.Minimized;
     }
 
     private static string Number(double value) => double.IsFinite(value) ? $"{Math.Max(0, value):0.0}%" : "미지원";

@@ -16,6 +16,9 @@ namespace RamFlow.UI;
 internal sealed class App : Application
 {
     private readonly bool _smoke;
+    private readonly bool _verify;
+    private readonly bool _startupCheck;
+    private readonly string? _dataRoot;
     private readonly string? _screenshot;
     private IResourceProvider? _provider;
     private Engine? _engine;
@@ -23,6 +26,7 @@ internal sealed class App : Application
     private Forms.NotifyIcon? _tray;
     private Forms.ContextMenuStrip? _menu;
     private System.Drawing.Icon? _icon;
+    private WindowActivation? _activation;
     private Forms.ToolStripMenuItem? _pausedItem;
     private Forms.ToolStripMenuItem? _dryRunItem;
     private Forms.ToolStripMenuItem[] _modeItems = [];
@@ -30,15 +34,18 @@ internal sealed class App : Application
     private int _cleaned;
     private bool _cleanupFailed;
 
-    internal App(bool smoke, string? screenshot)
+    internal App(bool smoke, string? screenshot, bool startupCheck = false, string? dataRoot = null)
     {
-        _smoke = smoke;
+        _smoke = smoke && !startupCheck;
+        _verify = smoke || startupCheck;
+        _startupCheck = startupCheck;
+        _dataRoot = dataRoot;
         _screenshot = screenshot;
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
         DispatcherUnhandledException += (_, e) =>
         {
             Console.Error.WriteLine(e.Exception);
-            if (!_smoke)
+            if (!_verify)
                 MessageBox.Show("오류가 발생하여 RamFlow를 종료합니다.\n" + e.Exception.Message,
                     "RamFlow", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
@@ -51,16 +58,20 @@ internal sealed class App : Application
         base.OnStartup(e);
         UiTheme.Install(this);
         _provider = _smoke ? new MockResourceProvider() : new WindowsResourceProvider();
-        _engine = new Engine(_provider, dataRoot: null, persist: !_smoke);
+        _engine = new Engine(_provider, dataRoot: _dataRoot, persist: !_smoke);
         if (!_smoke) _engine.ApplySettings(_engine.Settings with { DryRun = true });
-        _window = new MainWindow(_engine, () => ExitApplication(0), _smoke, RestartElevated) { Icon = BrandAssets.Logo };
-        _window.SourceInitialized += (_, _) => BrandAssets.ApplyWindowFrame(_window);
+        _window = new MainWindow(_engine, () => ExitApplication(0), _verify, RestartElevated) { Icon = BrandAssets.Logo };
+        _window.SourceInitialized += (_, _) =>
+        {
+            BrandAssets.ApplyWindowFrame(_window);
+            _activation = new WindowActivation(_window, _verify ? "RamFlow.UI.Test." + Environment.ProcessId : null);
+        };
         MainWindow = _window;
         _window.SettingsChanged += (_, _) => UpdateTray();
         _engine.Start();
         _window.Show();
         _window.RefreshState();
-        if (_smoke)
+        if (_verify)
         {
             _smokeTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle)
             {
@@ -69,7 +80,7 @@ internal sealed class App : Application
             _smokeTimer.Tick += SmokeFinished;
             _smokeTimer.Start();
         }
-        else CreateTray();
+        if (!_smoke) CreateTray();
         SessionEnding += (_, _) => Cleanup();
     }
 
@@ -180,7 +191,7 @@ internal sealed class App : Application
         _tray.Text = "RamFlow · " + (settings.Paused ? "일시 정지" : settings.DryRun ? "시뮬레이션" : "실제 적용");
     }
 
-    private void SmokeFinished(object? sender, EventArgs e)
+    private async void SmokeFinished(object? sender, EventArgs e)
     {
         _smokeTimer?.Stop();
         int code = 0;
@@ -189,10 +200,24 @@ internal sealed class App : Application
             _window!.RefreshState();
             if (!_window.LastRefreshSucceeded)
                 throw new InvalidOperationException("Smoke test 상태 조회에 실패했습니다.");
+            if (_startupCheck && (!_engine!.Settings.DryRun || _engine.GetState().Snapshot.RamTotal == 0))
+                throw new InvalidOperationException("실제 WPF/분리 엔진 시작 검증 실패");
             if (_window.Icon != BrandAssets.Logo || BrandAssets.Logo.PixelWidth < 256)
                 throw new InvalidOperationException("RamFlow 창 아이콘이 로드되지 않았습니다.");
             using (var trayIcon = BrandAssets.CreateTrayIcon())
                 if (trayIcon.Width != 32 || trayIcon.Height != 32) throw new InvalidOperationException("트레이 아이콘 크기 오류");
+            string activationName = "RamFlow.UI.Test." + Environment.ProcessId;
+            _window.Hide();
+            if (!WindowActivation.TryShowExisting(activationName)) throw new InvalidOperationException("숨긴 창 재실행 요청 실패");
+            await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);
+            if (!_window.IsVisible || !_window.ShowInTaskbar || _window.WindowState == WindowState.Minimized)
+                throw new InvalidOperationException("숨긴 창이 작업표시줄로 복원되지 않았습니다.");
+            _window.Close();
+            if (!_window.IsVisible || _window.WindowState != WindowState.Minimized || !_window.ShowInTaskbar)
+                throw new InvalidOperationException("닫기 버튼이 작업표시줄 최소화로 동작하지 않습니다.");
+            if (!WindowActivation.TryShowExisting(activationName)) throw new InvalidOperationException("최소화된 창 재실행 요청 실패");
+            await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);
+            if (_window.WindowState == WindowState.Minimized || !_window.IsVisible) throw new InvalidOperationException("최소화된 창 복원 실패");
             _window.UpdateLayout();
             _window.VerifyPages(_screenshot);
             if (_provider is MockResourceProvider mock && (mock.Writes != 0 || mock.Trims != 0))
@@ -233,6 +258,7 @@ internal sealed class App : Application
         Release(() => _smokeTimer?.Stop());
         if (_smokeTimer is not null) _smokeTimer.Tick -= SmokeFinished;
         Release(() => _window?.StopRefresh());
+        Release(() => _activation?.Dispose());
         Release(() => { if (_tray is not null) { _tray.Visible = false; _tray.Dispose(); } });
         Release(() => _menu?.Dispose());
         Release(() => _icon?.Dispose());

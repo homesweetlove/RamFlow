@@ -1,13 +1,13 @@
 # 검증 안내
 
-## .NET 10 / 0.3.1
+## .NET 10 / 0.3.2
 
 - Native Mock 회귀: Dry Run, Foreground 보호, Idle 우선순위, CPU Sets, 실패 복원, PID 재사용, 설정 검증, Pagefile 입력 검증 및 저장된 저널 재시작 복원.
 - Storage 자체 테스트 26개: 스트리밍 보관·해시·원자적 복원·명시적 삭제, 기본 Dry Run, 충돌/수정/손상/취소/부분 실패, 정션·ADS·하드 링크·스파스 파일·사용 중 파일·대소문자 경로 충돌 차단.
 - `--windows`: 직접 생성한 테스트 자식 프로세스만 Memory/CPU/EcoQoS 조정 후 복원. Windows 메모리와 CPU topology 실측.
 - `--ipc`: Mock 엔진으로 실제 Named Pipe 시작·상태 조회·일반 권한의 실제 조정 거부·정상 종료, 클라이언트 토큰의 Identification 제한 확인.
-- 안전 회귀: Pagefile 비활성 설정 백업 복원, 원자적 백업과 잘못된 백업 거부, ZIP 경로 이탈·실제 추출 크기 제한. Windows/IPC를 포함한 누적 39개 assertion 통과.
-- `verify-native.py`: 실제 WPF 창과 9개 페이지 렌더링, 임베드된 창·트레이 아이콘 로드, 패키징된 엔진의 Dry Run 실측/IPC/정상 종료, 사용자 폴더와 무관한 테스트 설치·제거.
+- 안전 회귀: Pagefile 비활성 설정 백업 복원, 원자적 백업과 잘못된 백업 거부, ZIP 경로 이탈·실제 추출 크기 제한. Windows/IPC를 포함한 누적 40개 assertion 통과.
+- `verify-native.py`: 실제 WPF 창과 9개 페이지 렌더링, 임베드된 창·트레이 아이콘 로드, 숨김/최소화 창 복원, 실제 WPF의 분리 엔진 시작 및 Dry Run 확인, 패키징된 엔진의 Dry Run 실측/IPC/정상 종료, 사용자 폴더와 무관한 테스트 설치·제거.
 
 외부 WebDAV 서버, Google Drive 서버 업로드 완료, 사용자 Pagefile 변경, 실제 SCM 서비스 설치, 최신 버전의 외부 다운로드·설치 및 특정 게임/LLM 성능 개선은 자동 검증하지 않습니다. 이 경로는 확인을 요구하는 기능으로 구현했고 지원 범위는 README에 명시했습니다. 아래는 보존한 Python 0.2.0 검증 안내입니다.
 
