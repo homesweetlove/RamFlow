@@ -28,4 +28,5 @@ jobs:
           name: RamFlow-windows-x64
           path: |
             dist/RamFlow-0.2.0-windows-x64.zip
+            dist/SHA256SUMS.txt
             artifacts/*.png

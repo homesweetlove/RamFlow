@@ -13,7 +13,9 @@ from .commands import dispatch
 def run_service() -> None:
     engine = Engine(WindowsProvider(), Settings.load(), persist=True)
     engine.pagefile.refresh_disks_async()
-    server = IpcServer(lambda cmd, args: dispatch(engine, cmd, args))
+    server = IpcServer(lambda cmd, args: dispatch(engine, cmd, args),
+                       authorized_handler=lambda cmd, args, admin:
+                       dispatch(engine, cmd, args, administrator=admin))
     server.start()
     engine.start_thread()
     print("WinMemoryFlow 서비스 실행 중 (Ctrl+C로 종료)")

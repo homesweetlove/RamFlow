@@ -44,6 +44,9 @@ class SystemProvider(ABC):
     def process_identity(self, pid: int) -> float | None:
         return next((p.create_time for p in self.list_processes() if p.pid == pid), None)
 
+    def process_exited(self, pid: int) -> bool:
+        return not any(p.pid == pid for p in self.list_processes())
+
     def validate_target(self, pid: int, identity: float) -> bool:
         return self.process_identity(pid) == identity and self.foreground()[0] != pid
 
@@ -216,6 +219,12 @@ class WindowsProvider(SystemProvider):
             return psutil.Process(pid).create_time()
         except psutil.Error:
             return None
+
+    def process_exited(self, pid: int) -> bool:
+        try:
+            return not psutil.pid_exists(pid)
+        except (psutil.Error, OSError):
+            return False
 
     def validate_target(self, pid: int, identity: float) -> bool:
         from .process_analyzer import SYSTEM_NAMES

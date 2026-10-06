@@ -25,6 +25,7 @@ class WorkingSetManager:
         self.p, self.policy, self.log = provider, policy, log
         self.originals: dict[tuple[str, int], tuple[float, object]] = {}
         self._retry_after: dict[tuple[str, int], float] = {}
+        self.pending_restores: set[tuple[str, int]] = set()
 
     def execute(self, actions: list[PlannedAction], ts: float, dry_run: bool) -> list[ActionResult]:
         results = []
@@ -41,6 +42,9 @@ class WorkingSetManager:
     def _execute(self, a: PlannedAction, ts: float, dry: bool) -> ActionResult:
         kind = a.extra.get("resource", a.kind)
         key = (kind, a.pid)
+        identity = a.extra.get("identity")
+        if identity is not None and key in self.originals and self.originals[key][0] != identity:
+            self._forget(key)
         restoring = a.kind == "restore_resource" or (kind == "set_priority" and a.value == 5)
         if restoring and key in self.originals:
             return self._restore(key, a)
@@ -56,9 +60,10 @@ class WorkingSetManager:
             return ActionResult(a, True, True, msg)
         if restoring:
             return ActionResult(a, False, True, "실제 변경 이력 없음 — 복원 생략")
+        if key in self.pending_restores:
+            return ActionResult(a, False, False, "원래 값 복원 재시도 중 — 새 변경 생략")
         if ts < self._retry_after.get(key, 0):
             return ActionResult(a, False, False, "이전 실패 이후 재시도 대기")
-        identity = a.extra.get("identity")
         if identity is None or not self.p.validate_target(a.pid, identity):
             self._retry_after[key] = ts + 60
             return ActionResult(a, False, False, "실행 직전 보호/포그라운드/PID 재사용 확인 — 변경 생략")
@@ -95,16 +100,40 @@ class WorkingSetManager:
     def _restore(self, key, action):
         identity, value = self.originals[key]
         current = self.p.process_identity(key[1])
+        if current is None and not self.p.process_exited(key[1]):
+            self.pending_restores.add(key)
+            return ActionResult(action, False, False, "프로세스 식별 조회 실패 — 복원 기록 유지 및 재시도")
         if current is None or current != identity:
-            self.originals.pop(key, None)
+            self._forget(key)
             return ActionResult(action, False, True, "원래 프로세스 종료/PID 재사용 — 복원 대상 제거")
         _, setter = self._accessors(key[0])
         ok = setter(key[1], value)
         if ok:
-            self.originals.pop(key, None)
+            self._forget(key)
             if key[0] == "set_priority":
                 self.policy.record_priority(key[1], 5)
+        else:
+            self.pending_restores.add(key)
         return ActionResult(action, False, ok, f"{key[0]} 원래 값 {value} 복원 {'완료' if ok else '실패(재시도 예정)'}")
+
+    def _forget(self, key):
+        self.originals.pop(key, None)
+        self.pending_restores.discard(key)
+        self._retry_after.pop(key, None)
+
+    def discard_stale(self):
+        stale = set()
+        for key, (identity, _) in list(self.originals.items()):
+            current = self.p.process_identity(key[1])
+            if (current is not None and current != identity) or (current is None and self.p.process_exited(key[1])):
+                self._forget(key)
+                stale.add(key)
+        return stale
+
+    def retry_restores(self, ts):
+        actions = [PlannedAction("restore_resource", pid, reason="이전 복원 실패 재시도",
+                                 extra={"resource": kind}) for kind, pid in self.pending_restores]
+        return self.execute(actions, ts, False)
 
     def restore_all(self) -> list[ActionResult]:
         results = []

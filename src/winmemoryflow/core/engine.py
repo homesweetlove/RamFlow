@@ -69,6 +69,11 @@ class Engine:
     def tick(self) -> dict:
         with self._lock:
             s = self.settings
+            for kind, pid in self.executor.discard_stale():
+                self.scheduler.lowered.discard((kind, pid))
+                if kind == "set_priority":
+                    self.policy._lowered.pop(pid, None)
+            self.scheduler.feedback(self.executor.retry_restores(time.time()))
             if (s.dry_run or not s.auto_optimization) and self.executor.originals:
                 self.executor.restore_all()
             snap = self.provider.sample()
@@ -181,7 +186,7 @@ class Engine:
             "resource_groups": resource_groups(self._assess, self._workload),
             "processes": [a.to_dict() for a in self._assess],
             "optimization_paused": not self.settings.auto_optimization,
-            "pending_restores": len(self.executor.originals) if (self.settings.dry_run or not self.settings.auto_optimization) else 0,
+            "pending_restores": len(self.executor.pending_restores),
             "last_actions": [{"msg": r.message, "dry": r.dry_run, "ok": r.success, "kind": r.action.kind}
                              for r in self._last_results],
             "advice": self._advice,

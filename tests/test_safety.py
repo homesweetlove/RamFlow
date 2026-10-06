@@ -174,6 +174,80 @@ def test_ipc_limits_final_chunk_too():
         _read_message(Files, None)
 
 
+def test_nonadmin_cannot_resume_or_enable_live_controls():
+    p, e = busy_engine()
+    e.apply_settings({"auto_optimization": False})
+    original = e.settings.to_dict()
+    with pytest.raises(PermissionError):
+        dispatch(e, "set_settings", {"settings": {"auto_optimization": True}}, administrator=False)
+    assert e.settings.to_dict() == original
+    dispatch(e, "set_settings", {"settings": {"auto_optimization": True}}, administrator=True)
+    with pytest.raises(PermissionError):
+        dispatch(e, "set_settings", {"settings": {"ecoqos": True}}, administrator=False)
+    dispatch(e, "set_settings", {"settings": {"auto_optimization": False}}, administrator=False)
+    dispatch(e, "set_settings", {"settings": {"dry_run": True}}, administrator=False)
+    dispatch(e, "set_settings", {"settings": {"auto_optimization": True}}, administrator=False)
+
+
+def test_failed_restore_retried_after_disabling_policy(monkeypatch):
+    p, e = busy_engine()
+    setter = p.set_cpu_priority
+    attempts = []
+    def fail_once(pid, value):
+        if pid == 999 and value == 0x20 and not attempts:
+            attempts.append(pid)
+            return False
+        return setter(pid, value)
+    monkeypatch.setattr(p, "set_cpu_priority", fail_once)
+    e.apply_settings({"cpu_management": False})
+    assert p.cpu_priorities[999] == 0x4000
+    assert ("set_cpu_priority", 999) in e.executor.pending_restores
+    e.tick()
+    assert p.cpu_priorities[999] == 0x20
+    assert ("set_cpu_priority", 999) not in e.executor.originals
+    assert not e.executor.pending_restores
+
+
+@pytest.mark.parametrize("gap", [False, True])
+def test_reused_pid_captures_and_restores_replacement_originals(gap):
+    p, e = busy_engine()
+    p._procs = [x for x in p._procs if x.pid != 999]
+    if gap:
+        p.advance(20)
+        e.tick()
+    p.memory_priorities.pop(999, None)
+    p.cpu_priorities.pop(999, None)
+    p.power_states.pop(999, None)
+    p._procs.append(ProcessInfo(999, "replacement.exe", 500 * MB, 500 * MB, create_time=99))
+    for _ in range(35):
+        p.advance(60)
+        e.tick()
+    assert p.memory_priorities[999] < 5
+    assert p.cpu_priorities[999] == 0x4000
+    assert p.power_states[999] == (1, 1)
+    assert all(identity == 99 for (kind, pid), (identity, _) in e.executor.originals.items() if pid == 999)
+    e.stop()
+    assert p.memory_priorities[999] == 5
+    assert p.cpu_priorities[999] == 0x20
+    assert p.power_states[999] == (0, 0)
+
+
+def test_temporary_identity_failure_keeps_restore_records(monkeypatch):
+    p, e = busy_engine()
+    identity = p.process_identity
+    monkeypatch.setattr(p, "process_identity", lambda pid: None if pid == 999 else identity(pid))
+    e.tick()
+    assert ("set_cpu_priority", 999) in e.executor.originals
+    e.apply_settings({"cpu_management": False})
+    assert ("set_cpu_priority", 999) in e.executor.pending_restores
+    assert p.cpu_priorities[999] == 0x4000
+    monkeypatch.setattr(p, "process_identity", identity)
+    e.tick()
+    assert p.cpu_priorities[999] == 0x20
+    assert not e.executor.pending_restores
+    e.stop()
+
+
 def test_command_rejects_nan_and_negative_inputs():
     _, e = busy_engine(dry=True)
     for cmd, args in [("get_events", {"n": -1}), ("check_llm", {"model_gb": float("nan")}),

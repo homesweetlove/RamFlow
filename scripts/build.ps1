@@ -22,6 +22,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'License bundling failed' }
     Copy-Item -LiteralPath README.md -Destination dist/RamFlow/README.md -Force
     Compress-Archive -Path dist/RamFlow,dist/RamFlow-cli -DestinationPath dist/RamFlow-0.2.0-windows-x64.zip -Force
+    $ramZipHash = (Get-FileHash -LiteralPath dist/RamFlow-0.2.0-windows-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -LiteralPath dist/SHA256SUMS.txt -Value "$ramZipHash  RamFlow-0.2.0-windows-x64.zip" -Encoding ascii
 } finally {
     $env:PATH = $ramBuildPath
     Pop-Location

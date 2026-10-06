@@ -28,7 +28,7 @@ def _pipe_name():
     return PIPE_NAME + "-" + _identity()
 
 
-def authorize(cmd: str, args: dict, administrator: bool) -> None:
+def authorize(cmd: str, args: dict, administrator: bool, current_settings=None) -> None:
     """관리자 프로세스의 위험한 명령은 관리자 토큰을 가진 IPC 클라이언트만 호출한다."""
     privileged = cmd in {"terminate", "apply_pagefile", "restore_pagefile"}
     if cmd == "set_settings":
@@ -36,6 +36,12 @@ def authorize(cmd: str, args: dict, administrator: bool) -> None:
         if not isinstance(settings, dict):
             raise ValueError("설정 형식 오류")
         privileged |= settings.get("dry_run") is False
+        if current_settings is not None:
+            from ..config.settings import Settings
+            effective = Settings(**current_settings.to_dict())
+            effective.update(settings)
+            # 현재 설정을 포함한 실제 동작 전환은 엔진 잠금 아래에서 검사한다.
+            privileged |= not effective.dry_run and effective.auto_optimization
     if privileged and not administrator:
         raise PermissionError("이 명령은 관리자 토큰이 필요합니다. 관리자 권한의 RamFlow UI에서 실행하세요.")
 
@@ -101,9 +107,10 @@ def _write_message(win32file, handle, payload, deadline):
 
 
 class IpcServer:
-    def __init__(self, handler):
+    def __init__(self, handler, authorized_handler=None):
         """handler(cmd:str, args:dict) -> dict(JSON 직렬화 가능)"""
         self.handler = handler
+        self.authorized_handler = authorized_handler
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._slots = threading.BoundedSemaphore(16)
@@ -185,7 +192,9 @@ class IpcServer:
                 finally:
                     win32security.RevertToSelf()
                 authorize(cmd, args, administrator)
-                resp = {"ok": True, "data": self.handler(cmd, args)}
+                data = (self.authorized_handler(cmd, args, administrator)
+                        if self.authorized_handler else self.handler(cmd, args))
+                resp = {"ok": True, "data": data}
             except Exception as e:
                 resp = {"ok": False, "error": str(e)}
             win32file.WriteFile(handle, json.dumps(resp, ensure_ascii=False).encode("utf-8"))

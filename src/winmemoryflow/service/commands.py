@@ -8,7 +8,7 @@ from ..core.engine import Engine
 from ..core.learning import UsageLearner  # noqa: F401  (타입 참조용)
 
 
-def dispatch(engine: Engine, cmd: str, args: dict) -> dict:
+def dispatch(engine: Engine, cmd: str, args: dict, *, administrator=None) -> dict:
     if not isinstance(args, dict):
         raise ValueError("명령 인수는 JSON 객체여야 합니다.")
     # 벤치마크/폴더 분석의 대기 시간에는 엔진의 모니터링을 계속 허용한다.
@@ -22,6 +22,9 @@ def dispatch(engine: Engine, cmd: str, args: dict) -> dict:
             raise ValueError("폴더 경로 형식 오류")
         return scan_models(folder)
     with engine._lock:
+        if administrator is not None:
+            from ..ipc.pipe import authorize
+            authorize(cmd, args, administrator, engine.settings)
         return _dispatch_locked(engine, cmd, args)
 
 
