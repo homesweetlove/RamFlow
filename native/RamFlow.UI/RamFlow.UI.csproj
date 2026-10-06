@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject>RamFlow.UI.Program</StartupObject>
+    <AssemblyName>RamFlow</AssemblyName>
+    <RootNamespace>RamFlow.UI</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../RamFlow.Core/RamFlow.Core.csproj" />
+    <ProjectReference Include="../RamFlow.Storage/RamFlow.Storage.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,31 @@
+name: Native Windows validation
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Native regression and self-contained portable build
+        shell: pwsh
+        run: ./scripts/build-native.ps1
+      - name: Windows API and protected IPC
+        shell: pwsh
+        run: dotnet run --project native/RamFlow.Tests -c Release -- --windows --ipc
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RamFlow-native-windows-x64
+          path: |
+            dist/RamFlow-0.3.0-windows-x64.zip
+            dist/SHA256SUMS-native.txt
+            artifacts/native-dashboard.png

@@ -16,3 +16,8 @@ benchmarks/
 config.json
 learning.json
 pagefile_backup.json
+.tools/
+**/bin/
+**/obj/
+*.pdb
+*.user
