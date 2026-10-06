@@ -1,0 +1,31 @@
+name: Windows validation and portable build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - name: Tests and portable executables
+        shell: pwsh
+        run: ./scripts/build.ps1
+      - name: UI smoke test
+        shell: pwsh
+        run: python scripts/smoke_ui.py artifacts/dashboard.png
+      - name: Windows API and IPC roundtrip
+        run: python scripts/verify_windows.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RamFlow-windows-x64
+          path: |
+            dist/RamFlow-0.2.0-windows-x64.zip
+            artifacts/*.png

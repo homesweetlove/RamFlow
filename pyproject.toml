@@ -1,0 +1,25 @@
+[project]
+name = "ramflow"
+version = "0.2.0"
+description = "Windows용 포그라운드 중심 리소스 오케스트레이터"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["psutil>=5.9,<8", "PySide6>=6.5,<7", "pywin32>=306; sys_platform == 'win32'"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pyinstaller>=6.16,<7"]
+
+[project.scripts]
+winmemoryflow = "winmemoryflow.__main__:main"
+ramflow = "winmemoryflow.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
