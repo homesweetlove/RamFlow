@@ -53,7 +53,8 @@ internal sealed class App : Application
         _provider = _smoke ? new MockResourceProvider() : new WindowsResourceProvider();
         _engine = new Engine(_provider, dataRoot: null, persist: !_smoke);
         if (!_smoke) _engine.ApplySettings(_engine.Settings with { DryRun = true });
-        _window = new MainWindow(_engine, () => ExitApplication(0), _smoke, RestartElevated);
+        _window = new MainWindow(_engine, () => ExitApplication(0), _smoke, RestartElevated) { Icon = BrandAssets.Logo };
+        _window.SourceInitialized += (_, _) => BrandAssets.ApplyWindowFrame(_window);
         MainWindow = _window;
         _window.SettingsChanged += (_, _) => UpdateTray();
         _engine.Start();
@@ -97,7 +98,7 @@ internal sealed class App : Application
         _menu.Items.Add(modes);
         _menu.Items.Add(new Forms.ToolStripSeparator());
         _menu.Items.Add("종료 · 원래 상태 복원", null, (_, _) => Dispatch(() => ExitApplication(0)));
-        _icon = (System.Drawing.Icon)System.Drawing.SystemIcons.Application.Clone();
+        _icon = BrandAssets.CreateTrayIcon();
         _tray = new Forms.NotifyIcon
         {
             Text = "RamFlow · 시뮬레이션",
@@ -188,6 +189,10 @@ internal sealed class App : Application
             _window!.RefreshState();
             if (!_window.LastRefreshSucceeded)
                 throw new InvalidOperationException("Smoke test 상태 조회에 실패했습니다.");
+            if (_window.Icon != BrandAssets.Logo || BrandAssets.Logo.PixelWidth < 256)
+                throw new InvalidOperationException("RamFlow 창 아이콘이 로드되지 않았습니다.");
+            using (var trayIcon = BrandAssets.CreateTrayIcon())
+                if (trayIcon.Width != 32 || trayIcon.Height != 32) throw new InvalidOperationException("트레이 아이콘 크기 오류");
             _window.UpdateLayout();
             _window.VerifyPages(_screenshot);
             if (_provider is MockResourceProvider mock && (mock.Writes != 0 || mock.Trims != 0))

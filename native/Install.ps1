@@ -2,6 +2,7 @@ param(
     [string]$SourceDirectory = $PSScriptRoot,
     [string]$TargetDirectory = (Join-Path $env:LOCALAPPDATA 'Programs\RamFlow'),
     [switch]$Startup,
+    [switch]$DesktopShortcut,
     [switch]$MonitorService,
     [switch]$NoIntegration,
     [switch]$Launch,
@@ -30,16 +31,21 @@ if ($ramTarget -ne $ramSource) {
             if ($ramFile.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw '연결된 파일은 설치할 수 없습니다.' }
             Copy-Item -LiteralPath $ramFile.FullName -Destination $ramStage -Recurse -Force
         }
-        @{product='homesweetlove.RamFlow';version='0.3.0'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramStage 'RamFlow-install.json') -Encoding utf8
+        @{product='homesweetlove.RamFlow';version='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramStage 'RamFlow-install.json') -Encoding utf8
         if (Test-Path -LiteralPath $ramTarget) { Move-Item -LiteralPath $ramTarget -Destination $ramBackup }
         try { Move-Item -LiteralPath $ramStage -Destination $ramTarget } catch { if (Test-Path -LiteralPath $ramBackup) { Move-Item -LiteralPath $ramBackup -Destination $ramTarget }; throw }
         if (Test-Path -LiteralPath $ramBackup) { Remove-Item -LiteralPath $ramBackup -Recurse -Force }
     } finally { if (Test-Path -LiteralPath $ramStage) { Remove-Item -LiteralPath $ramStage -Recurse -Force } }
-} else { @{product='homesweetlove.RamFlow';version='0.3.0'} | ConvertTo-Json | Set-Content -LiteralPath $ramMarker -Encoding utf8 }
+} else { @{product='homesweetlove.RamFlow';version='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath $ramMarker -Encoding utf8 }
 if (-not $NoIntegration) {
-    $ramMenu = Join-Path ([Environment]::GetFolderPath('Programs')) 'RamFlow.lnk'
-    $ramShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($ramMenu)
-    $ramShortcut.TargetPath = Join-Path $ramTarget 'RamFlow.exe'; $ramShortcut.WorkingDirectory = $ramTarget; $ramShortcut.Save()
+    $ramLinks = @((Join-Path ([Environment]::GetFolderPath('Programs')) 'RamFlow.lnk'))
+    if ($DesktopShortcut) { $ramLinks += Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'RamFlow.lnk' }
+    foreach ($ramLink in $ramLinks) {
+        $ramShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($ramLink)
+        if ((Test-Path -LiteralPath $ramLink) -and $ramShortcut.TargetPath -ne (Join-Path $ramTarget 'RamFlow.exe')) { throw '다른 프로그램의 RamFlow 바로가기를 덮어쓰지 않습니다. 사용자 설치는 완료됐습니다.' }
+        $ramShortcut.TargetPath = Join-Path $ramTarget 'RamFlow.exe'; $ramShortcut.WorkingDirectory = $ramTarget
+        $ramShortcut.IconLocation = (Join-Path $ramTarget 'RamFlow.exe') + ',0'; $ramShortcut.Save()
+    }
     if ($Startup) { New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Force | Out-Null; Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name RamFlow -Value ('"' + (Join-Path $ramTarget 'RamFlow.exe') + '"') }
     if ($MonitorService) {
         $ramPrincipal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -51,7 +57,7 @@ if (-not $NoIntegration) {
         $ramAcl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
         foreach ($ramSid in @('S-1-5-18','S-1-5-32-544')) { $ramRule = [Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($ramSid), 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow'); $ramAcl.AddAccessRule($ramRule) }
         Set-Acl -LiteralPath $ramServiceDirectory -AclObject $ramAcl
-        @{product='homesweetlove.RamFlow';version='0.3.0'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramServiceDirectory 'RamFlow-monitor-state.json') -Encoding utf8
+        @{product='homesweetlove.RamFlow';version='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramServiceDirectory 'RamFlow-monitor-state.json') -Encoding utf8
         # SYSTEM 서비스는 사용자가 쓸 수 없는 Program Files의 독립 복사본으로 실행한다.
         $ramAdminTarget = [IO.Path]::GetFullPath((Join-Path $env:ProgramFiles 'RamFlowMonitor'))
         if (-not $ramAdminTarget.StartsWith([IO.Path]::GetFullPath($env:ProgramFiles).TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw '서비스 설치 경로 검증 실패' }

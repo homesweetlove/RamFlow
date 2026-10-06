@@ -24,7 +24,7 @@ try {
     foreach ($ramNotice in @('LICENSE.txt','ThirdPartyNotices.txt')) { if (Test-Path -LiteralPath (Join-Path $ramSdkRoot $ramNotice)) { Copy-Item -LiteralPath (Join-Path $ramSdkRoot $ramNotice) -Destination dist/RamFlow-native/licenses -Force } }
     python scripts/verify-native.py
     if ($LASTEXITCODE -ne 0) { throw 'Native packaged validation failed' }
-    Compress-Archive -LiteralPath dist/RamFlow-native -DestinationPath dist/RamFlow-0.3.0-windows-x64.zip -Force
-    $ramHash = (Get-FileHash -LiteralPath dist/RamFlow-0.3.0-windows-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-    Set-Content -LiteralPath dist/SHA256SUMS-native.txt -Value "$ramHash  RamFlow-0.3.0-windows-x64.zip" -Encoding ascii
+    Compress-Archive -LiteralPath dist/RamFlow-native -DestinationPath dist/RamFlow-0.3.1-windows-x64.zip -Force
+    $ramHash = (Get-FileHash -LiteralPath dist/RamFlow-0.3.1-windows-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -LiteralPath dist/SHA256SUMS-native.txt -Value "$ramHash  RamFlow-0.3.1-windows-x64.zip" -Encoding ascii
 } finally { Pop-Location }

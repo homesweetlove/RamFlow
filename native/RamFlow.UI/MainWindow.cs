@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
 using RamFlow.Core;
@@ -29,6 +30,10 @@ public sealed class MainWindow : Window
     private readonly TextBlock _cpu = Label("—", 26);
     private readonly TextBlock _disk = Label("—", 26);
     private readonly TextBlock _commit = Label("—", 26);
+    private readonly ProgressBar _ramMeter = Meter(UiTheme.Accent);
+    private readonly ProgressBar _cpuMeter = Meter(UiTheme.Good);
+    private readonly ProgressBar _diskMeter = Meter(UiTheme.Warning);
+    private readonly ProgressBar _commitMeter = Meter(UiTheme.Danger);
     private readonly TextBlock _memoryDetail = Label("", 13, UiTheme.Muted);
     private readonly TextBlock _insight = Label("분석 대기", 14);
     private readonly TextBlock _aiResult = Label("메모리 샘플을 기다리는 중", 16);
@@ -77,13 +82,25 @@ public sealed class MainWindow : Window
         FontFamily = new FontFamily("Malgun Gothic");
         FontSize = 13;
 
-        var shell = new DockPanel { Margin = new Thickness(24) };
-        var header = new Grid { Margin = new Thickness(0, 0, 0, 18) };
+        var shell = new DockPanel { Margin = new Thickness(20, 16, 20, 14) };
+        var header = new Grid { Margin = new Thickness(0, 0, 0, 14), MinHeight = 46 };
         header.ColumnDefinitions.Add(new ColumnDefinition());
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        var brand = new StackPanel();
-        brand.Children.Add(Label("RamFlow", 30));
-        brand.Children.Add(Label("리소스 컨트롤 센터  /  RAM · CPU · 워크로드", 12, UiTheme.Muted));
+        var brand = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        var logo = new Image { Source = BrandAssets.Logo, Width = 44, Height = 44, Margin = new Thickness(0, 0, 12, 0) };
+        RenderOptions.SetBitmapScalingMode(logo, BitmapScalingMode.HighQuality);
+        AutomationProperties.SetName(logo, "RamFlow 로고");
+        brand.Children.Add(logo);
+        var brandText = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        TextBlock brandName = Label("RamFlow", 23);
+        brandName.FontWeight = FontWeights.SemiBold;
+        brandName.FontFamily = new FontFamily("Segoe UI");
+        brandName.Margin = new Thickness(0, 0, 0, 3);
+        brandText.Children.Add(brandName);
+        TextBlock tagline = Label("내 PC의 리소스를 한눈에", 11, UiTheme.Muted);
+        tagline.Margin = new Thickness(0);
+        brandText.Children.Add(tagline);
+        brand.Children.Add(brandText);
         header.Children.Add(brand);
         var actions = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         actions.Children.Add(Command("새로고침", RefreshState));
@@ -98,12 +115,32 @@ public sealed class MainWindow : Window
         DockPanel.SetDock(header, Dock.Top);
         shell.Children.Add(header);
 
-        var statusBar = new StackPanel { Margin = new Thickness(0, 0, 0, 14) };
-        statusBar.Children.Add(_status);
-        if (smokeTest) statusBar.Children.Add(Label("SMOKE TEST · 설정 변경이 잠겨 있습니다", 12, UiTheme.Warning));
+        _status.FontSize = 11;
+        _status.TextWrapping = TextWrapping.NoWrap;
+        _status.TextTrimming = TextTrimming.CharacterEllipsis;
+        _status.Margin = new Thickness(0);
+        _status.SetBinding(FrameworkElement.ToolTipProperty, new Binding(nameof(TextBlock.Text)) { Source = _status });
+        var statusContent = new DockPanel { LastChildFill = true };
+        if (smokeTest)
+        {
+            TextBlock smokeLabel = Label("SMOKE · 읽기 전용", 10, UiTheme.Warning);
+            smokeLabel.Margin = new Thickness(14, 0, 0, 0);
+            DockPanel.SetDock(smokeLabel, Dock.Right);
+            statusContent.Children.Add(smokeLabel);
+        }
+        statusContent.Children.Add(_status);
+        var statusBar = new Border
+        {
+            Child = statusContent, Background = UiTheme.Surface, BorderBrush = UiTheme.Border,
+            BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 0, 14)
+        };
         DockPanel.SetDock(statusBar, Dock.Top);
         shell.Children.Add(statusBar);
-        _footer.Margin = new Thickness(0, 14, 0, 0);
+        _footer.FontSize = 10;
+        _footer.TextWrapping = TextWrapping.NoWrap;
+        _footer.TextTrimming = TextTrimming.CharacterEllipsis;
+        _footer.Margin = new Thickness(194, 10, 0, 0);
         DockPanel.SetDock(_footer, Dock.Bottom);
         shell.Children.Add(_footer);
         _tabs.Background = UiTheme.Background;
@@ -117,6 +154,7 @@ public sealed class MainWindow : Window
         _tabs.Items.Add(Tab("활동 로그", LogsPage()));
         FeaturePages.Add(_tabs, engine);
         if (smokeTest) foreach (TabItem feature in _tabs.Items.Cast<TabItem>().Skip(5)) if (feature.Content is UIElement element) element.IsEnabled = false;
+        ConfigureNavigation();
         shell.Children.Add(_tabs);
         Content = shell;
 
@@ -153,13 +191,17 @@ public sealed class MainWindow : Window
             _cpu.Text = Number(s.CpuPercent);
             _disk.Text = s.DiskPercent.HasValue ? Number(s.DiskPercent.Value) : "미지원";
             _commit.Text = s.CommitLimit > 0 ? $"{commitPercent:0.0}%" : "측정 대기";
+            _ramMeter.Value = ramPercent;
+            _cpuMeter.Value = double.IsFinite(s.CpuPercent) ? Math.Clamp(s.CpuPercent, 0, 100) : 0;
+            _diskMeter.Value = s.DiskPercent is double disk && double.IsFinite(disk) ? Math.Clamp(disk, 0, 100) : 0;
+            _diskMeter.Opacity = s.DiskPercent.HasValue ? 1 : 0.3;
+            _commitMeter.Value = commitPercent;
             _ramChart.AddSample(s.Time, s.RamTotal > 0 ? ramPercent : null);
             _cpuChart.AddSample(s.Time, s.RamTotal > 0 ? s.CpuPercent : null);
             _diskChart.AddSample(s.Time, s.DiskPercent);
             _commitChart.AddSample(s.Time, s.CommitLimit > 0 ? commitPercent : null);
-            _memoryDetail.Text = $"사용 가능 {Display.Bytes(s.Available)} / 물리 메모리 {Display.Bytes(s.RamTotal)}\n" +
-                $"커밋 {Display.Bytes(s.Commit)} / 한도 {Display.Bytes(s.CommitLimit)}   ·   " +
-                $"캐시 {Display.Bytes(s.Cache)}   ·   대기 {Display.Bytes(s.Standby)}   ·   수정 {Display.Bytes(s.Modified)} · 압축 {(s.CompressedBytes is double compressed ? Display.Bytes(compressed) : "미측정")}\n" +
+            _memoryDetail.Text = $"사용 가능 {Display.Bytes(s.Available)} · 총 {Display.Bytes(s.RamTotal)} · 커밋 {Display.Bytes(s.Commit)} / {Display.Bytes(s.CommitLimit)}\n" +
+                $"캐시 {Display.Bytes(s.Cache)} · 대기 {Display.Bytes(s.Standby)} · 수정 {Display.Bytes(s.Modified)} · 압축 {(s.CompressedBytes is double compressed ? Display.Bytes(compressed) : "미측정")}\n" +
                 $"GPU 사용 {(s.GpuUsedBytes is double gpu ? Display.Bytes(gpu) : "미지원")} · 온도 {(s.ThermalCelsius is double thermal ? thermal.ToString("F1") + "°C" : "미지원")} · 배터리 {(s.BatteryPercent is int battery ? battery + "%" : "미지원")}\n" +
                 $"CPU Sets {state.CpuTopology.Count}개 · 효율 클래스 {state.CpuTopology.Select(x => x.Efficiency).Distinct().Count()}개 · Page-in {s.PagesInput?.ToString("F0") ?? "미측정"} pages/sec";
             Settings current = _engine.Settings;
@@ -207,6 +249,28 @@ public sealed class MainWindow : Window
             using var stream = System.IO.File.Create(System.IO.Path.ChangeExtension(screenshot, $"page-{index}.png")); png.Save(stream);
         }
         _tabs.SelectedIndex = 0; UpdateLayout();
+        double originalWidth = Width, originalHeight = Height;
+        try
+        {
+            Width = MinWidth; Height = MinHeight; UpdateLayout();
+            for (int index = 0; index < _tabs.Items.Count; index++)
+            {
+                _tabs.SelectedIndex = index; UpdateLayout();
+                if (_tabs.SelectedItem is not TabItem item || item.Content is not UIElement content || content.RenderSize.Width <= 0)
+                    throw new InvalidOperationException("최소 크기에서 페이지 렌더링 실패");
+            }
+            _tabs.SelectedIndex = 0; UpdateLayout();
+            if (screenshot is not null)
+            {
+                var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight), 96, 96, PixelFormats.Pbgra32);
+                bitmap.Render(this);
+                var png = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                png.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                using var stream = System.IO.File.Create(System.IO.Path.ChangeExtension(screenshot, "minimum.png"));
+                png.Save(stream);
+            }
+        }
+        finally { Width = originalWidth; Height = originalHeight; _tabs.SelectedIndex = 0; UpdateLayout(); }
     }
 
     public void ShowFromTray()
@@ -220,12 +284,23 @@ public sealed class MainWindow : Window
 
     private UIElement Dashboard()
     {
-        var page = PageStack();
+        var page = new StackPanel { Margin = new Thickness(0, 0, 2, 0) };
+        var heading = new DockPanel { Margin = new Thickness(4, 0, 4, 10) };
+        TextBlock period = Label("최근 6분 · 2초 간격", 11, UiTheme.Muted);
+        period.VerticalAlignment = VerticalAlignment.Center;
+        period.Margin = new Thickness(14, 0, 0, 0);
+        DockPanel.SetDock(period, Dock.Right);
+        heading.Children.Add(period);
+        TextBlock title = Label("리소스 개요", 22);
+        title.FontWeight = FontWeights.SemiBold;
+        title.Margin = new Thickness(0);
+        heading.Children.Add(title);
+        page.Children.Add(heading);
         var metrics = new UniformGrid { Columns = 4 };
-        metrics.Children.Add(Metric("RAM", _ram, "물리 메모리 사용률"));
-        metrics.Children.Add(Metric("CPU", _cpu, "전체 프로세서 사용률"));
-        metrics.Children.Add(Metric("디스크", _disk, "활성 시간 · 미지원 시 표시"));
-        metrics.Children.Add(Metric("커밋", _commit, "커밋 한도 대비 사용률"));
+        metrics.Children.Add(Metric("RAM", _ram, "물리 메모리 사용률", _ramMeter, UiTheme.Accent));
+        metrics.Children.Add(Metric("CPU", _cpu, "전체 프로세서 사용률", _cpuMeter, UiTheme.Good));
+        metrics.Children.Add(Metric("디스크", _disk, "디스크 활성 시간", _diskMeter, UiTheme.Warning));
+        metrics.Children.Add(Metric("커밋", _commit, "커밋 한도 대비 사용률", _commitMeter, UiTheme.Danger));
         page.Children.Add(metrics);
         var charts = new UniformGrid { Columns = 2 };
         foreach (HistoryChart chart in new[] { _ramChart, _cpuChart, _diskChart, _commitChart })
@@ -235,9 +310,77 @@ public sealed class MainWindow : Window
             charts.Children.Add(card);
         }
         page.Children.Add(charts);
-        page.Children.Add(Card(_memoryDetail));
-        page.Children.Add(Card(_insight));
+        _memoryDetail.FontSize = 11;
+        _memoryDetail.LineHeight = 17;
+        _insight.FontSize = 11;
+        _insight.LineHeight = 17;
+        var summaries = new UniformGrid { Columns = 2 };
+        summaries.Children.Add(Summary("메모리 & 장치", _memoryDetail));
+        summaries.Children.Add(Summary("작업 흐름", _insight));
+        page.Children.Add(summaries);
         return Scroll(page);
+    }
+
+    private void ConfigureNavigation()
+    {
+        var navigation = (ResourceDictionary)XamlReader.Parse("""
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="NavSurface" Color="NAV_SURFACE"/>
+              <SolidColorBrush x:Key="NavLine" Color="NAV_LINE"/>
+              <SolidColorBrush x:Key="NavAccent" Color="NAV_ACCENT"/>
+              <SolidColorBrush x:Key="NavText" Color="NAV_TEXT"/>
+              <SolidColorBrush x:Key="NavMuted" Color="NAV_MUTED"/>
+              <Style x:Key="NavigationItem" TargetType="TabItem">
+                <Setter Property="Foreground" Value="{StaticResource NavMuted}"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="Margin" Value="0,2"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabItem">
+                  <Border x:Name="Frame" Background="Transparent" CornerRadius="7" Padding="10,11" BorderThickness="1" BorderBrush="Transparent">
+                    <Grid>
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="3"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <Border x:Name="Marker" Background="{StaticResource NavAccent}" CornerRadius="2" Height="18" Opacity="0"/>
+                      <ContentPresenter Grid.Column="1" Margin="10,0,0,0" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                    </Grid>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsSelected" Value="True"><Setter Property="Foreground" Value="{StaticResource NavText}"/><Setter TargetName="Frame" Property="Background" Value="#163747"/><Setter TargetName="Marker" Property="Opacity" Value="1"/></Trigger>
+                    <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsMouseOver" Value="True"/><Condition Property="IsSelected" Value="False"/></MultiTrigger.Conditions><Setter TargetName="Frame" Property="Background" Value="#1B2D42"/></MultiTrigger>
+                    <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Frame" Property="BorderBrush" Value="{StaticResource NavAccent}"/></Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate></Setter.Value></Setter>
+              </Style>
+              <Style x:Key="NavigationShell" TargetType="TabControl">
+                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabControl">
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="176"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Border Background="{StaticResource NavSurface}" BorderBrush="{StaticResource NavLine}" BorderThickness="1" CornerRadius="12" Padding="7">
+                      <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="워크스페이스" FontSize="10" Foreground="{StaticResource NavMuted}" Margin="12,10,8,12"/>
+                        <TextBlock DockPanel.Dock="Bottom" Text="Ctrl+Tab  페이지 전환" FontSize="10" Foreground="{StaticResource NavMuted}" Margin="12,12,8,8"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False"><ItemsPresenter/></ScrollViewer>
+                      </DockPanel>
+                    </Border>
+                    <ContentPresenter x:Name="PART_SelectedContentHost" Grid.Column="2" ContentSource="SelectedContent" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                  </Grid>
+                </ControlTemplate></Setter.Value></Setter>
+              </Style>
+            </ResourceDictionary>
+            """.Replace("NAV_SURFACE", UiTheme.Surface.Color.ToString())
+                .Replace("NAV_LINE", UiTheme.Border.Color.ToString())
+                .Replace("NAV_ACCENT", UiTheme.Accent.Color.ToString())
+                .Replace("NAV_TEXT", UiTheme.Text.Color.ToString())
+                .Replace("NAV_MUTED", UiTheme.Muted.Color.ToString()));
+        _tabs.Resources.MergedDictionaries.Add(navigation);
+        _tabs.Style = (Style)navigation["NavigationShell"];
+        _tabs.ItemContainerStyle = (Style)navigation["NavigationItem"];
+        _tabs.ItemsPanel = (ItemsPanelTemplate)XamlReader.Parse("""
+            <ItemsPanelTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"><StackPanel IsItemsHost="True"/></ItemsPanelTemplate>
+            """);
+        _tabs.TabStripPlacement = Dock.Left;
+        _tabs.Padding = new Thickness(0);
+        _tabs.BorderThickness = new Thickness(0);
+        AutomationProperties.SetName(_tabs, "RamFlow 페이지 탐색");
     }
 
     private UIElement ProcessesPage()
@@ -250,22 +393,22 @@ public sealed class MainWindow : Window
         search.Children.Add(_filter);
         DockPanel.SetDock(search, Dock.Top);
         page.Children.Add(search);
-        Column(_processes, "PID", nameof(ProcessView.Pid), 65);
-        Column(_processes, "프로세스", nameof(ProcessView.Name), 180);
+        Column(_processes, "PID", nameof(ProcessView.Pid), 80);
+        Column(_processes, "프로세스", nameof(ProcessView.Name), 160);
         Column(_processes, "RAM", nameof(ProcessView.Ram), 95);
         Column(_processes, "전용 메모리", nameof(ProcessView.Private), 105);
         Column(_processes, "CPU", nameof(ProcessView.Cpu), 75);
         Column(_processes, "I/O /초", nameof(ProcessView.Io), 95);
         Column(_processes, "활동", nameof(ProcessView.Activity), 100);
         Column(_processes, "보호 사유", nameof(ProcessView.Protection), 200, true);
-        Column(_groups, "프로세스 그룹", nameof(GroupView.Name), 180);
-        Column(_groups, "개수", nameof(GroupView.Count), 65);
-        Column(_groups, "RAM 합계", nameof(GroupView.Ram), 110);
-        Column(_groups, "전용 합계", nameof(GroupView.Private), 110);
-        Column(_groups, "CPU 합계", nameof(GroupView.Cpu), 90);
+        Column(_groups, "프로세스 그룹", nameof(GroupView.Name), 160);
+        Column(_groups, "개수", nameof(GroupView.Count), 60);
+        Column(_groups, "RAM 합계", nameof(GroupView.Ram), 95);
+        Column(_groups, "전용 합계", nameof(GroupView.Private), 100);
+        Column(_groups, "CPU 합계", nameof(GroupView.Cpu), 80);
         Column(_groups, "I/O /초", nameof(GroupView.Io), 100);
-        Column(_groups, "활동", nameof(GroupView.Activity), 130);
-        Column(_groups, "보호 사유", nameof(GroupView.Protection), 220, true);
+        Column(_groups, "활동", nameof(GroupView.Activity), 95);
+        Column(_groups, "보호 사유", nameof(GroupView.Protection), 180, true);
         var tabs = new TabControl { Background = UiTheme.Surface, BorderBrush = UiTheme.Border };
         tabs.Items.Add(Tab("개별 프로세스", _processes));
         tabs.Items.Add(Tab("이름별 그룹", _groups));
@@ -549,20 +692,59 @@ public sealed class MainWindow : Window
     private static ScrollViewer Scroll(UIElement content) => new()
     { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
     private static TabItem Tab(string title, UIElement content) => new()
-    { Header = title, Content = content, Foreground = UiTheme.Text, Padding = new Thickness(16, 10, 16, 10) };
+    { Header = title, Content = content, Padding = new Thickness(16, 10, 16, 10) };
     private static Border Card(UIElement content) => new()
     {
         Child = content, Background = UiTheme.Surface, BorderBrush = UiTheme.Border, BorderThickness = new Thickness(1),
         CornerRadius = new CornerRadius(12), Padding = new Thickness(14), Margin = new Thickness(4, 4, 4, 8)
     };
-    private static Border Metric(string title, TextBlock value, string detail)
+    private static ProgressBar Meter(Brush color) => new()
+    {
+        Minimum = 0, Maximum = 100, Height = 3, Foreground = color,
+        Background = UiTheme.Elevated, BorderThickness = new Thickness(0), IsHitTestVisible = false
+    };
+    private static Border Metric(string title, TextBlock value, string detail, ProgressBar meter, Brush color)
     {
         var stack = new StackPanel();
-        stack.Children.Add(Label(title, 13, UiTheme.Muted));
-        value.Foreground = UiTheme.Accent;
+        TextBlock name = Label(title, 11, UiTheme.Muted);
+        name.FontWeight = FontWeights.SemiBold;
+        name.Margin = new Thickness(0);
+        stack.Children.Add(name);
+        value.Foreground = color;
+        value.FontFamily = new FontFamily("Segoe UI");
+        value.FontSize = 30;
+        value.FontWeight = FontWeights.SemiBold;
+        value.Margin = new Thickness(0, 2, 0, 2);
         stack.Children.Add(value);
-        stack.Children.Add(Label(detail, 11, UiTheme.Muted));
-        return Card(stack);
+        TextBlock description = Label(detail, 10, UiTheme.Muted);
+        description.TextWrapping = TextWrapping.NoWrap;
+        description.TextTrimming = TextTrimming.CharacterEllipsis;
+        description.ToolTip = detail;
+        description.Margin = new Thickness(0, 0, 0, 8);
+        stack.Children.Add(description);
+        stack.Children.Add(meter);
+        Border card = Card(stack);
+        card.Padding = new Thickness(12, 10, 12, 10);
+        return card;
+    }
+    private static Border Summary(string title, TextBlock detail)
+    {
+        var stack = new DockPanel();
+        TextBlock heading = Label(title, 12);
+        heading.FontWeight = FontWeights.SemiBold;
+        heading.Margin = new Thickness(0, 0, 0, 6);
+        DockPanel.SetDock(heading, Dock.Top);
+        stack.Children.Add(heading);
+        detail.Margin = new Thickness(0);
+        stack.Children.Add(new ScrollViewer
+        {
+            Content = detail, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
+        });
+        Border card = Card(stack);
+        card.Height = 112;
+        card.Padding = new Thickness(12, 10, 12, 10);
+        return card;
     }
     private static DataGrid Table()
     {
@@ -594,7 +776,8 @@ public sealed class MainWindow : Window
         table.Columns.Add(new DataGridTextColumn
         {
             Header = title, Binding = new Binding(path), ElementStyle = textStyle,
-            Width = stretch ? new DataGridLength(1, DataGridLengthUnitType.Star) : new DataGridLength(width), MinWidth = 60
+            Width = stretch ? new DataGridLength(1, DataGridLengthUnitType.Star) : new DataGridLength(width),
+            MinWidth = width
         });
     }
 

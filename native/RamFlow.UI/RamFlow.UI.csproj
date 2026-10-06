@@ -9,8 +9,11 @@
     <StartupObject>RamFlow.UI.Program</StartupObject>
     <AssemblyName>RamFlow</AssemblyName>
     <RootNamespace>RamFlow.UI</RootNamespace>
+    <ApplicationIcon>Assets/ramflow.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="Assets/ramflow.png" />
+    <Resource Include="Assets/ramflow.ico" />
     <ProjectReference Include="../RamFlow.Core/RamFlow.Core.csproj" />
     <ProjectReference Include="../RamFlow.Storage/RamFlow.Storage.csproj" />
   </ItemGroup>

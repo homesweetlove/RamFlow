@@ -1,10 +1,12 @@
 # RamFlow
 
-현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.0은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
+<img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
+
+현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.1은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
 
 ## 실행
 
-[최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.0-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
+[최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.1-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
 
 기본값은 **Dry Run**입니다. 시작할 때마다 실제 최적화를 해제하고 예상 동작부터 보여줍니다. 실제 적용은 설정의 **관리자로 다시 열기**를 선택하고 Dry Run을 해제한 뒤 확인합니다. 트레이에서 종료하면 변경한 자원 설정을 복원합니다. 창 닫기는 트레이로 숨깁니다.
 
@@ -47,6 +49,7 @@ COLD 파일은 GUID 메타데이터로 관리합니다. 목록에서 복원하�
 
 ```powershell
 ./Install.ps1                    # 사용자 Programs + 시작 메뉴
+./Install.ps1 -DesktopShortcut   # 위 내용 + 전용 아이콘의 바탕화면 바로가기
 ./Install.ps1 -Startup           # 위 내용 + 현재 사용자 자동 시작
 ./Install.ps1 -MonitorService    # 관리자: 별도 시스템 모니터 서비스도 설치
 ./Uninstall.ps1                 # 먼저 트레이에서 종료

@@ -29,8 +29,9 @@ if (-not $NoIntegration) {
     $ramRun = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
     $ramValue = (Get-ItemProperty -Path $ramRun -Name RamFlow -ErrorAction SilentlyContinue).RamFlow
     if ($ramValue -eq ('"' + (Join-Path $ramTarget 'RamFlow.exe') + '"')) { Remove-ItemProperty -Path $ramRun -Name RamFlow }
-    $ramMenu = Join-Path ([Environment]::GetFolderPath('Programs')) 'RamFlow.lnk'
-    if (Test-Path -LiteralPath $ramMenu) { $ramShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($ramMenu); if ($ramShortcut.TargetPath -eq (Join-Path $ramTarget 'RamFlow.exe')) { Remove-Item -LiteralPath $ramMenu } }
+    foreach ($ramLink in @((Join-Path ([Environment]::GetFolderPath('Programs')) 'RamFlow.lnk'), (Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'RamFlow.lnk'))) {
+        if (Test-Path -LiteralPath $ramLink) { $ramShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($ramLink); if ($ramShortcut.TargetPath -eq (Join-Path $ramTarget 'RamFlow.exe')) { Remove-Item -LiteralPath $ramLink } }
+    }
 }
 # 설치 폴더만 제거한다. 모델 파일·클라우드 파일·복구 메타데이터는 보존한다.
 if (-not $ramTarget.StartsWith($ramParent.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw '최종 제거 경로 검증 실패' }
