@@ -111,6 +111,10 @@ internal sealed class App : Application
     private void CreateTray()
     {
         _menu = new Forms.ContextMenuStrip();
+        _menu.Opening += (_, _) => {
+            try { UpdateTray(); }
+            catch (Exception error) { Console.Error.WriteLine("Tray settings refresh: " + error.Message); }
+        };
         _menu.Items.Add("RamFlow 열기", null, (_, _) => Dispatch(() => _window?.ShowFromTray()));
         _menu.Items.Add(new Forms.ToolStripSeparator());
         _pausedItem = new Forms.ToolStripMenuItem("일시 정지", null, (_, _) =>

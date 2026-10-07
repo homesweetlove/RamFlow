@@ -545,7 +545,7 @@ public sealed class MainWindow : Window
         Button save = Command("설정 저장", SaveSettings);
         save.IsEnabled = !_smokeTest;
         actions.Children.Add(save);
-        actions.Children.Add(Command("현재 설정 다시 읽기", LoadSettings));
+        actions.Children.Add(Command("현재 설정 다시 읽기", () => { LoadSettings(); SettingsChanged?.Invoke(this, EventArgs.Empty); }));
         Button elevate = Command("관리자로 다시 열기", () =>
         {
             if (!_smokeTest && !UiPrivilege.IsAdministrator) _restartElevated?.Invoke();
