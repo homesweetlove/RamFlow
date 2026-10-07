@@ -1,69 +1,72 @@
 # RamFlow
 
+[![English](https://img.shields.io/badge/Language-English-2F81F7)](README.md)
+[![한국어](https://img.shields.io/badge/언어-한국어-2F81F7)](README.ko.md)
+
 <img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
 
-현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.2은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
+RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.2, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
 
-## 실행
+## Run
 
-[최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.2-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
+Download `RamFlow-0.3.2-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
 
-기본값은 **Dry Run**입니다. 시작할 때마다 실제 최적화를 해제하고 예상 동작부터 보여줍니다. 실제 적용은 설정의 **관리자로 다시 열기**를 선택하고 Dry Run을 해제한 뒤 확인합니다. 트레이에서 종료하면 변경한 자원 설정을 복원합니다. X 버튼은 작업표시줄에 최소화합니다. 다시 실행하면 기존 창이 열리며, 트레이로 숨기기는 상단의 전용 버튼을 이용합니다.
+The default mode is **Dry Run**. On every launch, real optimization is disabled first so you can review the expected behavior before applying changes. To enable real changes, choose **Reopen as administrator** in Settings, disable Dry Run, and confirm. Exiting from the system tray restores the resource settings changed by RamFlow. The X button minimizes the app to the taskbar. Launching RamFlow again reopens the existing window, while the dedicated button in the title area hides it to the tray.
 
-## 기능
+## Features
 
-| 항목 | 구현 |
+| Area | Implementation |
 |---|---|
-| 모니터 | RAM/Commit/캐시/Standby/Modified, CPU, 디스크, Page-in/out, 배터리, 지원되는 GPU/온도 카운터 |
-| 압박 | Memory Pressure EMA·히스테리시스·연속 확인·Commit 위기 감지, 센서가 있는 항목만 System Pressure에 반영 |
-| Foreground First | 현재 앱·동일 이름 프로세스·작업 그룹 보호, 약 250ms마다 복원 확인 |
-| App Nap | 30분 Idle 앱의 Memory Priority/CPU Below Normal/EcoQoS, 압박이 높은 2시간 Deep Idle에 제한적 Working Set 축소 |
-| CPU Sets | 공식 CPU topology와 EfficiencyClass 사용, 하이브리드·단일 그룹에 한해 Idle 앱 효율 코어 선택; 기본 OFF |
-| 예측 | 선택적 시간대·앱 전환 빈도 학습, 자주 사용할 앱 보호; 예측만으로 Working Set을 비우지 않음 |
-| 안전 복원 | 원래 값 사전 기록, 일부 API 실패 재시도, 생성 시각 검증, 강제 종료 후 다음 시작 때 복원 저널 재처리 |
-| 모델 저장소 | HOT/WARM/COLD 분석, 스트리밍 보관, SHA-256·크기·원자적 메타데이터, 명시적 공간 회수, 복원 후 모델 실행 |
-| 클라우드 | 연결된 Google Drive/OneDrive 등의 동기화 폴더 또는 HTTPS WebDAV. 암호는 메모리에서만 사용 |
-| Pagefile | Windows 자동/균형/Low RAM/개발/게임/AI/수동 모드, 관측 Commit 기반 권장, 최초 백업, 확인 후 적용·복원 |
-| 벤치마크 | Before/After, 선택 프로그램 준비·완료 시간, JSON/CSV 내보내기, Frame Time/tokens/sec 숫자 열 CSV 분석 |
-| UI | 한국어 9개 화면, 그래프, 프로세스·그룹·보호 사유, 트레이, 일시 정지·작업 모드 |
-| 분리 엔진 | 사용자 세션의 별도 .NET 프로세스, 사용자 SID별 Named Pipe, 로컬 전용, 크기·연결·관리자 토큰 검사 |
-| 설치/업데이트 | 사용자 설치·시작 메뉴·선택적 자동 시작, 검증된 업데이트 설치·재시작, 원복 후 제거 |
+| Monitoring | RAM/Commit/cache/Standby/Modified, CPU, disk, page-in/out, battery, and supported GPU/temperature counters |
+| Pressure | Memory Pressure EMA, hysteresis, consecutive confirmation, Commit crisis detection, and System Pressure calculated only from available sensors |
+| Foreground First | Protects the active app, same-name processes, and task groups; restoration is checked about every 250 ms |
+| App Nap | Memory Priority/CPU Below Normal/EcoQoS for apps idle for 30 minutes, with limited Working Set reduction after 2 hours of deep idle under high pressure |
+| CPU Sets | Uses official CPU topology and EfficiencyClass data; can select efficient cores for idle apps on hybrid, single-group systems; OFF by default |
+| Prediction | Optional learning of time-of-day and app-switch frequency to protect frequently used apps; prediction alone never trims Working Sets |
+| Safe restore | Records original values before changes, retries selected API failures, validates process creation time, and replays the restore journal on the next launch after a forced shutdown |
+| Model storage | HOT/WARM/COLD analysis, streamed archiving, SHA-256/size/atomic metadata, explicit space reclamation, and model execution after restore |
+| Cloud | Connected sync folders such as Google Drive/OneDrive or HTTPS WebDAV. Passwords are kept in memory only |
+| Pagefile | Windows automatic/balanced/Low RAM/development/gaming/AI/manual modes, recommendations based on observed Commit, first-state backup, and confirmed apply/restore |
+| Benchmarking | Before/After measurements, selected-program ready/completion timing, JSON/CSV export, and CSV analysis of numeric Frame Time/tokens/sec columns |
+| UI | Nine Korean-language screens, graphs, process/group/protection reasons, tray controls, pause, and work modes |
+| Separate engine | Dedicated .NET process in the user session, per-user-SID Named Pipe, local-only access, and size/connection/admin-token validation |
+| Install/update | Per-user install, Start Menu integration, optional startup, verified update install/restart, and restore-before-uninstall behavior |
 
-## 보호와 제한적 개입
+## Protection and limited intervention
 
-시스템·서비스·보안·드라이버·AI·음악·다운로드·렌더·컴파일·서버 및 정보가 불확실한 앱은 보호합니다. 화이트리스트는 이름으로 등록합니다. 정상 메모리 상태에는 개입하지 않으며 CPU 부하나 배터리 상태도 고려합니다. 전체화면 중 새로운 변경을 중단합니다. Working Set은 한 번에 한 앱, 전역 2분 간격, 같은 PID 15분 이상 간격으로만 축소합니다. 자동 종료·Realtime Priority·커널 후킹·Standby Clear는 사용하지 않습니다.
+RamFlow protects system, service, security, driver, AI, music, download, render, compile, server, and insufficiently identified applications. Whitelisting is name-based. It does not intervene when memory conditions are healthy, and it also considers CPU load and battery state. New changes are suspended while a full-screen application is active. Working Set reduction is limited to one application at a time, at least two minutes apart globally, and at least 15 minutes apart for the same PID. RamFlow does not use automatic process termination, Realtime Priority, kernel hooking, or Standby List clearing.
 
-실제 변경 직전과 복원 때 PID 생성 시각, 사용자 소유권·세션·시스템 경로·Critical 상태를 확인합니다. 처음 관측한 값으로 복원하며, 조회가 일시적으로 실패해도 복원 기록을 보존합니다. 정전/강제 종료 뒤 즉시 복원은 불가능하지만 다음 실행이 복원 저널을 재처리합니다. Working Set 자체는 OS가 재접근 시 복구합니다.
+Immediately before applying a real change and again during restoration, RamFlow verifies the PID creation time, user ownership, session, system path, and Critical status. Restoration uses the first observed value, and restore records are retained even if a query temporarily fails. Immediate restoration after a power loss or forced shutdown is impossible, but the restore journal is replayed on the next launch. The OS itself reloads Working Set pages when they are accessed again.
 
-## 모델 보관과 복원
+## Model archiving and restoration
 
-모델 저장소에서 원본 폴더와 보관 폴더/HTTPS WebDAV 컬렉션을 선택합니다. 먼저 분석한 뒤 파일을 선택해 **보관 · 원본 유지**를 수행하세요. Dry Run이 켜져 있으면 전송도 시뮬레이션합니다.
+In Model Storage, choose the source folder and an archive folder or HTTPS WebDAV collection. Analyze first, select files, and then run **Archive · Keep original**. When Dry Run is enabled, transfers are simulated as well.
 
-동기화 폴더의 해시 일치는 로컬 복사본 검증이며, 클라우드 서버 업로드 완료를 보장하지 않습니다. 원본 제거는 별도 확인 후에만 수행합니다. 공급자의 업로드 완료와 보관 파일을 직접 확인하세요. WebDAV는 PUT 완료 응답 뒤 전체 GET 해시를 검사합니다. 클라우드는 RAM/Pagefile로 사용하지 않습니다.
+A matching hash inside a sync folder verifies the local copy only; it does not guarantee that the cloud provider has completed the server-side upload. Removing the original requires a separate confirmation. Verify the provider's upload status and archived file yourself. For WebDAV, RamFlow performs a full GET hash check after a successful PUT response. Cloud storage is never used as RAM or a pagefile.
 
-COLD 파일은 GUID 메타데이터로 관리합니다. 목록에서 복원하거나 **모델 자동 복원 후 실행**으로 런타임의 실행 파일과 인수 JSON 배열을 지정할 수 있습니다. 모델 경로는 마지막 인수로 추가됩니다. 사용 중인 파일, 수정된 원본, 손상된 보관본, 충돌, 경로 이탈, 정션·심볼릭 링크·스파스/온라인 전용 파일은 작업을 거부합니다. 파일 시각 기반 HOT/WARM/COLD는 실제 사용 빈도와 다를 수 있습니다.
+COLD files are managed using GUID metadata. You can restore them from the list or use **Auto-restore model and run** to define a runtime executable and a JSON array of arguments. The restored model path is appended as the final argument. Operations are rejected for files currently in use, modified originals, damaged archives, conflicts, path escapes, junctions, symbolic links, sparse files, and online-only files. HOT/WARM/COLD classification based on file timestamps may differ from actual usage frequency.
 
-## 설치·서비스·제거
+## Installation, service, and removal
 
-포터블 사용은 설치 없이 가능합니다. 사용자 설치는 UI 또는 배포 폴더의 `Install.ps1`로 합니다.
+Portable use requires no installation. Per-user installation is available through the UI or `Install.ps1` in the distribution folder.
 
 ```powershell
-./Install.ps1                    # 사용자 Programs + 시작 메뉴
-./Install.ps1 -DesktopShortcut   # 위 내용 + 전용 아이콘의 바탕화면 바로가기
-./Install.ps1 -Startup           # 위 내용 + 현재 사용자 자동 시작
-./Install.ps1 -MonitorService    # 관리자: 별도 시스템 모니터 서비스도 설치
-./Uninstall.ps1                 # 먼저 트레이에서 종료
+./Install.ps1                    # User Programs + Start Menu
+./Install.ps1 -DesktopShortcut   # Above + desktop shortcut with dedicated icon
+./Install.ps1 -Startup           # Above + startup for the current user
+./Install.ps1 -MonitorService    # Administrator: also install the separate system monitor service
+./Uninstall.ps1                 # Exit from the tray first
 ```
 
-SCM 서비스는 Session 0에서 사용자 Foreground를 볼 수 없으므로 모니터링만 합니다. 실제 자원 조정은 사용자 세션의 분리 엔진이 담당합니다. 관리자 서비스 실행파일은 쓰기 제한된 Program Files, 상태는 쓰기 제한된 ProgramData에 둡니다. 서비스는 기본 설치하지 않습니다.
+The SCM service only performs monitoring because a service running in Session 0 cannot observe the user's foreground application. Real resource adjustments are handled by the separate engine in the user session. The administrative service executable is stored under write-restricted Program Files and its state under write-restricted ProgramData. The service is not installed by default.
 
-업데이트 화면에서 공개 저장소 확인 → SHA-256 검증 → 새 버전 설치·재시작을 선택합니다. 설치에는 사용자 확인이 필요하며 일반 권한으로 연 창에서 진행합니다. 선택적 SCM 모니터 서비스는 관리자 권한으로 제거·재설치해 업데이트합니다.
+From the Update screen, RamFlow checks the public repository, verifies SHA-256, and then offers installation and restart of the new version. Installation requires user confirmation and is initiated from a normally privileged window. If the optional SCM monitor service is installed, updating it requires removal and reinstallation with administrator privileges.
 
-제거는 설치 폴더, 해당 설치의 시작 메뉴/자동 시작 및 선택적 서비스를 제거합니다. Pagefile을 변경했다면 관리자 권한으로 최초 설정을 먼저 복원합니다. `%LOCALAPPDATA%\RamFlowNative`의 모델 복구 메타데이터와 사용자 모델·클라우드 파일은 보존합니다. 이 메타데이터를 삭제하면 보관 모델의 자동 복원 정보를 잃을 수 있습니다.
+Uninstall removes the installation folder, the Start Menu/startup entries created by that installation, and the optional service. If RamFlow changed the pagefile configuration, restore the original setting with administrator privileges first. Model-recovery metadata under `%LOCALAPPDATA%\RamFlowNative`, user models, and cloud files are preserved. Deleting this metadata can remove the information needed to automatically restore archived models.
 
-## 빌드·검증
+## Build and validation
 
-Windows와 .NET 10 SDK, Python 3가 필요합니다. Python은 검증 스크립트에만 사용합니다.
+Windows, the .NET 10 SDK, and Python 3 are required. Python is used only for validation scripts.
 
 ```powershell
 dotnet run --project native/RamFlow.Tests -c Release
@@ -72,12 +75,12 @@ dotnet run --project native/RamFlow.Storage.Tests -c Release
 ./scripts/build-native.ps1
 ```
 
-Mock 회귀, 자체 생성 자식 프로세스만 변경하는 Windows API 왕복, Mock Named Pipe 권한·정상 종료, 테스트 파일만 쓰는 모델 보관·복원, 실제 WPF 창 생성 및 테스트 전용 폴더의 설치·제거를 검증합니다. GitHub Actions도 Windows에서 같은 빌드를 수행합니다. 실제 사용자 Pagefile·SCM 등록·외부 클라우드 업로드는 자동 검증에서 수행하지 않습니다.
+Validation covers mock regressions, Windows API round trips that modify only self-created child processes, mock Named Pipe authorization and clean shutdown, model archive/restore using test files only, creation of the real WPF window, and install/uninstall flows inside test-only folders. GitHub Actions performs the same Windows build. Automated validation does not modify a real user's pagefile, register SCM services, or upload to external cloud storage.
 
-## Windows 구조에 맞춘 대안과 측정 범위
+## Windows-aware design choices and measurement scope
 
-문서화된 Background I/O Mode는 자기 프로세스에만 사용할 수 있으므로 RamFlow 엔진 자체에 적용합니다. 다른 앱의 I/O 우선순위를 비공식 Nt API로 변경하지 않습니다. 대신 활성 I/O 작업을 보호하고 Idle 앱 CPU/EcoQoS를 조정합니다. CPU affinity를 고정하는 대신 복원 가능한 CPU Sets를 사용합니다. 현재 앱의 P-core 고정은 수행하지 않습니다.
+The documented Background I/O Mode can only be applied to the calling process, so RamFlow applies it to its own engine rather than changing another application's I/O priority through undocumented Nt APIs. Instead, it protects active I/O work and adjusts CPU/EcoQoS for idle apps. Restorable CPU Sets are used instead of permanently pinning CPU affinity. RamFlow does not force the foreground app onto P-cores.
 
-GPU/ACPI 온도 카운터가 없으면 미지원으로 표시합니다. GPU 값은 관측 전용 dedicated usage이며 전체 VRAM 용량이나 모델별 KV cache 보장을 의미하지 않습니다. Page-in은 페이지 수이며 hard-fault 사건 수가 아닙니다. 앱 준비 시간과 스케줄링 지터는 실제 입력 지연이 아닙니다. 게임/LLM/IDE 결과는 사용자가 선택한 런타임/CSV로 측정합니다. 환경별 성능 개선 수치는 보장하지 않습니다.
+If GPU/ACPI temperature counters are unavailable, they are shown as unsupported. GPU values represent observable dedicated usage only; they do not imply total VRAM capacity or guarantee per-model KV cache availability. Page-in is a page count, not a hard-fault event count. Application-ready time and scheduling jitter are not equivalent to real input latency. Game/LLM/IDE results are measured using the runtime or CSV selected by the user. Performance improvements are not guaranteed across environments.
 
-WinUI 3의 별도 배포 의존성 대신 WPF를 선택했습니다. 커널 드라이버나 후킹을 사용하지 않습니다. 공식 API와 검증 범위는 [아키텍처](docs/NATIVE_ARCHITECTURE.md), [검증](docs/VALIDATION.md)를 참고하세요. Python 0.2.0 실행 안내는 [기존 버전 문서](docs/LEGACY_PYTHON.md)에 있습니다.
+WPF was chosen instead of WinUI 3 to avoid an additional deployment dependency. RamFlow does not use kernel drivers or hooks. See [Architecture](docs/NATIVE_ARCHITECTURE.md) and [Validation](docs/VALIDATION.md) for details on official APIs and validation scope. Instructions for the Python 0.2.0 version are available in the [legacy version documentation](docs/LEGACY_PYTHON.md).
