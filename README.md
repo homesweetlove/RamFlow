@@ -5,13 +5,13 @@
 
 <img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
 
-RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.2, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
+RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.3, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
 
 ## Run
 
-Download `RamFlow-0.3.2-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
+Download `RamFlow-0.3.3-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
 
-The default mode is **Dry Run**. On every launch, real optimization is disabled first so you can review the expected behavior before applying changes. To enable real changes, choose **Reopen as administrator** in Settings, disable Dry Run, and confirm. Exiting from the system tray restores the resource settings changed by RamFlow. The X button minimizes the app to the taskbar. Launching RamFlow again reopens the existing window, while the dedicated button in the title area hides it to the tray.
+The default mode is **Dry Run**. On every launch, real optimization is disabled first so you can review the expected behavior before applying changes. To enable real changes, choose **Reopen as administrator** in Settings, disable Dry Run, and confirm. Exiting from the system tray restores the resource settings changed by RamFlow. The X button hides the window and its running taskbar button while the tray and background engine keep running. Launch RamFlow again or double-click the tray icon to reopen the existing window. Choose Exit in the tray menu to shut down completely.
 
 ## Features
 

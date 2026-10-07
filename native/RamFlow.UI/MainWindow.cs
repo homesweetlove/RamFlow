@@ -634,7 +634,7 @@ public sealed class MainWindow : Window
     {
         if (AllowClose) { StopRefresh(); return; }
         e.Cancel = true;
-        WindowState = WindowState.Minimized;
+        Hide();
     }
 
     private static string Number(double value) => double.IsFinite(value) ? $"{Math.Max(0, value):0.0}%" : "미지원";

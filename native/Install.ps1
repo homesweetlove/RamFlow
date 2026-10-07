@@ -31,12 +31,12 @@ if ($ramTarget -ne $ramSource) {
             if ($ramFile.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw '연결된 파일은 설치할 수 없습니다.' }
             Copy-Item -LiteralPath $ramFile.FullName -Destination $ramStage -Recurse -Force
         }
-        @{product='homesweetlove.RamFlow';version='0.3.2'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramStage 'RamFlow-install.json') -Encoding utf8
+        @{product='homesweetlove.RamFlow';version='0.3.3'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramStage 'RamFlow-install.json') -Encoding utf8
         if (Test-Path -LiteralPath $ramTarget) { Move-Item -LiteralPath $ramTarget -Destination $ramBackup }
         try { Move-Item -LiteralPath $ramStage -Destination $ramTarget } catch { if (Test-Path -LiteralPath $ramBackup) { Move-Item -LiteralPath $ramBackup -Destination $ramTarget }; throw }
         if (Test-Path -LiteralPath $ramBackup) { Remove-Item -LiteralPath $ramBackup -Recurse -Force }
     } finally { if (Test-Path -LiteralPath $ramStage) { Remove-Item -LiteralPath $ramStage -Recurse -Force } }
-} else { @{product='homesweetlove.RamFlow';version='0.3.2'} | ConvertTo-Json | Set-Content -LiteralPath $ramMarker -Encoding utf8 }
+} else { @{product='homesweetlove.RamFlow';version='0.3.3'} | ConvertTo-Json | Set-Content -LiteralPath $ramMarker -Encoding utf8 }
 if (-not $NoIntegration) {
     $ramLinks = @((Join-Path ([Environment]::GetFolderPath('Programs')) 'RamFlow.lnk'))
     if ($DesktopShortcut) { $ramLinks += Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'RamFlow.lnk' }
@@ -57,7 +57,7 @@ if (-not $NoIntegration) {
         $ramAcl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
         foreach ($ramSid in @('S-1-5-18','S-1-5-32-544')) { $ramRule = [Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($ramSid), 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow'); $ramAcl.AddAccessRule($ramRule) }
         Set-Acl -LiteralPath $ramServiceDirectory -AclObject $ramAcl
-        @{product='homesweetlove.RamFlow';version='0.3.2'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramServiceDirectory 'RamFlow-monitor-state.json') -Encoding utf8
+        @{product='homesweetlove.RamFlow';version='0.3.3'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ramServiceDirectory 'RamFlow-monitor-state.json') -Encoding utf8
         # SYSTEM 서비스는 사용자가 쓸 수 없는 Program Files의 독립 복사본으로 실행한다.
         $ramAdminTarget = [IO.Path]::GetFullPath((Join-Path $env:ProgramFiles 'RamFlowMonitor'))
         if (-not $ramAdminTarget.StartsWith([IO.Path]::GetFullPath($env:ProgramFiles).TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw '서비스 설치 경로 검증 실패' }

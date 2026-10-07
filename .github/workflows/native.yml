@@ -26,6 +26,6 @@ jobs:
         with:
           name: RamFlow-native-windows-x64
           path: |
-            dist/RamFlow-0.3.2-windows-x64.zip
+            dist/RamFlow-0.3.3-windows-x64.zip
             dist/SHA256SUMS-native.txt
             artifacts/native-dashboard.png

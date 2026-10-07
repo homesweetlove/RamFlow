@@ -6,6 +6,7 @@ import subprocess
 import shutil
 import sys
 import time
+import uuid
 
 root = Path(__file__).resolve().parents[1]
 app = root / 'dist' / 'RamFlow-native'
@@ -21,14 +22,15 @@ run([app/'RamFlow.exe', '--smoke-test', '--screenshot', root/'artifacts'/'native
 run([app/'RamFlow.exe', '--startup-check', '--data-root', data/'startup'], timeout=45)
 state = json.loads(run([app/'RamFlow.Service.exe', '--simulate']))
 assert state['Snapshot']['RamTotal'] > 0
-child = subprocess.Popen([str(app/'RamFlow.Service.exe'), '--serve', '--data-root', str(data/'engine')],
+ipc_scope = ['--ipc-namespace', uuid.uuid4().hex]
+child = subprocess.Popen([str(app/'RamFlow.Service.exe'), '--serve', '--data-root', str(data/'engine'), *ipc_scope],
                          creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 try:
     for attempt in range(30):
         if child.poll() is not None:
             raise RuntimeError('Isolated engine did not start; another engine may be active')
         try:
-            live = json.loads(run([app/'RamFlow.Service.exe', '--ipc-state'], timeout=5))
+            live = json.loads(run([app/'RamFlow.Service.exe', '--ipc-state', *ipc_scope], timeout=5))
             if live['EnginePid'] == child.pid and live['Snapshot']['RamTotal'] > 0:
                 break
         except (RuntimeError, subprocess.TimeoutExpired):
@@ -36,7 +38,7 @@ try:
         time.sleep(.1)
     else:
         raise RuntimeError('Packaged engine telemetry/IPC did not become ready')
-    run([app/'RamFlow.Service.exe', '--ipc-stop'])
+    run([app/'RamFlow.Service.exe', '--ipc-stop', *ipc_scope])
     child.wait(timeout=10)
     assert child.returncode == 0
 finally:

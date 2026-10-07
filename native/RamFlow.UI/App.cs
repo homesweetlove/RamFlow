@@ -212,12 +212,15 @@ internal sealed class App : Application
             await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);
             if (!_window.IsVisible || !_window.ShowInTaskbar || _window.WindowState == WindowState.Minimized)
                 throw new InvalidOperationException("숨긴 창이 작업표시줄로 복원되지 않았습니다.");
+            int enginePid = _engine!.GetState().EnginePid;
             _window.Close();
-            if (!_window.IsVisible || _window.WindowState != WindowState.Minimized || !_window.ShowInTaskbar)
-                throw new InvalidOperationException("닫기 버튼이 작업표시줄 최소화로 동작하지 않습니다.");
-            if (!WindowActivation.TryShowExisting(activationName)) throw new InvalidOperationException("최소화된 창 재실행 요청 실패");
+            if (_window.IsVisible)
+                throw new InvalidOperationException("닫기 버튼이 창을 트레이로 숨기지 않습니다.");
+            if (_engine.GetState().EnginePid != enginePid)
+                throw new InvalidOperationException("창을 숨기는 동안 백그라운드 엔진이 변경되었습니다.");
+            if (!WindowActivation.TryShowExisting(activationName)) throw new InvalidOperationException("닫은 창 재실행 요청 실패");
             await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);
-            if (_window.WindowState == WindowState.Minimized || !_window.IsVisible) throw new InvalidOperationException("최소화된 창 복원 실패");
+            if (_window.WindowState == WindowState.Minimized || !_window.IsVisible) throw new InvalidOperationException("닫은 창 복원 실패");
             _window.UpdateLayout();
             _window.VerifyPages(_screenshot);
             if (_provider is MockResourceProvider mock && (mock.Writes != 0 || mock.Trims != 0))
