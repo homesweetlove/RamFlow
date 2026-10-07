@@ -15,6 +15,7 @@ internal static class BrandAssets
     {
         var logo = new BitmapImage();
         logo.BeginInit();
+        logo.DecodePixelWidth = 256;
         logo.CacheOption = BitmapCacheOption.OnLoad;
         logo.UriSource = new Uri("pack://application:,,,/Assets/ramflow.png", UriKind.Absolute);
         logo.EndInit();

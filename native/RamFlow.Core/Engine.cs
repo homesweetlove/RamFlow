@@ -22,6 +22,8 @@ public sealed class Engine : IDisposable
     private IReadOnlyList<ProcessSample> processes = [];
     private State state = new(new(), 0, PressureLevel.Normal, "background", "", [], [], 0, [], []);
     private DateTimeOffset lastScan = DateTimeOffset.MinValue, lastTrim = DateTimeOffset.MinValue;
+    private int trimCount;
+    private ulong lastWorkingSetReduction;
     private Task? worker;
     private CancellationTokenSource? cancellation;
     private bool disposed;
@@ -116,30 +118,63 @@ public sealed class Engine : IDisposable
             pressure.Update(snap, snap.RamTotal >= 32UL * 1073741824 ? -5 : snap.RamTotal <= 8UL * 1073741824 ? 2 : 0);
             var rows = new List<ProcessRow>();
             var alive = new HashSet<(int, long)>();
+            int trimDelay = Policy.TrimIdleSeconds(pressure.Level);
+            int trimCandidates = 0;
+            bool trimAttempted = false;
+            double? nextIdleSeconds = null;
+            bool canManage = foreground.Pid > 0 && foreground.Name.Length > 0 && !fullscreen && !settings.Paused;
+            // Account for every sibling before selecting an app: a small busy helper
+            // must protect a larger quiet process with the same executable name.
             foreach (var p in processes) {
                 var key = (p.Pid, p.Identity); alive.Add(key);
                 if (!seen.ContainsKey(key)) { seen[key] = now; activity[p.Name] = now; }
-                if (p.CpuPercent >= 2 || p.IoBytesPerSecond >= 1048576) activity[p.Name] = now;
+                if (!p.ActivityKnown || p.CpuPercent >= 2 || p.IoBytesPerSecond >= 1048576) activity[p.Name] = now;
+            }
+            foreach (var p in processes.OrderByDescending(p => p.WorkingSet)) {
                 double idle = (now - activity.GetValueOrDefault(p.Name, now)).TotalSeconds;
                 string category = p.Name == foreground.Name ? "Active" : idle < 300 ? "Recently Active" : idle < 1800 ? "Background" : idle < 7200 ? "Idle" : "Deep Idle";
                 string? protection = Policy.Protect(p, foreground, settings, mode);
                 if (protection is null && predictions.Contains(p.Name)) protection = "시간대 사용 예측 보호";
                 rows.Add(new(p.Pid, p.Identity, p.Name, p.WorkingSet, p.PrivateBytes, category, protection, p.CpuPercent, p.IoBytesPerSecond));
-                bool eligible = protection is null && idle >= 1800 && !fullscreen && !settings.Paused &&
+                bool eligible = protection is null && idle >= 1800 && canManage &&
                     (pressure.Level >= PressureLevel.Moderate || snap.CpuPercent >= 80 || snap.OnBattery);
-                if (!eligible) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); continue; }
-                if (settings.DryRun) { Log($"{p.Name} · {category} · Memory Priority / CPU / EcoQoS 조정 예상", true); continue; }
-                if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, now);
-                if (settings.WorkingSetTrim && pressure.Level >= PressureLevel.High && idle >= 7200 && p.WorkingSet >= 150 * 1048576UL &&
-                    (now - lastTrim).TotalSeconds >= 120 && (now - trims.GetValueOrDefault(p.Pid, DateTimeOffset.MinValue)).TotalSeconds >= 900 && provider.Validate(p)) {
-                    bool ok = provider.Trim(p.Pid, p.Identity); lastTrim = now; trims[p.Pid] = now;
-                    Log($"{p.Name} · 제한적 Working Set 축소 {(ok ? "완료" : "실패")}");
-                }
+                if (!eligible) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); }
+                else if (settings.DryRun) Log($"{p.Name} · {category} · Memory Priority / CPU / EcoQoS 조정 예상", true);
+                else if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, now);
+                bool memoryCandidate = protection is null && canManage && settings.WorkingSetTrim &&
+                    pressure.Level >= PressureLevel.High && p.WorkingSet >= 150 * 1048576UL;
+                if (!memoryCandidate) continue;
+                if (idle < trimDelay) { nextIdleSeconds = Math.Min(nextIdleSeconds ?? double.MaxValue, trimDelay - idle); continue; }
+                trimCandidates++;
+                if (trimAttempted || (now - lastTrim).TotalSeconds < 120 || (now - trims.GetValueOrDefault(p.Pid, DateTimeOffset.MinValue)).TotalSeconds < 900) continue;
+                if (settings.DryRun) continue;
+                // Recheck activity immediately before an irreversible working-set eviction.
+                var latestForeground = provider.Foreground();
+                bool latestFullscreen = provider.Fullscreen();
+                string latestMode = Policy.Mode(settings, latestForeground.Name, snap, latestFullscreen);
+                if (latestForeground.Pid <= 0 || latestForeground.Name.Length == 0 || latestFullscreen || Policy.Protect(p, latestForeground, settings, latestMode) is not null || !provider.Validate(p)) continue;
+                ulong? before = provider.WorkingSet(p.Pid, p.Identity);
+                bool ok = provider.Trim(p.Pid, p.Identity); lastTrim = now; trims[p.Pid] = now;
+                trimAttempted = true;
+                ulong? after = ok ? provider.WorkingSet(p.Pid, p.Identity) : null;
+                if (ok) {
+                    trimCount++;
+                    lastWorkingSetReduction = before.HasValue && after.HasValue && before.Value > after.Value ? before.Value - after.Value : 0;
+                    Log($"{p.Name} · 제한적 Working Set 축소 완료 · 프로세스 상주량 {(before.HasValue && after.HasValue ? Display.Bytes(lastWorkingSetReduction) + " 감소" : "측정 불가")}");
+                } else Log($"{p.Name} · 제한적 Working Set 축소 실패");
             }
             foreach (var key in seen.Keys.Except(alive).ToArray()) seen.Remove(key);
             foreach (var name in activity.Keys.Except(processes.Select(p => p.Name)).ToArray()) activity.Remove(name);
             if (persist) SaveJournal();
-            state = new(snap, pressure.Score, pressure.Level, mode, foreground.Name, rows.OrderByDescending(x => x.WorkingSet).ToArray(), events.ToArray(), pending.Count, provider.Topology(), predictions);
+            string memoryStatus = settings.Paused ? "메모리 관리 일시정지" : !settings.WorkingSetTrim ? "RAM 정리 꺼짐" :
+                !canManage ? "활성 창 확인 또는 전체화면 종료 대기" : pressure.Level < PressureLevel.High ? "메모리 여유 · 정리하지 않음" :
+                trimCandidates > 0 ? $"RAM 정리 대상 {trimCandidates}개 · 전역 2분 / 같은 앱 15분 간격" :
+                nextIdleSeconds.HasValue ? $"비활성 확인 대기 · 가장 빠른 후보 {Math.Ceiling(nextIdleSeconds.Value)}초 후" : "현재 정리할 비활성 앱 없음 · 사용 중인 작업 보호";
+            if (settings.DryRun) memoryStatus = "시뮬레이션 · 실제 RAM 정리 없음 · " + memoryStatus;
+            memoryStatus += $" · 누적 정리 {trimCount}회";
+            state = new(snap, pressure.Score, pressure.Level, mode, foreground.Name, rows.OrderByDescending(x => x.WorkingSet).ToArray(), events.ToArray(), pending.Count, provider.Topology(), predictions) {
+                MemoryStatus = memoryStatus, TrimCount = trimCount, LastWorkingSetReduction = lastWorkingSetReduction
+            };
             return state;
         }
     }

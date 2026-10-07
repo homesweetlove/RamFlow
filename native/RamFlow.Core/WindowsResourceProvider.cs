@@ -5,11 +5,14 @@ namespace RamFlow.Core;
 
 public sealed class WindowsResourceProvider : IResourceProvider
 {
-    private readonly Counters counters = new();
+    // The UI's remote engine proxy does not sample this provider. Initialize
+    // the native PDH query only in the process that actually collects telemetry.
+    private Counters? counters;
     private readonly Dictionary<(int, long), (DateTimeOffset Time, double Cpu, ulong Io)> previous = new();
     private long oldIdle, oldKernel, oldUser;
     public Snapshot Sample()
     {
+        var counters = this.counters ??= new Counters();
         counters.Collect();
         var memory = new WindowsNative.Memory { Length = (uint)Marshal.SizeOf<WindowsNative.Memory>() };
         var perf = new WindowsNative.Performance { Size = (uint)Marshal.SizeOf<WindowsNative.Performance>() };
@@ -121,6 +124,15 @@ public sealed class WindowsResourceProvider : IResourceProvider
         using var p = WindowsNative.OpenProcess(0x1100, false, pid);
         return !p.IsInvalid && WindowsNative.GetProcessTimes(p, out long creation, out _, out _, out _) && creation == identity && WindowsNative.EmptyWorkingSet(p);
     }
+    public ulong? WorkingSet(int pid, long identity)
+    {
+        try {
+            using var process = Process.GetProcessById(pid);
+            if (process.StartTime.ToFileTimeUtc() != identity) return null;
+            ulong bytes = (ulong)process.WorkingSet64;
+            return Identity(pid) == identity ? bytes : null;
+        } catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException or NotSupportedException) { return null; }
+    }
     public IReadOnlyList<CpuCore> Topology()
     {
         WindowsNative.GetSystemCpuSetInformation(IntPtr.Zero, 0, out uint size, IntPtr.Zero, 0);
@@ -139,5 +151,5 @@ public sealed class WindowsResourceProvider : IResourceProvider
             } return result;
         } finally { Marshal.FreeHGlobal(buffer); }
     }
-    public void Dispose() => counters.Dispose();
+    public void Dispose() => counters?.Dispose();
 }

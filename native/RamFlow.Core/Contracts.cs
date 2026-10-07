@@ -45,6 +45,9 @@ public sealed record State(Snapshot Snapshot, double PressureScore, PressureLeve
     int PendingRestores, IReadOnlyList<CpuCore> CpuTopology, IReadOnlyList<string> Predictions)
 {
     public int EnginePid { get; init; } = Environment.ProcessId;
+    public string MemoryStatus { get; init; } = "";
+    public int TrimCount { get; init; }
+    public ulong LastWorkingSetReduction { get; init; }
     public double SystemPressure
     {
         get {
@@ -70,6 +73,7 @@ public interface IResourceProvider : IDisposable
     ResourceValues? ReadValues(int pid);
     bool WriteValues(int pid, ResourceValues values, long identity);
     bool Trim(int pid, long identity);
+    ulong? WorkingSet(int pid, long identity);
 }
 public static class Display
 {

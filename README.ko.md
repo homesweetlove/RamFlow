@@ -5,11 +5,11 @@
 
 <img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
 
-현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.3은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
+현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.4은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
 
 ## 실행
 
-[최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.3-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
+[최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.4-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
 
 기본값은 **Dry Run**입니다. 시작할 때마다 실제 최적화를 해제하고 예상 동작부터 보여줍니다. 실제 적용은 설정의 **관리자로 다시 열기**를 선택하고 Dry Run을 해제한 뒤 확인합니다. 트레이에서 종료하면 변경한 자원 설정을 복원합니다. X 버튼을 누르면 창과 작업표시줄 실행 버튼이 사라지고 트레이에서 백그라운드로 계속 동작합니다. 다시 실행하거나 트레이 아이콘을 더블클릭하면 기존 창이 열립니다. 완전히 종료하려면 트레이 메뉴의 종료를 선택하세요.
 
@@ -20,7 +20,7 @@
 | 모니터 | RAM/Commit/캐시/Standby/Modified, CPU, 디스크, Page-in/out, 배터리, 지원되는 GPU/온도 카운터 |
 | 압박 | Memory Pressure EMA·히스테리시스·연속 확인·Commit 위기 감지, 센서가 있는 항목만 System Pressure에 반영 |
 | Foreground First | 현재 앱·동일 이름 프로세스·작업 그룹 보호, 약 250ms마다 복원 확인 |
-| App Nap | 30분 Idle 앱의 Memory Priority/CPU Below Normal/EcoQoS, 압박이 높은 2시간 Deep Idle에 제한적 Working Set 축소 |
+| App Nap | 30분 Idle 앱의 Memory Priority/CPU Below Normal/EcoQoS, 압박 정도별 비활성 확인 후 제한적 Working Set 축소 |
 | CPU Sets | 공식 CPU topology와 EfficiencyClass 사용, 하이브리드·단일 그룹에 한해 Idle 앱 효율 코어 선택; 기본 OFF |
 | 예측 | 선택적 시간대·앱 전환 빈도 학습, 자주 사용할 앱 보호; 예측만으로 Working Set을 비우지 않음 |
 | 안전 복원 | 원래 값 사전 기록, 일부 API 실패 재시도, 생성 시각 검증, 강제 종료 후 다음 시작 때 복원 저널 재처리 |
@@ -34,7 +34,7 @@
 
 ## 보호와 제한적 개입
 
-시스템·서비스·보안·드라이버·AI·음악·다운로드·렌더·컴파일·서버 및 정보가 불확실한 앱은 보호합니다. 화이트리스트는 이름으로 등록합니다. 정상 메모리 상태에는 개입하지 않으며 CPU 부하나 배터리 상태도 고려합니다. 전체화면 중 새로운 변경을 중단합니다. Working Set은 한 번에 한 앱, 전역 2분 간격, 같은 PID 15분 이상 간격으로만 축소합니다. 자동 종료·Realtime Priority·커널 후킹·Standby Clear는 사용하지 않습니다.
+시스템·서비스·보안·드라이버·AI·음악·다운로드·렌더·컴파일·서버 및 정보가 불확실한 앱은 보호합니다. 화이트리스트는 이름으로 등록합니다. 정상 메모리 상태에는 개입하지 않으며 CPU 부하나 배터리 상태도 고려합니다. 전체화면 중 새로운 변경을 중단합니다. Working Set은 한 번에 한 앱, 전역 2분 간격, 같은 PID 15분 이상 간격으로만 축소합니다. 관측한 비활성 대기 시간은 메모리 압박이 높을 때 10분, 심할 때 3분, 위급할 때 1분입니다. CPU·전력 정책 변경은 기존 30분 비활성 조건을 유지합니다. 자동 종료·Realtime Priority·커널 후킹·Standby Clear는 사용하지 않습니다.
 
 실제 변경 직전과 복원 때 PID 생성 시각, 사용자 소유권·세션·시스템 경로·Critical 상태를 확인합니다. 처음 관측한 값으로 복원하며, 조회가 일시적으로 실패해도 복원 기록을 보존합니다. 정전/강제 종료 뒤 즉시 복원은 불가능하지만 다음 실행이 복원 저널을 재처리합니다. Working Set 자체는 OS가 재접근 시 복구합니다.
 

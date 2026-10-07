@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Text.Json;
 
 int passed = 0;
+if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
 void Check(bool value, string message) { if (!value) throw new Exception(message); passed++; }
 (MockResourceProvider P, Engine E) Busy(bool dry = false)
 {
@@ -107,6 +108,82 @@ Console.WriteLine($"Native regression: {passed} assertions passed; no live Windo
     }
     Console.WriteLine($"Native safety regression: {passed} assertions passed.");
 }
+
+// Pressure-dependent memory relief uses only mock processes and a controlled clock.
+{
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { Available = 400 * 1048576UL, PagesInput = 0, Standby = 0 };
+    p.Items.Add(new(987652, 14, "smaller-idle.exe", "D:\\Apps\\smaller.exe", 1, 300 * 1048576UL, 250 * 1048576UL, 0, 0, true));
+    using var e = new Engine(p, persist: false);
+    e.ApplySettings(new() { DryRun = false });
+    for (int i = 0; i < 90; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    Check(p.Trims == 0, "Severe pressure trimmed before three minutes of observed inactivity");
+    var state = e.Tick();
+    Check(p.Trims == 1 && p.TrimmedPids[0] == 987650, "Largest eligible app was not trimmed first at three minutes");
+    Check(p.Writes == 0, "Short memory relief changed CPU or power settings before thirty minutes");
+    Check(state.Processes.Count == 3, "A trim truncated the process list");
+    Check(state.TrimCount == 1 && state.LastWorkingSetReduction == 250 * 1048576UL, "Measured working-set reduction is wrong");
+    p.Current = p.Current with { Time = p.Current.Time.AddSeconds(119) }; e.Tick();
+    Check(p.Trims == 1, "Global trim cooldown violated");
+    p.Current = p.Current with { Time = p.Current.Time.AddSeconds(1) }; e.Tick();
+    Check(p.Trims == 2 && p.TrimmedPids[1] == 987652, "Other app did not become eligible after global cooldown");
+    p.Current = p.Current with { Time = p.Current.Time.AddSeconds(120) }; e.Tick();
+    Check(p.Trims == 2, "Same-app fifteen-minute cooldown violated");
+}
+foreach (string scenario in new[] { "dry", "paused", "fullscreen", "unknown", "whitelist", "foreground", "active", "self", "disabled", "no-foreground" }) {
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { Available = 100 * 1048576UL, PagesInput = 0, Standby = 0 };
+    var settings = new Settings { DryRun = false };
+    switch (scenario) {
+        case "dry": settings = settings with { DryRun = true }; break;
+        case "paused": settings = settings with { Paused = true }; break;
+        case "fullscreen": p.FullscreenActive = true; break;
+        case "unknown": p.Items[0] = p.Items[0] with { ActivityKnown = false }; break;
+        case "whitelist": settings = settings with { Whitelist = ["idle-demo.exe"] }; break;
+        case "foreground": p.Focus = (987650, "idle-demo.exe"); p.Items.RemoveAt(1); break;
+        case "active": p.Items[0] = p.Items[0] with { CpuPercent = 3 }; break;
+        case "self": p.Items[0] = p.Items[0] with { Name = "RamFlow.exe" }; break;
+        case "disabled": settings = settings with { WorkingSetTrim = false }; break;
+        case "no-foreground": p.Focus = (0, ""); break;
+    }
+    using var e = new Engine(p, persist: false); e.ApplySettings(settings);
+    for (int i = 0; i < 70; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    Check(p.Trims == 0, "Protected relief scenario trimmed resources: " + scenario);
+}
+{
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { Available = 100 * 1048576UL, PagesInput = 0, Standby = 0 };
+    using var e = new Engine(p, persist: false); e.ApplySettings(new() { DryRun = false });
+    for (int i = 0; i < 30; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    Check(p.Trims == 0, "Critical pressure trimmed before one minute");
+    e.Tick(); Check(p.Trims == 1, "Critical pressure did not relieve an inactive app after one minute");
+    Check(Policy.TrimIdleSeconds(PressureLevel.High) == 600, "High pressure ten-minute delay changed");
+}
+{
+    var pressure = new Pressure();
+    var low = new Snapshot { RamTotal = 8UL * 1073741824, Available = 100 * 1048576UL, Commit = 6UL * 1073741824, CommitLimit = 16UL * 1073741824 };
+    for (int i = 0; i < 20; i++) { pressure.Update(low); if (i >= 1) Check(pressure.Level == PressureLevel.Critical, "Persistently critical memory pressure was downgraded without recovery"); }
+}
+Console.WriteLine($"Native pressure relief regression: {passed} assertions passed.");
+
+foreach (string siblingActivity in new[] { "cpu", "io", "unknown", "new" }) {
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { Available = 100 * 1048576UL, Standby = 0 };
+    var sibling = new ProcessSample(987652, 14, "idle-demo.exe", "D:\\Apps\\idle-demo.exe", 1,
+        50 * 1048576UL, 45 * 1048576UL, 0, 0, true);
+    if (siblingActivity != "new") p.Items.Add(sibling);
+    using var e = new Engine(p, persist: false); e.ApplySettings(new() { DryRun = false });
+    for (int i = 0; i < 30; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    if (siblingActivity == "new") p.Items.Add(sibling);
+    else p.Items[2] = siblingActivity switch {
+        "cpu" => sibling with { CpuPercent = 3 },
+        "io" => sibling with { IoBytesPerSecond = 2 * 1048576 },
+        _ => sibling with { ActivityKnown = false }
+    };
+    e.Tick();
+    Check(p.Trims == 0, "Large quiet process was trimmed before accounting for its sibling: " + siblingActivity);
+}
+Console.WriteLine($"Native app-group activity regression: {passed} assertions passed.");
 
 if (args.Contains("--windows")) {
     using var provider = new WindowsResourceProvider();

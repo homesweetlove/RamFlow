@@ -34,3 +34,5 @@ Core는 외부 NuGet 라이브러리 없이 .NET과 Windows API를 사용합니�
 - [.NET Windows 설치](https://learn.microsoft.com/dotnet/core/install/windows): .NET 10 SDK와 자체 런타임 포함 배포.
 
 제품 압박 점수와 모델 실행 가능성은 휴리스틱입니다. 원시 카운터가 없는 값을 임의로 0으로 성공 처리하지 않으며 UI에서 미지원으로 표시합니다. 실제 성능 주장은 동일 작업의 반복 실측 이후에만 가능합니다.
+
+WPF UI는 표의 유한한 뷰포트/행 재활용과 선택한 페이지만 갱신합니다. 이 유틸리티는 낮은 빈도의 2D 갱신을 사용하므로 자체 프로세스의 소프트웨어 렌더링을 선택해 이 컴퓨터에서 관측한 큰 그래픽 자원 할당을 줄입니다. 전역 레지스트리는 변경하지 않습니다. API 범위는 [Microsoft RenderOptions.ProcessRenderMode](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.renderoptions.processrendermode?view=windowsdesktop-10.0)를 참고하세요.

@@ -5,11 +5,11 @@
 
 <img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
 
-RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.3, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
+RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.4, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
 
 ## Run
 
-Download `RamFlow-0.3.3-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
+Download `RamFlow-0.3.4-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
 
 The default mode is **Dry Run**. On every launch, real optimization is disabled first so you can review the expected behavior before applying changes. To enable real changes, choose **Reopen as administrator** in Settings, disable Dry Run, and confirm. Exiting from the system tray restores the resource settings changed by RamFlow. The X button hides the window and its running taskbar button while the tray and background engine keep running. Launch RamFlow again or double-click the tray icon to reopen the existing window. Choose Exit in the tray menu to shut down completely.
 
@@ -20,7 +20,7 @@ The default mode is **Dry Run**. On every launch, real optimization is disabled 
 | Monitoring | RAM/Commit/cache/Standby/Modified, CPU, disk, page-in/out, battery, and supported GPU/temperature counters |
 | Pressure | Memory Pressure EMA, hysteresis, consecutive confirmation, Commit crisis detection, and System Pressure calculated only from available sensors |
 | Foreground First | Protects the active app, same-name processes, and task groups; restoration is checked about every 250 ms |
-| App Nap | Memory Priority/CPU Below Normal/EcoQoS for apps idle for 30 minutes, with limited Working Set reduction after 2 hours of deep idle under high pressure |
+| App Nap | Memory Priority/CPU Below Normal/EcoQoS for apps idle for 30 minutes, with pressure-dependent, limited Working Set reduction for observed inactive apps |
 | CPU Sets | Uses official CPU topology and EfficiencyClass data; can select efficient cores for idle apps on hybrid, single-group systems; OFF by default |
 | Prediction | Optional learning of time-of-day and app-switch frequency to protect frequently used apps; prediction alone never trims Working Sets |
 | Safe restore | Records original values before changes, retries selected API failures, validates process creation time, and replays the restore journal on the next launch after a forced shutdown |
@@ -34,7 +34,7 @@ The default mode is **Dry Run**. On every launch, real optimization is disabled 
 
 ## Protection and limited intervention
 
-RamFlow protects system, service, security, driver, AI, music, download, render, compile, server, and insufficiently identified applications. Whitelisting is name-based. It does not intervene when memory conditions are healthy, and it also considers CPU load and battery state. New changes are suspended while a full-screen application is active. Working Set reduction is limited to one application at a time, at least two minutes apart globally, and at least 15 minutes apart for the same PID. RamFlow does not use automatic process termination, Realtime Priority, kernel hooking, or Standby List clearing.
+RamFlow protects system, service, security, driver, AI, music, download, render, compile, server, and insufficiently identified applications. Whitelisting is name-based. It does not intervene when memory conditions are healthy, and it also considers CPU load and battery state. New changes are suspended while a full-screen application is active. Working Set reduction is limited to one application at a time, at least two minutes apart globally, and at least 15 minutes apart for the same PID. Observed inactivity is required for 10 minutes under high memory pressure, 3 minutes under severe pressure, or 1 minute under critical pressure. CPU and power adjustments retain the 30-minute inactivity requirement. RamFlow does not use automatic process termination, Realtime Priority, kernel hooking, or Standby List clearing.
 
 Immediately before applying a real change and again during restoration, RamFlow verifies the PID creation time, user ownership, session, system path, and Critical status. Restoration uses the first observed value, and restore records are retained even if a query temporarily fails. Immediate restoration after a power loss or forced shutdown is impossible, but the restore journal is replayed on the next launch. The OS itself reloads Working Set pages when they are accessed again.
 

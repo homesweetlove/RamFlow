@@ -14,6 +14,12 @@ public static class Policy
         ["office"] = new(StringComparer.OrdinalIgnoreCase) { "winword", "excel", "powerpnt", "outlook", "onenote", "hwp" },
         ["media"] = new(StringComparer.OrdinalIgnoreCase) { "vlc", "spotify", "ffmpeg", "blender", "obs64", "photoshop", "premiere" } };
     public static string Base(string name) => Path.GetFileNameWithoutExtension(name).ToLowerInvariant();
+    public static int TrimIdleSeconds(PressureLevel level) => level switch {
+        PressureLevel.Critical => 60,
+        PressureLevel.Severe => 180,
+        PressureLevel.High => 600,
+        _ => 7200
+    };
     public static string Mode(Settings settings, string foreground, Snapshot snap, bool fullscreen)
     {
         if (settings.Mode != "auto") return settings.Mode;
@@ -24,7 +30,7 @@ public static class Policy
     public static string? Protect(ProcessSample p, (int Pid, string Name) foreground, Settings settings, string mode)
     {
         string name = Base(p.Name);
-        if (p.Pid <= 4 || p.Pid == Environment.ProcessId || ProtectedNames.Contains(name) || p.Session <= 0) return "시스템·서비스·보안 프로세스";
+        if (p.Pid <= 4 || p.Pid == Environment.ProcessId || name is "ramflow" or "ramflow.service" || ProtectedNames.Contains(name) || p.Session <= 0) return "시스템·서비스·보안 프로세스";
         if (p.Pid == foreground.Pid || string.Equals(p.Name, foreground.Name, StringComparison.OrdinalIgnoreCase)) return "현재 사용 중인 앱";
         if (settings.Whitelist.Any(x => Base(x) == name)) return "사용자 예외";
         if (!p.ActivityKnown) return "활동 정보 확인 불가";
@@ -57,7 +63,7 @@ public sealed class Pressure
         critical = severe ? critical + 1 : 0;
         PressureLevel target = critical >= 2 ? PressureLevel.Critical : FromScore(Score);
         if (target > Level) { down = 0; if (++up >= 3 || critical >= 2) { Level = target; up = 0; } }
-        else { up = 0; if (FromScore(Score + 5) < Level && ++down >= 5) { Level--; down = 0; } else if (FromScore(Score + 5) >= Level) down = 0; }
+        else { up = 0; if (target < Level && FromScore(Score + 5) < Level && ++down >= 5) { Level--; down = 0; } else if (target >= Level || FromScore(Score + 5) >= Level) down = 0; }
     }
     private static PressureLevel FromScore(double score) => score >= 90 ? PressureLevel.Critical : score >= 75 ? PressureLevel.Severe : score >= 50 ? PressureLevel.High : score >= 25 ? PressureLevel.Moderate : PressureLevel.Normal;
 }

@@ -56,11 +56,23 @@ internal sealed class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        // This utility redraws sparse charts every two seconds. Avoid the large
+        // native graphics allocation seen when its first window is rendered.
+        RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+        TraceMemory("start");
         UiTheme.Install(this);
+        TraceMemory("theme");
         _provider = _smoke ? new MockResourceProvider() : new WindowsResourceProvider();
+        TraceMemory("provider");
+        if (_provider is MockResourceProvider largeMock)
+            for (int index = 0; index < 600; index++)
+                largeMock.Items.Add(new(990000 + index, index + 100, $"idle-{index:D4}.exe", "D:\\Apps\\mock.exe", 1,
+                    200 * 1048576UL, 180 * 1048576UL, 0, 0, true));
         _engine = new Engine(_provider, dataRoot: _dataRoot, persist: !_smoke);
+        TraceMemory("engine");
         if (!_smoke) _engine.ApplySettings(_engine.Settings with { DryRun = true });
         _window = new MainWindow(_engine, () => ExitApplication(0), _verify, RestartElevated) { Icon = BrandAssets.Logo };
+        TraceMemory("window");
         _window.SourceInitialized += (_, _) =>
         {
             BrandAssets.ApplyWindowFrame(_window);
@@ -70,7 +82,9 @@ internal sealed class App : Application
         _window.SettingsChanged += (_, _) => UpdateTray();
         _engine.Start();
         _window.Show();
+        TraceMemory("show");
         _window.RefreshState();
+        TraceMemory("refresh");
         if (_verify)
         {
             _smokeTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle)
@@ -82,6 +96,16 @@ internal sealed class App : Application
         }
         if (!_smoke) CreateTray();
         SessionEnding += (_, _) => Cleanup();
+    }
+
+    private void TraceMemory(string step)
+    {
+        if (!_startupCheck) return;
+        using var process = Process.GetCurrentProcess();
+        Console.Error.WriteLine(System.Text.Json.JsonSerializer.Serialize(new {
+            Step = step, PrivateMiB = process.PrivateMemorySize64 / 1048576d,
+            WorkingSetMiB = process.WorkingSet64 / 1048576d, ManagedMiB = GC.GetTotalMemory(false) / 1048576d
+        }));
     }
 
     private void CreateTray()
@@ -222,7 +246,14 @@ internal sealed class App : Application
             await System.Windows.Threading.Dispatcher.Yield(DispatcherPriority.Background);
             if (_window.WindowState == WindowState.Minimized || !_window.IsVisible) throw new InvalidOperationException("닫은 창 복원 실패");
             _window.UpdateLayout();
+            if (_smoke)
+            {
+                var table = _window.MeasureProcessTable();
+                if (table.Items < 600 || table.RealizedRows <= 0 || table.RealizedRows > 60 || table.Height <= 0)
+                    throw new InvalidOperationException($"프로세스 표 가상화 실패: {table.Items}개 / 렌더링 {table.RealizedRows}행 / 높이 {table.Height}");
+            }
             _window.VerifyPages(_screenshot);
+            TraceMemory("verified-pages");
             if (_provider is MockResourceProvider mock && (mock.Writes != 0 || mock.Trims != 0))
                 throw new InvalidOperationException("Smoke test 중 자원 변경이 감지되었습니다.");
             if (_screenshot is not null)

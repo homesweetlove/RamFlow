@@ -24,6 +24,11 @@ public sealed class MainWindow : Window
     private readonly bool _smokeTest;
     private readonly DispatcherTimer _timer;
     private readonly TabControl _tabs = new();
+    private readonly TabControl _processTabs = new()
+    {
+        HorizontalContentAlignment = HorizontalAlignment.Stretch,
+        VerticalContentAlignment = VerticalAlignment.Stretch
+    };
     private readonly TextBlock _status = Label("상태를 읽는 중", 13);
     private readonly TextBlock _footer = Label("측정 대기", 12, UiTheme.Muted);
     private readonly TextBlock _ram = Label("—", 26);
@@ -156,6 +161,8 @@ public sealed class MainWindow : Window
         FeaturePages.Add(_tabs, engine);
         if (smokeTest) foreach (TabItem feature in _tabs.Items.Cast<TabItem>().Skip(5)) if (feature.Content is UIElement element) element.IsEnabled = false;
         ConfigureNavigation();
+        _tabs.SelectionChanged += OnPageSelectionChanged;
+        _processTabs.SelectionChanged += OnPageSelectionChanged;
         shell.Children.Add(_tabs);
         Content = shell;
 
@@ -181,6 +188,7 @@ public sealed class MainWindow : Window
     public void RefreshState()
     {
         if (!Dispatcher.CheckAccess()) { Dispatcher.Invoke(RefreshState); return; }
+        if (!IsVisible || WindowState == WindowState.Minimized) return;
         try
         {
             State state = _engine.GetState();
@@ -188,36 +196,18 @@ public sealed class MainWindow : Window
             Snapshot s = state.Snapshot;
             double ramPercent = Percent(s.RamTotal > s.Available ? s.RamTotal - s.Available : 0, s.RamTotal);
             double commitPercent = Percent(s.Commit, s.CommitLimit);
-            _ram.Text = s.RamTotal > 0 ? $"{ramPercent:0.0}%" : "측정 대기";
-            _cpu.Text = Number(s.CpuPercent);
-            _disk.Text = s.DiskPercent.HasValue ? Number(s.DiskPercent.Value) : "미지원";
-            _commit.Text = s.CommitLimit > 0 ? $"{commitPercent:0.0}%" : "측정 대기";
-            _ramMeter.Value = ramPercent;
-            _cpuMeter.Value = double.IsFinite(s.CpuPercent) ? Math.Clamp(s.CpuPercent, 0, 100) : 0;
-            _diskMeter.Value = s.DiskPercent is double disk && double.IsFinite(disk) ? Math.Clamp(disk, 0, 100) : 0;
-            _diskMeter.Opacity = s.DiskPercent.HasValue ? 1 : 0.3;
-            _commitMeter.Value = commitPercent;
+            // Keep bounded chart history while other pages are selected, without rebuilding their UI.
             _ramChart.AddSample(s.Time, s.RamTotal > 0 ? ramPercent : null);
             _cpuChart.AddSample(s.Time, s.RamTotal > 0 ? s.CpuPercent : null);
             _diskChart.AddSample(s.Time, s.DiskPercent);
             _commitChart.AddSample(s.Time, s.CommitLimit > 0 ? commitPercent : null);
-            _memoryDetail.Text = $"사용 가능 {Display.Bytes(s.Available)} · 총 {Display.Bytes(s.RamTotal)} · 커밋 {Display.Bytes(s.Commit)} / {Display.Bytes(s.CommitLimit)}\n" +
-                $"캐시 {Display.Bytes(s.Cache)} · 대기 {Display.Bytes(s.Standby)} · 수정 {Display.Bytes(s.Modified)} · 압축 {(s.CompressedBytes is double compressed ? Display.Bytes(compressed) : "미측정")}\n" +
-                $"GPU 사용 {(s.GpuUsedBytes is double gpu ? Display.Bytes(gpu) : "미지원")} · 온도 {(s.ThermalCelsius is double thermal ? thermal.ToString("F1") + "°C" : "미지원")} · 배터리 {(s.BatteryPercent is int battery ? battery + "%" : "미지원")}\n" +
-                $"CPU Sets {state.CpuTopology.Count}개 · 효율 클래스 {state.CpuTopology.Select(x => x.Efficiency).Distinct().Count()}개 · Page-in {s.PagesInput?.ToString("F0") ?? "미측정"} pages/sec";
             Settings current = _engine.Settings;
             string running = current.Paused ? "일시정지" : "모니터링 중";
             _status.Text = $"{running}   ·   {(current.DryRun ? "시뮬레이션" : "실제 적용")}   ·   " +
                 $"메모리 {Pressure(state.Level)} ({state.PressureScore:0.0}) · 시스템 압박 {state.SystemPressure:0.0}   ·   {ModeLabel(state.Mode)}";
             _status.Foreground = state.Level >= PressureLevel.High ? UiTheme.Warning : UiTheme.Good;
             _pauseButton.Content = current.Paused ? "관리 재개" : "일시정지";
-            _insight.Text = $"현재 작업: {(string.IsNullOrWhiteSpace(state.Foreground) ? "확인 중" : state.Foreground)}\n" +
-                $"보호된 프로세스 {state.Processes.Count(p => !string.IsNullOrEmpty(p.ProtectedReason))}개   ·   복원 대기 {state.PendingRestores}개\n" +
-                (state.Predictions.Count > 0 ? string.Join("\n", state.Predictions.Take(5)) : "예측 결과가 아직 없습니다.");
-            UpdateTables();
-            _logs.ItemsSource = state.Events.OrderByDescending(e => e.Time).Select(e => new LogView(
-                e.Time.ToLocalTime().ToString("MM-dd HH:mm:ss"), e.DryRun ? "시뮬레이션" : "기록", e.Message)).ToArray();
-            UpdateAi();
+            RefreshSelectedPage();
             double age = (DateTimeOffset.UtcNow - s.Time).TotalSeconds;
             _footer.Text = $"샘플 {s.Time.ToLocalTime():HH:mm:ss}   ·   2초마다 상태 조회   ·   F5 새로고침 / Ctrl+, 설정 / Ctrl+Q 종료" +
                 (age > 10 ? "   ·   샘플 갱신 지연" : "");
@@ -232,11 +222,93 @@ public sealed class MainWindow : Window
         }
     }
 
+    private void OnPageSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Selection events from DataGrids and settings controls also bubble through the tabs.
+        if (!ReferenceEquals(e.OriginalSource, _tabs) && !ReferenceEquals(e.OriginalSource, _processTabs)) return;
+        // The nested event bubbles to the outer handler; render it only once.
+        if (!ReferenceEquals(sender, e.OriginalSource)) return;
+        try { RefreshSelectedPage(); }
+        catch (Exception error)
+        {
+            LastRefreshSucceeded = false;
+            _footer.Text = $"상태 조회 실패: {error.Message}";
+            _footer.Foreground = UiTheme.Danger;
+        }
+    }
+
+    private void RefreshSelectedPage()
+    {
+        if (_state is not State state || !IsVisible || WindowState == WindowState.Minimized) return;
+        switch (_tabs.SelectedIndex)
+        {
+            case 0:
+                UpdateDashboard(state);
+                break;
+            case 1:
+                UpdateTables();
+                break;
+            case 2:
+                UpdateAi();
+                break;
+            case 4:
+                LogView[] logs = state.Events.OrderByDescending(e => e.Time).Select(e => new LogView(
+                    e.Time.ToLocalTime().ToString("MM-dd HH:mm:ss"), e.DryRun ? "시뮬레이션" : "기록", e.Message)).ToArray();
+                if (_logs.ItemsSource is not LogView[] previous || !previous.SequenceEqual(logs))
+                    _logs.ItemsSource = logs;
+                break;
+        }
+    }
+
+    private void UpdateDashboard(State state)
+    {
+        Snapshot s = state.Snapshot;
+        double ramPercent = Percent(s.RamTotal > s.Available ? s.RamTotal - s.Available : 0, s.RamTotal);
+        double commitPercent = Percent(s.Commit, s.CommitLimit);
+        _ram.Text = s.RamTotal > 0 ? $"{ramPercent:0.0}%" : "측정 대기";
+        _cpu.Text = Number(s.CpuPercent);
+        _disk.Text = s.DiskPercent.HasValue ? Number(s.DiskPercent.Value) : "미지원";
+        _commit.Text = s.CommitLimit > 0 ? $"{commitPercent:0.0}%" : "측정 대기";
+        _ramMeter.Value = ramPercent;
+        _cpuMeter.Value = double.IsFinite(s.CpuPercent) ? Math.Clamp(s.CpuPercent, 0, 100) : 0;
+        _diskMeter.Value = s.DiskPercent is double disk && double.IsFinite(disk) ? Math.Clamp(disk, 0, 100) : 0;
+        _diskMeter.Opacity = s.DiskPercent.HasValue ? 1 : 0.3;
+        _commitMeter.Value = commitPercent;
+        _memoryDetail.Text = $"사용 가능 {Display.Bytes(s.Available)} · 총 {Display.Bytes(s.RamTotal)} · 커밋 {Display.Bytes(s.Commit)} / {Display.Bytes(s.CommitLimit)}\n" +
+            $"캐시 {Display.Bytes(s.Cache)} · 대기 {Display.Bytes(s.Standby)} · 수정 {Display.Bytes(s.Modified)} · 압축 {(s.CompressedBytes is double compressed ? Display.Bytes(compressed) : "미측정")}\n" +
+            $"GPU 사용 {(s.GpuUsedBytes is double gpu ? Display.Bytes(gpu) : "미지원")} · 온도 {(s.ThermalCelsius is double thermal ? thermal.ToString("F1") + "°C" : "미지원")} · 배터리 {(s.BatteryPercent is int battery ? battery + "%" : "미지원")}\n" +
+            $"CPU Sets {state.CpuTopology.Count}개 · 효율 클래스 {state.CpuTopology.Select(x => x.Efficiency).Distinct().Count()}개 · Page-in {s.PagesInput?.ToString("F0") ?? "미측정"} pages/sec";
+        _insight.Text = $"현재 작업: {(string.IsNullOrWhiteSpace(state.Foreground) ? "확인 중" : state.Foreground)}\n" +
+            $"보호된 프로세스 {state.Processes.Count(p => !string.IsNullOrEmpty(p.ProtectedReason))}개   ·   복원 대기 {state.PendingRestores}개\n" +
+            (string.IsNullOrWhiteSpace(state.MemoryStatus) ? "" : state.MemoryStatus + "\n") +
+            (state.Predictions.Count > 0 ? string.Join("\n", state.Predictions.Take(5)) : "예측 결과가 아직 없습니다.");
+    }
+
     public void StopRefresh()
     {
         if (!Dispatcher.CheckAccess()) { Dispatcher.Invoke(StopRefresh); return; }
         _timer.Stop();
     }
+
+    internal (int Items, int RealizedRows, double Height) MeasureProcessTable()
+    {
+        if (!_smokeTest) throw new InvalidOperationException("Smoke test 전용입니다.");
+        Dispatcher.VerifyAccess();
+        _tabs.SelectedIndex = 1;
+        _processTabs.SelectedIndex = 0;
+        RefreshSelectedPage();
+        UpdateLayout();
+        return (_processes.Items.Count, CountRows(_processes), _processes.ActualHeight);
+
+        static int CountRows(DependencyObject parent)
+        {
+            int count = parent is DataGridRow ? 1 : 0;
+            for (int index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+                count += CountRows(VisualTreeHelper.GetChild(parent, index));
+            return count;
+        }
+    }
+
     internal void VerifyPages(string? screenshot)
     {
         if (!_smokeTest) throw new InvalidOperationException("Smoke test 전용입니다.");
@@ -386,13 +458,16 @@ public sealed class MainWindow : Window
 
     private UIElement ProcessesPage()
     {
-        var page = new DockPanel { Margin = new Thickness(12) };
+        // An Auto header and a star-sized table viewport keep row measurement finite.
+        // A vertical StackPanel or outer ScrollViewer would realize every process row.
+        var page = new Grid { Margin = new Thickness(12) };
+        page.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        page.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         var search = new StackPanel { Margin = new Thickness(0, 0, 0, 12) };
         search.Children.Add(Label("프로세스 검색 · 이름 / PID / 보호 사유", 13, UiTheme.Muted));
         AutomationProperties.SetName(_filter, "프로세스 검색: 이름, PID 또는 보호 사유");
         _filter.TextChanged += (_, _) => UpdateTables();
         search.Children.Add(_filter);
-        DockPanel.SetDock(search, Dock.Top);
         page.Children.Add(search);
         Column(_processes, "PID", nameof(ProcessView.Pid), 80);
         Column(_processes, "프로세스", nameof(ProcessView.Name), 160);
@@ -410,10 +485,12 @@ public sealed class MainWindow : Window
         Column(_groups, "I/O /초", nameof(GroupView.Io), 100);
         Column(_groups, "활동", nameof(GroupView.Activity), 95);
         Column(_groups, "보호 사유", nameof(GroupView.Protection), 180, true);
-        var tabs = new TabControl { Background = UiTheme.Surface, BorderBrush = UiTheme.Border };
-        tabs.Items.Add(Tab("개별 프로세스", _processes));
-        tabs.Items.Add(Tab("이름별 그룹", _groups));
-        page.Children.Add(tabs);
+        _processTabs.Background = UiTheme.Surface;
+        _processTabs.BorderBrush = UiTheme.Border;
+        _processTabs.Items.Add(Tab("개별 프로세스", _processes));
+        _processTabs.Items.Add(Tab("이름별 그룹", _groups));
+        Grid.SetRow(_processTabs, 1);
+        page.Children.Add(_processTabs);
         return page;
     }
 
@@ -491,26 +568,37 @@ public sealed class MainWindow : Window
 
     private void UpdateTables()
     {
-        if (_state == null) return;
+        if (_state == null || !IsVisible || WindowState == WindowState.Minimized || _tabs.SelectedIndex != 1) return;
         string query = _filter.Text.Trim();
-        ProcessRow[] rows = _state.Processes.Where(p => query.Length == 0 ||
+        var rows = _state.Processes.Where(p => query.Length == 0 ||
             p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
             p.Pid.ToString(CultureInfo.InvariantCulture).Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            (p.ProtectedReason?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false))
-            .OrderByDescending(p => p.WorkingSet).ToArray();
-        _processes.ItemsSource = rows.Select(p => new ProcessView(p.Pid, p.Name, Display.Bytes(p.WorkingSet),
-            Display.Bytes(p.PrivateBytes), Number(p.CpuPercent), Rate(p.IoBytesPerSecond),
-            Activity(p.Activity), string.IsNullOrWhiteSpace(p.ProtectedReason) ? "—" : p.ProtectedReason)).ToArray();
-        _groups.ItemsSource = rows.GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(g => g.Sum(p => (double)p.WorkingSet))
-            .Select(g => new GroupView(g.Key, g.Count(), Display.Bytes(g.Sum(p => (double)p.WorkingSet)),
-                Display.Bytes(g.Sum(p => (double)p.PrivateBytes)), Number(g.Sum(p => p.CpuPercent)),
-                Rate(g.Sum(p => p.IoBytesPerSecond)), string.Join(", ", g.Select(p => Activity(p.Activity)).Distinct()),
-                ProtectionSummary(g))).ToArray();
+            (p.ProtectedReason?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false));
+        if (_processTabs.SelectedIndex == 0)
+        {
+            ProcessView[] processes = rows.OrderByDescending(p => p.WorkingSet).Select(p => new ProcessView(
+                p.Pid, p.Name, Display.Bytes(p.WorkingSet), Display.Bytes(p.PrivateBytes), Number(p.CpuPercent),
+                Rate(p.IoBytesPerSecond), Activity(p.Activity),
+                string.IsNullOrWhiteSpace(p.ProtectedReason) ? "—" : p.ProtectedReason)).ToArray();
+            if (_processes.ItemsSource is not ProcessView[] previous || !previous.SequenceEqual(processes))
+                _processes.ItemsSource = processes;
+        }
+        else if (_processTabs.SelectedIndex == 1)
+        {
+            GroupView[] groups = rows.OrderByDescending(p => p.WorkingSet).GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(g => g.Sum(p => (double)p.WorkingSet))
+                .Select(g => new GroupView(g.Key, g.Count(), Display.Bytes(g.Sum(p => (double)p.WorkingSet)),
+                    Display.Bytes(g.Sum(p => (double)p.PrivateBytes)), Number(g.Sum(p => p.CpuPercent)),
+                    Rate(g.Sum(p => p.IoBytesPerSecond)), string.Join(", ", g.Select(p => Activity(p.Activity)).Distinct()),
+                    ProtectionSummary(g))).ToArray();
+            if (_groups.ItemsSource is not GroupView[] previous || !previous.SequenceEqual(groups))
+                _groups.ItemsSource = groups;
+        }
     }
 
     private void UpdateAi()
     {
+        if (!IsVisible || WindowState == WindowState.Minimized || _tabs.SelectedIndex != 2) return;
         string input = _aiSize.Text.Trim();
         bool valid = double.TryParse(input, NumberStyles.Float, CultureInfo.CurrentCulture, out double size) ||
             double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out size);
@@ -759,6 +847,9 @@ public sealed class MainWindow : Window
             HeadersVisibility = DataGridHeadersVisibility.Column, RowHeight = 38,
             SelectionMode = DataGridSelectionMode.Single, Margin = new Thickness(8)
         };
+        ScrollViewer.SetCanContentScroll(table, true);
+        VirtualizingPanel.SetIsVirtualizing(table, true);
+        VirtualizingPanel.SetVirtualizationMode(table, VirtualizationMode.Recycling);
         var header = new Style(typeof(DataGridColumnHeader));
         header.Setters.Add(new Setter(Control.BackgroundProperty, UiTheme.Elevated));
         header.Setters.Add(new Setter(Control.ForegroundProperty, UiTheme.Muted));
