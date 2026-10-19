@@ -7,6 +7,22 @@
 
 현재 사용 중인 작업을 보호하는 Windows 리소스 오케스트레이터입니다. 최신 배포 **0.3.4은 C#/.NET 10 + WPF**로 구현했습니다. Python/PySide6 0.2.0은 호환·회귀 검증용으로 보존했습니다.
 
+
+## 엔지니어링 사례 — 문제 정의부터 검증까지
+
+RamFlow의 목표는 단순히 **“RAM을 최대한 비우는 것”이 아니라 현재 사용 중인 작업을 보호하면서 자원 압박에 보수적으로 대응하는 것**입니다.
+
+| 판단해야 할 문제 | 설계 선택 | 근거·한계 |
+| --- | --- | --- |
+| 압박 수치가 계속 흔들림 | EMA·히스테리시스·연속 확인으로 개입 빈도 제한 | [압박 정책 코드](native/RamFlow.Core/Policy.cs) · 모든 버벅임을 예측하지 않음 |
+| 조치가 현재 작업을 방해할 수 있음 | 전경·시스템·활성 입출력·활동 미확인 작업 보호 | [엔진 코드](native/RamFlow.Core/Engine.cs) · 모의 테스트 |
+| 설정 변경 뒤 원복이 필요함 | 원래 값 저널, PID 신원 확인, 복원 재시도 | Working Set 축소는 즉시 이전 크기로 되돌릴 수 없음 |
+| 최적화 프로그램 자체도 RAM을 사용함 | 0.3.3 대비 0.3.4 자체 메모리 측정·최적화 | 자체 측정 3회 중앙값: **상주량 347.6 → 165.0 MiB**, **전용 메모리 263.5 → 80.6 MiB** |
+
+측정값은 **RamFlow 프로세스 자체의 메모리**를 의미하며, 시스템 전체 RAM 절약이나 사용자 앱의 속도 향상을 뜻하지 않습니다. 반복 측정 원본과 신뢰구간은 아직 공개되지 않았습니다.
+
+**[한국어 기술 사례 연구](docs/ENGINEERING_CASE_STUDY.ko.md)** · [English](docs/ENGINEERING_CASE_STUDY.md) · [최신 아키텍처](docs/NATIVE_ARCHITECTURE.md) · [검증](docs/VALIDATION.md) · [후속 실험 계획](docs/MEASUREMENT_PROTOCOL.md)
+
 ## 실행
 
 [최신 공개 릴리스](https://github.com/homesweetlove/RamFlow/releases/latest)의 `RamFlow-0.3.4-windows-x64.zip`을 풀고 `RamFlow-native/RamFlow.exe`를 실행하세요. .NET 런타임을 포함하므로 Python이나 SDK 설치가 필요 없습니다. 폴더의 DLL과 `RamFlow.Service.exe`를 함께 유지하세요.
