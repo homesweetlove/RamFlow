@@ -7,6 +7,22 @@
 
 RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.4, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
 
+
+## Engineering story — from constraints to measured results
+
+RamFlow is designed around a question: **how can a low-memory Windows PC protect the user's active work while making conservative, reversible resource-management decisions?** This is not an automatic “free RAM” button.
+
+| Problem / decision | How it is addressed | Evidence and limits |
+| --- | --- | --- |
+| Pressure fluctuates | Pressure-score EMA, hysteresis, confirmed level changes | [Policy source](native/RamFlow.Core/Policy.cs) — heuristic, not guaranteed to predict lag |
+| Optimizations can interrupt ongoing work | Foreground, system, active-I/O and unknown-activity protection; conservative cooldowns | [Engine source](native/RamFlow.Core/Engine.cs) and mock tests |
+| Process state must recover | Original priority settings journaled before writes, identity checks and retrying restores | Restore cannot instantly reverse a working-set trim |
+| The tool itself consumes RAM | v0.3.3 → v0.3.4 process-footprint comparison | Internal 3-run medians: **347.6 → 165.0 MiB resident** and **263.5 → 80.6 MiB private** |
+
+The recorded memory figures concern **RamFlow's own process**, not total Windows RAM saved or improvement to foreground app speed. Raw repetitions and confidence intervals are not currently published. General real-world performance benefits require further measurement.
+
+**Read the full evidence-backed [Engineering Case Study](docs/ENGINEERING_CASE_STUDY.md)** ([한국어](docs/ENGINEERING_CASE_STUDY.ko.md)) · [Native architecture](docs/NATIVE_ARCHITECTURE.md) · [Validation](docs/VALIDATION.md) · [Controlled measurement plan](docs/MEASUREMENT_PROTOCOL.md)
+
 ## Run
 
 Download `RamFlow-0.3.4-windows-x64.zip` from the [latest public release](https://github.com/homesweetlove/RamFlow/releases/latest), extract it, and run `RamFlow-native/RamFlow.exe`. The .NET runtime is bundled, so Python or an SDK installation is not required. Keep the bundled DLLs and `RamFlow.Service.exe` in the same folder.
