@@ -1,4 +1,8 @@
-# RamFlow 아키텍처
+# RamFlow 아키텍처 — Python/PySide6 (레거시 v0.2.0)
+
+> **Historical architecture (Python/PySide6 v0.2.0).** This page is retained for the legacy implementation and its design evolution. **The current v0.3.4 release uses C# / .NET 10 / WPF.** For the current code path, see [Native architecture](NATIVE_ARCHITECTURE.md), [Engineering Case Study](ENGINEERING_CASE_STUDY.md) and [한국어 사례 연구](ENGINEERING_CASE_STUDY.ko.md). The older statement below about a future .NET port is historical, not the current status.
+
+
 
 ## 기술 선택
 
