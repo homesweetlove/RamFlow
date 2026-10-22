@@ -5,7 +5,22 @@
 
 <img src="native/RamFlow.UI/Assets/ramflow.png" width="72" alt="RamFlow icon" />
 
-RamFlow is a Windows resource orchestrator designed to protect the work you are actively using. The latest release, **0.3.4, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
+> **Get more from the RAM you already own—before paying for a hardware upgrade.**
+
+RamFlow is a Windows resource orchestrator for **resource-constrained PCs**. The motivation is straightforward: with memory upgrades becoming costly, users need a way to make better use of existing 8 GB or 16 GB machines while protecting the tasks they are actively doing. It does **not** create RAM or promise a universal speed boost. Instead, it measures memory pressure, protects foreground and sensitive workloads, and cautiously adjusts long-idle processes only when conditions warrant intervention.
+
+The latest release, **0.3.4, is implemented in C#/.NET 10 + WPF**. The Python/PySide6 0.2.0 version is preserved for compatibility and regression validation.
+
+## The problem RamFlow is trying to solve
+
+- **Audience:** people who need to run a browser, an IDE, and other everyday tools on a machine they cannot readily upgrade.
+- **Problem:** scarce memory can make active work compete with idle background applications; indiscriminate “RAM cleaning” can make the experience worse by forcing pages to reload.
+- **Approach:** observe real pressure → protect the foreground and important processes → make limited, reversible adjustments to sufficiently idle workloads → restore original settings. All launches begin in **Dry Run**.
+- **Evidence still needed:** repeatable measurements of actual task completion time, app switching, paging, and responsiveness on the *same hardware*, comparing RamFlow off, Dry Run, and explicitly enabled intervention. A rise in “available RAM” alone is not a performance result.
+
+RamFlow does **not** increase physical RAM, replace Windows memory management, or guarantee improved performance on every machine. Trimming a Working Set may cause page-in overhead on later access.
+
+[Portfolio case study](docs/PORTFOLIO_CASE_STUDY.md) · [Low-memory benchmark protocol](docs/LOW_MEMORY_BENCHMARK.md) · [Existing validation evidence](docs/VALIDATION.md)
 
 
 ## Engineering story — from constraints to measured results
