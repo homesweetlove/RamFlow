@@ -14,9 +14,11 @@ namespace RamFlow.UI;
 internal static class FeaturePages
 {
     private static string Root => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RamFlowNative");
-    public static void Add(TabControl tabs, Engine engine)
+    public static BenchmarkSession Add(TabControl tabs, Engine engine)
     {
-        tabs.Items.Add(Storage(engine)); tabs.Items.Add(PagefilePage(engine)); tabs.Items.Add(BenchmarkPage(engine)); tabs.Items.Add(UpdatePage());
+        var benchmark = new BenchmarkSession(engine);
+        tabs.Items.Add(Storage(engine)); tabs.Items.Add(PagefilePage(engine)); tabs.Items.Add(BenchmarkPage(engine, benchmark)); tabs.Items.Add(UpdatePage());
+        return benchmark;
     }
     private static StackPanel Panel() => new() { Margin = new Thickness(24), MaxWidth = 1100, HorizontalAlignment = HorizontalAlignment.Left };
     private static TextBlock Text(string value) => new() { Text = value, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 8), Foreground = UiTheme.Text };
@@ -120,20 +122,77 @@ internal static class FeaturePages
         Button(panel, "최초 설정 복원", async () => { bool dry = engine.Settings.DryRun; if (!dry && !Confirm("최초 Pagefile 백업을 복원할까요?")) return; await Core.Pagefile.RestoreAsync(backup, dry); output.Text = dry ? "[Dry Run] 복원 예상" : "복원 완료"; });
         return Tab("Pagefile", panel);
     }
-    private static TabItem BenchmarkPage(Engine engine)
+    private static TabItem BenchmarkPage(Engine engine, BenchmarkSession session)
     {
         var panel = Panel(); panel.Children.Add(Text("벤치마크 · 측정값을 JSON/CSV로 저장"));
-        panel.Children.Add(Text("기본 측정은 3초 동안 시스템 변화를 관측합니다. 실행 파일을 선택하면 시작/종료 시간을 추가합니다. 벤치마크는 최적화를 강제로 발생시키거나 사용자 작업을 종료하지 않습니다."));
+        panel.Children.Add(Text("평소에는 측정 OFF입니다. 시작·종료를 직접 눌러 현재 모드의 작업 시간, CPU, 메모리, 페이지 입력량과 측정 부하를 기록하세요. 최적화 모드는 기존 설정에서 승인한 상태를 사용합니다. RamFlow 미실행 비교는 독립 도구 benchmark-observer.py로 측정하세요."));
+        panel.Children.Add(Text("2초 간격 · 부하가 높으면 간격 확대 · 최대 30분 · 측정 중 파일 저장 없음. 미완료 작업은 완료 시간으로 표시하지 않습니다. 측정 종료는 실행한 프로그램을 종료하지 않습니다."));
         var executable = Input(); panel.Children.Add(executable); Button(panel, "측정할 실행 파일 선택", () => { var picker = new OpenFileDialog { Filter = "프로그램|*.exe" }; if (picker.ShowDialog() == true) executable.Text = picker.FileName; return Task.CompletedTask; });
-        var output = Text(""); panel.Children.Add(output);
-        var column = Input("0"); panel.Children.Add(Text("CSV 측정 열 번호 (첫 열 = 0)")); panel.Children.Add(column);
-        Button(panel, "측정 시작", async () => {
-            if (executable.Text.Length > 0 && !Confirm("측정 프로그램을 실행합니다:\n" + executable.Text)) return;
-            output.Text = "측정 중…"; var result = await Core.Benchmark.RunAsync(engine, executable.Text.Length == 0 ? null : executable.Text);
-            var picker = new SaveFileDialog { FileName = "RamFlow-benchmark", Filter = "JSON/CSV 보고서|*.report" }; if (picker.ShowDialog() == true) Core.Benchmark.Export(result, picker.FileName);
-            output.Text = $"가용 RAM {Display.Bytes(result.Before.Available)} → {Display.Bytes(result.After.Available)}\n시작(ms): {result.ApplicationLaunchMs?.ToString("F1") ?? "미측정"}\n작업 종료(ms): {result.WorkloadDurationMs?.ToString("F1") ?? "미측정"}\n스케줄링 지터: {result.SchedulingJitterMs:F2} ms\n" + string.Join("\n", result.Notes);
+        var output = Text("측정 OFF · 추가 샘플링 없음"); panel.Children.Add(output);
+        SessionBenchmarkResult? completed = null;
+        var start = new Button { Content = "측정 시작", Margin = new Thickness(0, 6, 0, 6), Padding = new Thickness(16, 9, 16, 9), HorizontalAlignment = HorizontalAlignment.Left };
+        var stop = new Button { Content = "측정 종료 · 결과 확인", IsEnabled = false, Margin = new Thickness(0, 6, 0, 6), Padding = new Thickness(16, 9, 16, 9), HorizontalAlignment = HorizontalAlignment.Left };
+        var export = new Button { Content = "완료 결과 JSON/CSV 저장", IsEnabled = false, Margin = new Thickness(0, 6, 0, 6), Padding = new Thickness(16, 9, 16, 9), HorizontalAlignment = HorizontalAlignment.Left };
+        start.Click += async (_, _) => {
+            string? file = string.IsNullOrWhiteSpace(executable.Text) ? null : executable.Text;
+            if (file is not null && !Confirm("측정 프로그램을 실행합니다:\n" + file)) return;
+            start.IsEnabled = false; export.IsEnabled = false; executable.IsEnabled = false;
+            try {
+                completed = null;
+                await Task.Run(() => session.Start(file));
+                stop.IsEnabled = true;
+                output.Text = "측정 중 · 종료 버튼으로 관측을 마치세요. 최대 시간에 도달한 경우에도 종료 버튼으로 결과를 확인할 수 있습니다.";
+            } catch (Exception e) {
+                start.IsEnabled = true; executable.IsEnabled = true;
+                output.Text = "측정 시작 실패: " + e.Message;
+            }
+        };
+        stop.Click += async (_, _) => {
+            stop.IsEnabled = false;
+            try {
+                completed = await session.StopAsync();
+                var result = completed;
+                string Metric(double? value) => value?.ToString("F2") ?? "미측정";
+                string Memory(Snapshot? value) => value is null ? "미측정" : Display.Bytes(value.Available);
+                output.Text = $"측정 OFF · {result.DurationMs / 1000:F1}초 · {(result.IsValid ? "관측 완료" : "비교에서 제외할 세션")}\n" +
+                    $"가용 RAM: {Memory(result.Before)} → {Memory(result.After)}\n" +
+                    $"시스템 CPU: {Metric(result.Before?.CpuPercent)} → {Metric(result.After?.CpuPercent)}%\n" +
+                    $"페이지 입력: {Metric(result.Before?.PagesInput)} → {Metric(result.After?.PagesInput)} pages/sec\n" +
+                    $"작업 완료: {(result.WorkloadCompleted ? Metric(result.WorkloadDurationMs) + " ms · 종료 코드 " + result.WorkloadExitCode : "미완료 또는 작업 미선택")}\n" +
+                    $"샘플 {result.SampleCount}개 · 보관 {result.Samples.Count}개 · 부하로 생략 {result.SkippedSamples}개\n" +
+                    $"측정 작업: CPU {result.SamplingCpuMs:F2} ms · 처리 시간 {result.SamplingWallMs:F2} ms · 할당 {Display.Bytes(result.SamplingAllocatedBytes)}\n" +
+                    "측정 프로세스의 CPU·메모리는 보고서에 포함됩니다. 단일 실행만으로 성능 개선을 판단하지 마세요.\n" +
+                    string.Join("\n", result.Notes);
+                export.IsEnabled = true;
+            } catch (Exception e) { output.Text = "측정 종료 오류: " + e.Message; }
+            finally { start.IsEnabled = true; executable.IsEnabled = true; }
+        };
+        export.Click += async (_, _) => {
+            if (completed is not { } result) return;
+            var picker = new SaveFileDialog { FileName = "RamFlow-benchmark-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"), Filter = "JSON/CSV 보고서|*.report" };
+            if (picker.ShowDialog() != true) return;
+            string path = picker.FileName;
+            export.IsEnabled = false; start.IsEnabled = false;
+            try { await Task.Run(() => BenchmarkSession.Export(result, path)); output.Text = "JSON/CSV 저장 완료 · " + path; }
+            catch (Exception e) { MessageBox.Show(e.Message, "RamFlow", MessageBoxButton.OK, MessageBoxImage.Error); }
+            finally { export.IsEnabled = true; start.IsEnabled = true; }
+        };
+        panel.Children.Add(start); panel.Children.Add(stop); panel.Children.Add(export);
+        Button(panel, "기존 단발 측정 · 프로그램 준비 시간", async () => {
+            if (session.IsRunning) throw new InvalidOperationException("수동 측정을 종료한 뒤 실행하세요.");
+            string? file = string.IsNullOrWhiteSpace(executable.Text) ? null : executable.Text;
+            if (file is not null && !Confirm("측정 프로그램을 실행합니다:\n" + file)) return;
+            start.IsEnabled = false;
+            try {
+                output.Text = "단발 측정 중…";
+                var result = await Task.Run(() => Core.Benchmark.RunAsync(engine, file));
+                output.Text = $"프로그램 준비: {result.ApplicationLaunchMs?.ToString("F1") ?? "미측정"} ms\n작업 완료: {result.WorkloadDurationMs?.ToString("F1") ?? "미측정"} ms\n" + string.Join("\n", result.Notes);
+                var picker = new SaveFileDialog { FileName = "RamFlow-single-benchmark", Filter = "JSON/CSV 보고서|*.report" };
+                if (picker.ShowDialog() == true) { string path = picker.FileName; await Task.Run(() => Core.Benchmark.Export(result, path)); }
+            } finally { start.IsEnabled = true; }
         });
-        Button(panel, "Frame Time / tokens/sec CSV 가져오기", () => { var picker = new OpenFileDialog { Filter = "CSV|*.csv" }; if (picker.ShowDialog() == true) { var stats = Core.Benchmark.ImportMetricCsv(picker.FileName, int.Parse(column.Text)); output.Text = $"{stats.Samples}개 · 평균 {stats.Mean:F3} · P95 {stats.P95:F3}\n선택한 숫자 열을 사용합니다. 단위는 원본 런타임 기준입니다."; } return Task.CompletedTask; });
+        var column = Input("0"); panel.Children.Add(Text("CSV 측정 열 번호 (첫 열 = 0)")); panel.Children.Add(column);
+        Button(panel, "Frame Time / tokens/sec CSV 가져오기", async () => { var picker = new OpenFileDialog { Filter = "CSV|*.csv" }; if (picker.ShowDialog() == true) { string path = picker.FileName; int selectedColumn = int.Parse(column.Text); var stats = await Task.Run(() => Core.Benchmark.ImportMetricCsv(path, selectedColumn)); output.Text = $"{stats.Samples}개 · 평균 {stats.Mean:F3} · P95 {stats.P95:F3}\n선택한 숫자 열을 사용합니다. 단위는 원본 런타임 기준입니다."; } });
         return Tab("벤치마크", panel);
     }
     private static TabItem UpdatePage()

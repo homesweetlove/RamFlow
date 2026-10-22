@@ -4,6 +4,8 @@
 >
 > For context, see [Engineering Case Study](ENGINEERING_CASE_STUDY.md) / [한국어 사례 연구](ENGINEERING_CASE_STUDY.ko.md) and the [previous validation record](VALIDATION.md).
 
+The [on-demand and independent benchmark guide](BENCHMARK.md) documents the implementation and commands. Compare built-in measurement OFF versus ON separately from the A/B/C conditions below. Include the external observer's CPU, private memory and sampling time in every result; its own collection is additional experimental overhead. The external tool does not switch RamFlow modes and reports unverifiable labels explicitly.
+
 ## 1. Questions to test
 
 1. Does enabling RamFlow improve *foreground task latency or completion time* relative to not running it?
