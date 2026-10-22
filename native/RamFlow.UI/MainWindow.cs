@@ -19,7 +19,7 @@ public sealed class MainWindow : Window
 {
     private const double GiB = 1073741824d;
     private readonly Engine _engine;
-    private readonly BenchmarkSession _benchmark;
+    private readonly BenchmarkPageLifetime _benchmark;
     private readonly Action _exit;
     private readonly Action? _restartElevated;
     private readonly bool _smokeTest;
@@ -70,8 +70,6 @@ public sealed class MainWindow : Window
     public bool AllowClose { get; set; }
     internal void StopBenchmark()
     {
-        // Finish the observer before App disposes its engine/IPC proxy.
-        if (_benchmark.IsRunning) _benchmark.StopAsync().GetAwaiter().GetResult();
         _benchmark.Dispose();
     }
     public bool LastRefreshSucceeded { get; private set; }

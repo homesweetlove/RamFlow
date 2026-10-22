@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json;
 using RamFlow.Core;
 
@@ -18,18 +17,23 @@ if (seconds is < 5 or > 1800) throw new ArgumentException("Use 5..1800 seconds")
 using var background = new BackgroundIo();
 using var engine = new Engine(new WindowsResourceProvider(), persist: false, allowRemote: false);
 engine.ApplySettings(new() { DryRun = true });
-engine.Start();
-await Task.Delay(4000); // Identical warmup in both builds and modes.
-object? session = null;
-Type? sessionType = null;
 using var self = Process.GetCurrentProcess();
+var setupClock = Stopwatch.StartNew();
+TimeSpan setupCpuStart = self.TotalProcessorTime;
+long setupAllocatedStart = GC.GetTotalAllocatedBytes();
+Type? sessionType = typeof(Engine).Assembly.GetType("RamFlow.Core.BenchmarkSession");
+object? session = sessionType is null ? null : Activator.CreateInstance(sessionType, engine);
+using var sessionLifetime = session as IDisposable;
+double setupCpuMs = (self.TotalProcessorTime - setupCpuStart).TotalMilliseconds;
+double setupWallMs = setupClock.Elapsed.TotalMilliseconds;
+long setupAllocated = GC.GetTotalAllocatedBytes() - setupAllocatedStart;
+engine.Start();
+await Task.Delay(4000); // Production creates the idle UI session before this warmup.
 TimeSpan cpuStart = self.TotalProcessorTime;
 long allocatedStart = GC.GetTotalAllocatedBytes();
 var clock = Stopwatch.StartNew();
 object? sessionResult = null;
 try {
-    sessionType = typeof(Engine).Assembly.GetType("RamFlow.Core.BenchmarkSession");
-    if (sessionType is not null) session = Activator.CreateInstance(sessionType, engine)!;
     if (measurement == "on") {
         if (sessionType is null) throw new InvalidOperationException("Build does not contain the on-demand sampler.");
         sessionType.GetMethod("Start")!.Invoke(session, [workload, workloadArgs]);
@@ -47,6 +51,9 @@ try {
         LogicalProcessors = Environment.ProcessorCount,
         Runtime = Environment.Version.ToString(),
         Measurement = measurement,
+        SessionSetupCpuMs = setupCpuMs,
+        SessionSetupWallMs = setupWallMs,
+        SessionSetupAllocatedBytes = setupAllocated,
         ElapsedSeconds = clock.Elapsed.TotalSeconds,
         ProcessCpuMs = (self.TotalProcessorTime - cpuStart).TotalMilliseconds,
         ProcessCpuPercent = (self.TotalProcessorTime - cpuStart).TotalSeconds / clock.Elapsed.TotalSeconds / Environment.ProcessorCount * 100,
@@ -61,6 +68,6 @@ try {
     if (report.Length > 0) await File.WriteAllTextAsync(report, json);
     Console.WriteLine(json);
 } finally {
-    (session as IDisposable)?.Dispose();
+    sessionLifetime?.Dispose();
     engine.Stop();
 }
