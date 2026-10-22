@@ -9,6 +9,8 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
 Push-Location $ramRoot
 try {
     if (-not $SkipTests) {
+        python scripts/test_benchmark_observer.py
+        if ($LASTEXITCODE -ne 0) { throw 'Standalone benchmark observer regression failed' }
         & $ramDotnet run --project native/RamFlow.Tests/RamFlow.Tests.csproj -c Release
         if ($LASTEXITCODE -ne 0) { throw 'Native regression failed' }
         & $ramDotnet run --project native/RamFlow.Storage.Tests/RamFlow.Storage.Tests.csproj -c Release
@@ -19,6 +21,7 @@ try {
     & $ramDotnet publish native/RamFlow.Service/RamFlow.Service.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o dist/RamFlow-native
     if ($LASTEXITCODE -ne 0) { throw 'Native service publish failed' }
     Copy-Item -LiteralPath native/Install.ps1,native/Uninstall.ps1,README.md,README.ko.md -Destination dist/RamFlow-native -Force
+    Copy-Item -LiteralPath scripts/benchmark-observer.py,docs/BENCHMARK.md -Destination dist/RamFlow-native -Force
     New-Item -ItemType Directory -Path dist/RamFlow-native/licenses -Force | Out-Null
     $ramSdkRoot = Split-Path -Parent (Get-Command $ramDotnet).Source
     foreach ($ramNotice in @('LICENSE.txt','ThirdPartyNotices.txt')) { if (Test-Path -LiteralPath (Join-Path $ramSdkRoot $ramNotice)) { Copy-Item -LiteralPath (Join-Path $ramSdkRoot $ramNotice) -Destination dist/RamFlow-native/licenses -Force } }

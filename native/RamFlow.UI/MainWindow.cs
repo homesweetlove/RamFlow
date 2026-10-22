@@ -19,6 +19,7 @@ public sealed class MainWindow : Window
 {
     private const double GiB = 1073741824d;
     private readonly Engine _engine;
+    private readonly BenchmarkPageLifetime _benchmark;
     private readonly Action _exit;
     private readonly Action? _restartElevated;
     private readonly bool _smokeTest;
@@ -67,6 +68,10 @@ public sealed class MainWindow : Window
     private Settings _loadedSettings = new();
 
     public bool AllowClose { get; set; }
+    internal void StopBenchmark()
+    {
+        _benchmark.Dispose();
+    }
     public bool LastRefreshSucceeded { get; private set; }
     public event EventHandler? SettingsChanged;
 
@@ -158,7 +163,7 @@ public sealed class MainWindow : Window
         _settingsTab = Tab("설정", SettingsPage());
         _tabs.Items.Add(_settingsTab);
         _tabs.Items.Add(Tab("활동 로그", LogsPage()));
-        FeaturePages.Add(_tabs, engine);
+        _benchmark = FeaturePages.Add(_tabs, engine);
         if (smokeTest) foreach (TabItem feature in _tabs.Items.Cast<TabItem>().Skip(5)) if (feature.Content is UIElement element) element.IsEnabled = false;
         ConfigureNavigation();
         _tabs.SelectionChanged += OnPageSelectionChanged;

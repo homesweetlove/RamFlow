@@ -43,7 +43,7 @@ The default mode is **Dry Run**. On every launch, real optimization is disabled 
 | Model storage | HOT/WARM/COLD analysis, streamed archiving, SHA-256/size/atomic metadata, explicit space reclamation, and model execution after restore |
 | Cloud | Connected sync folders such as Google Drive/OneDrive or HTTPS WebDAV. Passwords are kept in memory only |
 | Pagefile | Windows automatic/balanced/Low RAM/development/gaming/AI/manual modes, recommendations based on observed Commit, first-state backup, and confirmed apply/restore |
-| Benchmarking | Before/After measurements, selected-program ready/completion timing, JSON/CSV export, and CSV analysis of numeric Frame Time/tokens/sec columns |
+| Benchmarking | Manual start/stop sessions, CPU/memory/page-input and sampling-cost records, selected-program ready/completion timing, explicit JSON/CSV export, and Frame Time/tokens/sec CSV analysis |
 | UI | Nine Korean-language screens, graphs, process/group/protection reasons, tray controls, pause, and work modes |
 | Separate engine | Dedicated .NET process in the user session, per-user-SID Named Pipe, local-only access, and size/connection/admin-token validation |
 | Install/update | Per-user install, Start Menu integration, optional startup, verified update install/restart, and restore-before-uninstall behavior |
@@ -81,6 +81,8 @@ From the Update screen, RamFlow checks the public repository, verifies SHA-256, 
 Uninstall removes the installation folder, the Start Menu/startup entries created by that installation, and the optional service. If RamFlow changed the pagefile configuration, restore the original setting with administrator privileges first. Model-recovery metadata under `%LOCALAPPDATA%\RamFlowNative`, user models, and cloud files are preserved. Deleting this metadata can remove the information needed to automatically restore archived models.
 
 ## Build and validation
+
+Benchmark sessions are **OFF by default** and create no sampling worker until started. They run on a separate lowest-priority thread, retain at most 256 observations, back off under pressure, stop within 30 minutes, and write reports only on request. They never enable intervention or change the optimizer's protection/restoration policies. An independent, standard-library Python 3 tool, `benchmark-observer.py` (also bundled in the native ZIP), observes trials with RamFlow absent, in Dry Run, or already approved for intervention. See the [benchmark guide](docs/BENCHMARK.md) for mode verification, observer costs and an OFF/ON protocol. Measurements establish observations, not guaranteed speed improvements.
 
 Windows, the .NET 10 SDK, and Python 3 are required. Python is used only for validation scripts.
 

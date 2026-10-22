@@ -43,7 +43,7 @@ RamFlow의 목표는 단순히 **“RAM을 최대한 비우는 것”이 아니�
 | 모델 저장소 | HOT/WARM/COLD 분석, 스트리밍 보관, SHA-256·크기·원자적 메타데이터, 명시적 공간 회수, 복원 후 모델 실행 |
 | 클라우드 | 연결된 Google Drive/OneDrive 등의 동기화 폴더 또는 HTTPS WebDAV. 암호는 메모리에서만 사용 |
 | Pagefile | Windows 자동/균형/Low RAM/개발/게임/AI/수동 모드, 관측 Commit 기반 권장, 최초 백업, 확인 후 적용·복원 |
-| 벤치마크 | Before/After, 선택 프로그램 준비·완료 시간, JSON/CSV 내보내기, Frame Time/tokens/sec 숫자 열 CSV 분석 |
+| 벤치마크 | 수동 시작·종료, CPU·메모리·페이지 입력량 및 측정 자체 부하, 선택 프로그램 준비·완료 시간, JSON/CSV 내보내기, Frame Time/tokens/sec CSV 분석 |
 | UI | 한국어 9개 화면, 그래프, 프로세스·그룹·보호 사유, 트레이, 일시 정지·작업 모드 |
 | 분리 엔진 | 사용자 세션의 별도 .NET 프로세스, 사용자 SID별 Named Pipe, 로컬 전용, 크기·연결·관리자 토큰 검사 |
 | 설치/업데이트 | 사용자 설치·시작 메뉴·선택적 자동 시작, 검증된 업데이트 설치·재시작, 원복 후 제거 |
@@ -94,6 +94,8 @@ dotnet run --project native/RamFlow.Storage.Tests -c Release
 Mock 회귀, 자체 생성 자식 프로세스만 변경하는 Windows API 왕복, Mock Named Pipe 권한·정상 종료, 테스트 파일만 쓰는 모델 보관·복원, 실제 WPF 창 생성 및 테스트 전용 폴더의 설치·제거를 검증합니다. GitHub Actions도 Windows에서 같은 빌드를 수행합니다. 실제 사용자 Pagefile·SCM 등록·외부 클라우드 업로드는 자동 검증에서 수행하지 않습니다.
 
 ## Windows 구조에 맞춘 대안과 측정 범위
+
+수동 측정은 기본 **OFF**이며 시작 전에는 측정 스레드·타이머·카운터를 만들지 않습니다. 시작하면 별도 최저 우선순위 스레드에서 2초 간격으로 관측하고, 부하가 크면 간격을 늘리며 최대 256개 관측값·30분으로 제한합니다. 파일 저장은 사용자가 결과 내보내기를 선택할 때만 수행합니다. 실제 개입을 활성화하거나 기존 보호·복원 정책을 변경하지 않습니다. 배포 ZIP에 포함된 독립 도구 `benchmark-observer.py`는 Python 3 표준 라이브러리만 사용하며 RamFlow 미실행/Dry Run/이미 승인한 실제 개입 조건을 관측합니다. [벤치마크 사용법](docs/BENCHMARK.md)에서 측정 OFF/ON 비교, 조건 확인과 도구 자체 부하의 보고 기준을 확인하세요. 관측값만으로 작업 속도 향상을 보장하지 않습니다.
 
 문서화된 Background I/O Mode는 자기 프로세스에만 사용할 수 있으므로 RamFlow 엔진 자체에 적용합니다. 다른 앱의 I/O 우선순위를 비공식 Nt API로 변경하지 않습니다. 대신 활성 I/O 작업을 보호하고 Idle 앱 CPU/EcoQoS를 조정합니다. CPU affinity를 고정하는 대신 복원 가능한 CPU Sets를 사용합니다. 현재 앱의 P-core 고정은 수행하지 않습니다.
 

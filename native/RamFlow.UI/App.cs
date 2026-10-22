@@ -296,6 +296,7 @@ internal sealed class App : Application
         Release(() => _smokeTimer?.Stop());
         if (_smokeTimer is not null) _smokeTimer.Tick -= SmokeFinished;
         Release(() => _window?.StopRefresh());
+        Release(() => _window?.StopBenchmark());
         Release(() => _activation?.Dispose());
         Release(() => { if (_tray is not null) { _tray.Visible = false; _tray.Dispose(); } });
         Release(() => _menu?.Dispose());

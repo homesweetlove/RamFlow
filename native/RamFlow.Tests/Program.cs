@@ -7,6 +7,8 @@ using System.Text.Json;
 int passed = 0;
 if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
 void Check(bool value, string message) { if (!value) throw new Exception(message); passed++; }
+await BenchmarkTests.RunAsync(Check);
+await BenchmarkLifetimeTests.RunAsync(Check);
 (MockResourceProvider P, Engine E) Busy(bool dry = false)
 {
     var p = new MockResourceProvider();
