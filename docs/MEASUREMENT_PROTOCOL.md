@@ -6,7 +6,7 @@
 
 The later [2026-11-09 low-memory study](SCARCITY_STUDY.ko.md) is a separate, two-block feasibility experiment with raw numeric evidence. It does not complete the five-trial-per-condition target below or establish a net real-world speed benefit. Its protocol revisions, failed attempts and accelerated-clock pilots are recorded separately.
 
-The subsequent [background-control study](BACKGROUND_CONTROL_STUDY.ko.md) completed five paired blocks in each of two synthetic regimes, reporting foreground latency and background throughput together. It tests the redesigned opt-in controller and lightweight residency; the real-application and broader A/B/C questions below remain separate evaluation targets.
+The subsequent [background-control study](BACKGROUND_CONTROL_STUDY.ko.md) completed five paired blocks in each of two synthetic regimes, reporting foreground latency and background throughput together. It tests the redesigned opt-in controller and lightweight residency; a later [Chrome/VS Code study](REAL_APP_STUDY.ko.md) also completed five paired sessions per app with correctness and restoration checks. The broader A/B/C protocol below remains a separate extension.
 
 The [on-demand and independent benchmark guide](BENCHMARK.md) documents the implementation and commands. Compare built-in measurement OFF versus ON separately from the A/B/C conditions below. Include the external observer's CPU, private memory and sampling time in every result; its own collection is additional experimental overhead. The external tool does not switch RamFlow modes and reports unverifiable labels explicitly.
 

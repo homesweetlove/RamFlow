@@ -1,5 +1,22 @@
 # RamFlow
 
+## Protecting the work in the foreground
+
+When background work competes with the active app, RamFlow lets explicitly selected background jobs yield resources. On one PC, five paired fresh sessions per app compared a generated dashboard in real Chrome and a generated TypeScript document in real VS Code under fixed synthetic background CPU/memory contention. These are **medians of the five block-level p95 latencies**.
+
+| Reproduced workflow | Without | With | p95 reduction |
+| --- | ---: | ---: | ---: |
+| Chrome search → rendering boundary | 88.15ms | 48.14ms | 45.4% |
+| Chrome sort → rendering boundary | 88.56ms | 48.95ms | 44.7% |
+| VS Code edit → completion API | 99.36ms | 50.52ms | 49.2% |
+| VS Code edit → save API | 62.46ms | 31.60ms | 49.4% |
+
+All four features improved in 5/5 paired blocks. Background processing rate decreased about 60%. The study completed 20 conditions and 1,200 feature operations, verifying result correctness and restoration of changed resource settings.
+
+**[Actual-app study](docs/REAL_APP_STUDY.ko.md)** · [Per-block CSV](docs/evidence/2026-11-10-real-apps/trials.csv) · [Protocol and summary JSON](docs/evidence/2026-11-10-real-apps/summary.json)
+
+![Paired Chrome and VS Code workflow measurements](docs/evidence/2026-11-10-real-apps/comparison.png)
+
 ## Development: explicit background control
 
 The current working branch and separate test ZIP add opt-in background executable paths, a memory-aware job queue, and a disposable WPF UI backed by `RamFlow.Tray.exe`. These additions are not claimed to be present in the existing public v0.3.4 ZIP.
@@ -33,7 +50,7 @@ RamFlow is designed around a question: **how can a low-memory Windows PC protect
 | Process state must recover | Original priority settings journaled before writes, identity checks and retrying restores | Restore cannot instantly reverse a working-set trim |
 | The tool itself consumes RAM | v0.3.3 → v0.3.4 process-footprint comparison | Internal 3-run medians: **347.6 → 165.0 MiB resident** and **263.5 → 80.6 MiB private** |
 
-The recorded memory figures concern **RamFlow's own process**, not total Windows RAM saved or improvement to foreground app speed. Raw repetitions and confidence intervals are not currently published. General real-world performance benefits require further measurement.
+The recorded memory figures concern **RamFlow's own process**, not total Windows RAM saved or improvement to foreground app speed. Raw repetitions and confidence intervals are not currently published. The later foreground-workflow comparison is reported separately above, with per-block results and background processing cost.
 
 **Read the full evidence-backed [Engineering Case Study](docs/ENGINEERING_CASE_STUDY.md)** ([한국어](docs/ENGINEERING_CASE_STUDY.ko.md)) · [Native architecture](docs/NATIVE_ARCHITECTURE.md) · [Validation](docs/VALIDATION.md) · [Controlled measurement plan](docs/MEASUREMENT_PROTOCOL.md)
 
