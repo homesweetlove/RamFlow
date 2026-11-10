@@ -1,4 +1,4 @@
-param([string]$Dotnet = 'dotnet', [switch]$SkipTests, [string]$ArchiveName = 'RamFlow-0.3.4-windows-x64.zip')
+param([string]$Dotnet = 'dotnet', [switch]$SkipTests, [string]$ArchiveName = 'RamFlow-0.4.0-carp.1-research-windows-x64.zip')
 $ErrorActionPreference = 'Stop'
 $ramRoot = Split-Path -Parent $PSScriptRoot
 $ramDotnet = $Dotnet
@@ -11,6 +11,8 @@ try {
     if (-not $SkipTests) {
         python scripts/test_benchmark_observer.py
         if ($LASTEXITCODE -ne 0) { throw 'Standalone benchmark observer regression failed' }
+        python scripts/test_research_matrix.py
+        if ($LASTEXITCODE -ne 0) { throw 'Research matrix regression failed' }
         & $ramDotnet run --project native/RamFlow.Tests/RamFlow.Tests.csproj -c Release
         if ($LASTEXITCODE -ne 0) { throw 'Native regression failed' }
         & $ramDotnet run --project native/RamFlow.Storage.Tests/RamFlow.Storage.Tests.csproj -c Release

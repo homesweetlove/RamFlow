@@ -3,6 +3,8 @@ namespace RamFlow.Core;
 public sealed record Settings
 {
     public bool DryRun { get; init; } = true;
+    public string PolicyName { get; init; } = "v1";
+    public CarpOptions Carp { get; init; } = new();
     public bool Paused { get; init; }
     public string Mode { get; init; } = "auto";
     public bool CpuManagement { get; init; } = true;

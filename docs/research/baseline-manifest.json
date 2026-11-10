@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-11-10",
+  "baseline_commit": "53cd18a378ce41acba3d5a97f1ec7bd2ebe13ac9",
+  "release_commit": "b4937c406b56286cdcfed4a4e8a0d99bdaf93671",
+  "release_asset_digest_verified_via": "GitHub release REST metadata only",
+  "release_zip_sha256": "e9b86e1f7da3420946e321e6bd64e142f189f414440cc78e19c8cc780bd971df",
+  "files": [
+    {
+      "path": "docs/BACKGROUND_CONTROL_STUDY.ko.md",
+      "sha256": "ec1fccf122b8b00451ed9ff5c002bed929731ff31fc8faa005e509fb74568bae"
+    },
+    {
+      "path": "docs/BENCHMARK.md",
+      "sha256": "d4725e708b4cf8fe6282d8aef164712ff89cf56c8f536cea19a35cbb33d9cecc"
+    },
+    {
+      "path": "docs/ENGINEERING_CASE_STUDY.ko.md",
+      "sha256": "3a5f34b217837488b2fdbde69f8e8593a7ad5c4826ed918e92376708a0980e91"
+    },
+    {
+      "path": "docs/MEASUREMENT_PROTOCOL.md",
+      "sha256": "b91bd5039ce7daa4ecdb92a3ded53cc59ab95d2282b1d935959620a0c6e0c905"
+    },
+    {
+      "path": "docs/REAL_APP_STUDY.ko.md",
+      "sha256": "5418013f338ae08218877effb988557e216df72f4d8c41c46aa1d06fcdb81463"
+    },
+    {
+      "path": "docs/SCARCITY_STUDY.ko.md",
+      "sha256": "0ff47a8e8fcea2aaaa1c8e9136ad92a5c5b055438c69ef1c6760ba984ac6d12b"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/comparison.pdf",
+      "sha256": "d795a0dd86061f78ce6034eaa0cf82b5d39d568a8f3c6ac3f976e4805051d9f3"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/comparison.png",
+      "sha256": "69c755bf619397ed7b6fe46846e67b888fe9fe3103b9075cee219523547475da"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/comparison.svg",
+      "sha256": "18c28252bc2ac07da46c4b1af6a85df1b087bb32daa01121dbe159d44260c25e"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/handoff.json",
+      "sha256": "43fcae91524781b0604cd84505fab7774f6056b8331e7c9aaa4ded6d77a09a2c"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/summary.json",
+      "sha256": "e6042aaa6d6446dfbfd0320a152e125fc66749ed0e58f45e48b864b6721754bf"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-background-control/trials.csv",
+      "sha256": "5f0d2a7ee46e1aa14196d7a88ba99232f216af8c10e35eed19e9b7d33b5b4a4a"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-scarcity/summary.json",
+      "sha256": "a37ddf4654899707b0a921ca1b108b752bc94ac05a85f6ee3ea8891b1fecc915"
+    },
+    {
+      "path": "docs/evidence/2026-11-09-scarcity/trials.csv",
+      "sha256": "2ed9c75178a7a92d2b2594ed434a4473368a5728d5e64d358502c1ecd71ea028"
+    },
+    {
+      "path": "docs/evidence/2026-11-10-real-apps/comparison.pdf",
+      "sha256": "cfbaff73cccfb694e814652fc410ddf296142675774a91b12d1338f4ff232e7f"
+    },
+    {
+      "path": "docs/evidence/2026-11-10-real-apps/comparison.png",
+      "sha256": "087202fee392d606f3242183f7eb6daf151d7e0c40920be80f2a2abffbd4b669"
+    },
+    {
+      "path": "docs/evidence/2026-11-10-real-apps/comparison.svg",
+      "sha256": "9af3e2911e10ae79fd598e6de2e3a2c579a18d8fa60f457725de8754ebb98cf3"
+    },
+    {
+      "path": "docs/evidence/2026-11-10-real-apps/summary.json",
+      "sha256": "27fa37980421a8d6e46ba94878239ff1e713403265b32f31fd9646aff7753565"
+    },
+    {
+      "path": "docs/evidence/2026-11-10-real-apps/trials.csv",
+      "sha256": "950827956803d42b230b086cf206b3c4512d5a4e5b1c7e3d23f16bbb72c0e8cd"
+    },
+    {
+      "path": "native/RamFlow.Core/Contracts.cs",
+      "sha256": "ea749c4a783c881f6d708c51e1f29d2cb5c51ce9dcd5d93d8f56793dc14b6490"
+    },
+    {
+      "path": "native/RamFlow.Core/Engine.cs",
+      "sha256": "37a439e4d3943fd760410adbf2cb79f8592f15a7b9336b108cbfdbab72d911b6"
+    },
+    {
+      "path": "native/RamFlow.Core/Policy.cs",
+      "sha256": "f52f0a796569599d8a27eea77f6b77d1aff17696a29786c7f3fe528d89f9db34"
+    }
+  ],
+  "content_hash_basis": "Raw Git blob bytes before working-tree newline conversion"
+}
