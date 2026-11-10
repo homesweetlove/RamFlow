@@ -41,6 +41,19 @@ class AdapterTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 adapter.make_config(lab, model, variant="WithoutIdentityProtection")
 
+    def test_high_cpu_requires_explicit_opt_in_and_all_conditions_share_load(self):
+        with self.temporary() as root:
+            lab, model = pathlib.Path(root) / "lab.exe", pathlib.Path(root) / "model.json"
+            lab.touch(); model.touch()
+            with self.assertRaises(ValueError):
+                adapter.make_config(lab, model, background_threads=12)
+            config = adapter.make_config(lab, model, background_threads=12, allow_high_cpu=True)
+            matrix.validate_config(config)
+            for condition in config["conditions"].values():
+                command = condition["command"]
+                self.assertEqual(command[command.index("--background-threads") + 1], "12")
+                self.assertIn("--allow-high-cpu", command)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,12 +9,14 @@ import sys
 import research_matrix
 
 
-def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost"):
+def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost", background_threads=1, allow_high_cpu=False):
     lab, model = Path(lab).resolve(), Path(model).resolve()
     if not lab.is_file() or not model.is_file():
         raise ValueError("Supply an existing built ResearchLab and frozen model")
     if seconds < 2 or seconds > 300 or blocks < 1:
         raise ValueError("Use 2..300 seconds and positive blocks")
+    if type(background_threads) is not int or not 1 <= background_threads <= 32 or background_threads > 8 and not allow_high_cpu:
+        raise ValueError("Use 1..32 background threads; more than eight requires explicit --allow-high-cpu. Native per-machine limits still apply.")
     if variant not in ("WithoutBackgroundCost", "WithoutReaccessCost", "WithoutFeedback",
                        "WithoutMemoryAwareness", "WithoutStaging", "WithoutStability"):
         raise ValueError("Choose one explicit ablation; safety mechanisms are not ablations")
@@ -25,8 +27,8 @@ def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost"
             "--lab", str(lab), "--native-dir", "{trial_dir}/native", "--outcome", "{evidence_path}",
             "--condition", condition, "--regime", "{workload}", "--block", "{block_id}-{session_seed}",
             "--seed", "{session_seed}", "--seconds", str(seconds), "--model", str(model),
-            "--background-threads", "1",
-            "--variant", variant if condition == "F" else "None"],
+            "--background-threads", str(background_threads),
+            "--variant", variant if condition == "F" else "None"] + (["--allow-high-cpu"] if allow_high_cpu else []),
             definition="Disposable synthetic task; exact policy/model/action evidence is in native/outcome.json")
     for stage in ("reset", "warmup"):
         config["protocol"][stage] = dict(mode="external", command=None,
@@ -36,7 +38,8 @@ def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost"
     for regime, spec in config["workloads"].items():
         spec.update(kind="synthetic", description="Intended " + regime + "; actual global pressure is measured and unattained regimes are excluded, never relabelled")
     config["native_lab"] = dict(scope="Synthetic foreground-role child; not actual OS focus or a real app study",
-        model=str(model), ablation=variant, experiment_split="pilot", core_safety="PID creation, explicit targets, no trim, readback restoration, starvation guard")
+        model=str(model), ablation=variant, experiment_split="pilot", background_threads=background_threads,
+        high_cpu_explicit=allow_high_cpu, core_safety="PID creation, explicit targets, no trim, readback restoration, starvation guard")
     return config
 
 
@@ -49,6 +52,8 @@ def run_adapter(args):
         "--seed", args.seed, "--seconds", str(args.seconds), "--model", str(args.model.resolve()),
         "--background-threads", str(args.background_threads),
         "--variant", args.variant, "--split", "pilot"]
+    if args.allow_high_cpu:
+        command.append("--allow-high-cpu")
     child = subprocess.Popen(command, shell=False, stdin=subprocess.DEVNULL)
     try:
         code = child.wait()
@@ -77,6 +82,8 @@ def main(argv=None):
     config.add_argument("--seconds", type=int, default=5)
     config.add_argument("--blocks", type=int, default=6)
     config.add_argument("--variant", default="WithoutBackgroundCost")
+    config.add_argument("--background-threads", type=int, default=1)
+    config.add_argument("--allow-high-cpu", action="store_true")
     run = sub.add_parser("run")
     for name in ("lab", "model", "native-dir", "outcome"):
         run.add_argument("--" + name, type=Path, required=True)
@@ -85,11 +92,13 @@ def main(argv=None):
     run.add_argument("--seconds", type=int, default=5)
     run.add_argument("--background-threads", type=int, default=1)
     run.add_argument("--variant", default="None")
+    run.add_argument("--allow-high-cpu", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.mode == "run":
             return run_adapter(args)
-        payload = make_config(args.lab, args.model, args.seconds, args.blocks, args.variant)
+        payload = make_config(args.lab, args.model, args.seconds, args.blocks, args.variant,
+                              args.background_threads, args.allow_high_cpu)
         research_matrix.validate_config(payload)
         with args.output.open("x", encoding="utf-8") as stream:
             json.dump(payload, stream, ensure_ascii=False, indent=2, allow_nan=False)
