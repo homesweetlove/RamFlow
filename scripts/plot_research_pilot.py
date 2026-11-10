@@ -51,6 +51,8 @@ def main():
     fig.tight_layout(rect=(0, .11, 1, .94))
     for suffix in (".png", ".svg"):
         fig.savefig(str(args.output_prefix) + suffix, dpi=200)
+    svg = Path(str(args.output_prefix) + ".svg")
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n", encoding="utf-8")
     plt.close(fig)
 
 
