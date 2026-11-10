@@ -3,6 +3,8 @@ namespace RamFlow.Core;
 [Flags]
 public enum ResourceAction { None = 0, LowerCpu = 1, EcoQos = 2, LowerMemory = 4, CpuSets = 8 }
 public enum ContentionKind { Unknown, Healthy, Cpu, Ram, Mixed }
+public enum CarpAblation { None, WithoutBackgroundCost, WithoutReaccessCost, WithoutFeedback,
+    WithoutMemoryAwareness, WithoutStaging, WithoutStability }
 public sealed record CandidateEstimate(ResourceAction Action, double ForegroundGain, double BackgroundLoss,
     double ReaccessRisk, double ControlCost, double Confidence);
 public sealed record CandidateEvaluation(ResourceAction Action, double? Cost, CandidateEstimate? Estimate, string Reason);
@@ -13,6 +15,11 @@ public sealed record CarpEvidence(int Pid, long Identity, DateTimeOffset Observe
 {
     public double? MeasuredForegroundP95Ms { get; init; }
     public double? MeasuredBackgroundUnitsPerSecond { get; init; }
+    // Cumulative work within one explicit epoch. ObservedAt is the progress time;
+    // throughput, missing counters and epoch/counter resets do not prove progress.
+    public double? BackgroundCompletedUnits { get; init; }
+    public string? BackgroundProgressEpoch { get; init; }
+    public double? BackgroundReferenceUnitsPerSecond { get; init; }
 }
 public interface IPolicyObservationSource { CarpEvidence? Read(ProcessSample process, Snapshot snapshot); }
 public sealed record PolicyInput(Snapshot System, ProcessSample Process, Settings Settings,

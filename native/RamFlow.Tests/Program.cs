@@ -11,6 +11,8 @@ if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGu
 void Check(bool value, string message) { if (!value) throw new Exception(message); passed++; }
 BackgroundControlTests.Run(Check);
 ResearchPolicyTests.Run(Check);
+CostModelTests.Run(Check);
+StarvationTests.Run(Check);
 BackgroundJobsTests.Run(Check);
 UiHandoffTests.Run(Check);
 await BenchmarkTests.RunAsync(Check);

@@ -1,0 +1,414 @@
+{
+  "date": "2026-11-10",
+  "scope": "exploratory synthetic healthy-state pipeline pilot; no CARP superiority claim",
+  "independent_calibration": {
+    "fit_blocks": 3,
+    "validation_blocks": 3,
+    "trials": 24,
+    "completed": 24,
+    "restored": 24
+  },
+  "comparison": {
+    "paired_session_blocks": 3,
+    "trials": 18,
+    "completed": 18,
+    "restored": 18,
+    "apply_counts": {
+      "A": 0,
+      "B": 0,
+      "C": 3,
+      "D": 0,
+      "E": 0,
+      "F": 0
+    }
+  },
+  "rejected_model": {
+    "model_id": "804d1ce02908dc4fd95386288b4223ecf89fae8a142be7910f1a3dda303e2fbc",
+    "accepted_cells": 0,
+    "cells": [
+      {
+        "Contention": "Healthy",
+        "Action": "LowerCpu",
+        "Fit": [
+          {
+            "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+            "Features": {
+              "CpuPercent": 21.735537190082642,
+              "AvailableFraction": 0.3838922138135399,
+              "CommitFraction": 0.6033978194295743,
+              "PagesInputPerSecond": 0.8380508613067728,
+              "Valid": true
+            },
+            "ForegroundGain": -0.1257965102099634,
+            "BackgroundLoss": 0.02152831786987741,
+            "ReaccessRisk": 0,
+            "ControlCost": 0.031007811934495026
+          },
+          {
+            "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+            "Features": {
+              "CpuPercent": 21.03004291845494,
+              "AvailableFraction": 0.3836510990612792,
+              "CommitFraction": 0.6032845824931082,
+              "PagesInputPerSecond": 0.8800419251973164,
+              "Valid": true
+            },
+            "ForegroundGain": 0.2532928931405187,
+            "BackgroundLoss": -0.0010672304391745602,
+            "ReaccessRisk": 0,
+            "ControlCost": 0.009238221268660413
+          },
+          {
+            "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+            "Features": {
+              "CpuPercent": 19.63979416809606,
+              "AvailableFraction": 0.38382794875933013,
+              "CommitFraction": 0.6029806307162784,
+              "PagesInputPerSecond": 0.8798430852648016,
+              "Valid": true
+            },
+            "ForegroundGain": 0.14579757409314553,
+            "BackgroundLoss": 0.005426216986091581,
+            "ReaccessRisk": 0.05095952581232033,
+            "ControlCost": 0.006819424604291938
+          }
+        ],
+        "ValidationBlocks": 3,
+        "ForegroundMae": 0.05308581461026801,
+        "BackgroundMae": 0.011236763038708797,
+        "ReaccessMae": 0.09724318108847241,
+        "OverheadMae": 0.007413834108011848,
+        "ErrorBounds": [
+          0.0789613171076432,
+          0.020947599573127418,
+          0.1764416777436455,
+          0.007881965730293223
+        ],
+        "Quality": 0.8235583222563545,
+        "Accepted": false,
+        "Reason": "validation-outside-fit-support",
+        "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+      },
+      {
+        "Contention": "Healthy",
+        "Action": "LowerCpu, EcoQos",
+        "Fit": [
+          {
+            "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+            "Features": {
+              "CpuPercent": 19.293712316968126,
+              "AvailableFraction": 0.38374806037113957,
+              "CommitFraction": 0.6033618681441427,
+              "PagesInputPerSecond": 0.8763795638451715,
+              "Valid": true
+            },
+            "ForegroundGain": -0.40063742988271267,
+            "BackgroundLoss": 0.05053343733583726,
+            "ReaccessRisk": 0,
+            "ControlCost": 0.007772898249354276
+          },
+          {
+            "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+            "Features": {
+              "CpuPercent": 21.67952013710368,
+              "AvailableFraction": 0.3831197446406327,
+              "CommitFraction": 0.6035149975497373,
+              "PagesInputPerSecond": 10.548556588259245,
+              "Valid": true
+            },
+            "ForegroundGain": -0.05875725357579875,
+            "BackgroundLoss": 0.07631453926299214,
+            "ReaccessRisk": 0.1441172295422577,
+            "ControlCost": 0.0077970112371773485
+          },
+          {
+            "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+            "Features": {
+              "CpuPercent": 21.52117545375972,
+              "AvailableFraction": 0.38373694686552434,
+              "CommitFraction": 0.6032097000028646,
+              "PagesInputPerSecond": 0.8792725391403775,
+              "Valid": true
+            },
+            "ForegroundGain": -0.1414006179196705,
+            "BackgroundLoss": 0.045382823324829014,
+            "ReaccessRisk": 0.05412860188970847,
+            "ControlCost": 0.012658156380668006
+          }
+        ],
+        "ValidationBlocks": 3,
+        "ForegroundMae": null,
+        "BackgroundMae": null,
+        "ReaccessMae": null,
+        "OverheadMae": null,
+        "ErrorBounds": null,
+        "Quality": 0,
+        "Accepted": false,
+        "Reason": "validation-outside-fit-support",
+        "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+      },
+      {
+        "Contention": "Healthy",
+        "Action": "LowerMemory",
+        "Fit": [
+          {
+            "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+            "Features": {
+              "CpuPercent": 21.553228621291453,
+              "AvailableFraction": 0.3827596026325801,
+              "CommitFraction": 0.6038108747063097,
+              "PagesInputPerSecond": 1.7806220246918858,
+              "Valid": true
+            },
+            "ForegroundGain": 0.019914418109660215,
+            "BackgroundLoss": 0.010368466137091192,
+            "ReaccessRisk": 0,
+            "ControlCost": 0.008263746855280717
+          },
+          {
+            "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+            "Features": {
+              "CpuPercent": 19.204152249134943,
+              "AvailableFraction": 0.3831203889018278,
+              "CommitFraction": 0.6036718758861656,
+              "PagesInputPerSecond": 0.889264118824183,
+              "Valid": true
+            },
+            "ForegroundGain": -0.023820841612168797,
+            "BackgroundLoss": 0.0006203707979274276,
+            "ReaccessRisk": 0.03240459936249018,
+            "ControlCost": 0.009222647455865868
+          },
+          {
+            "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+            "Features": {
+              "CpuPercent": 22.489270386266092,
+              "AvailableFraction": 0.3836847617087224,
+              "CommitFraction": 0.6031271273980902,
+              "PagesInputPerSecond": 0.877913487595609,
+              "Valid": true
+            },
+            "ForegroundGain": -0.12576763168936234,
+            "BackgroundLoss": 0.013430725111774455,
+            "ReaccessRisk": 0.015656279139524054,
+            "ControlCost": 0.009740938539459449
+          }
+        ],
+        "ValidationBlocks": 3,
+        "ForegroundMae": 0.11281165276607263,
+        "BackgroundMae": 0.0011175751616833152,
+        "ReaccessMae": 0.016020292834004746,
+        "OverheadMae": 0.0006743764904924704,
+        "ErrorBounds": [
+          0.21445675343301226,
+          0.0014540791218021765,
+          0.016020292834004746,
+          0.0006798605363538684
+        ],
+        "Quality": 0.7855432465669877,
+        "Accepted": false,
+        "Reason": "validation-outside-fit-support",
+        "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+      }
+    ]
+  },
+  "aborted_cpu": {
+    "planned_trials": 18,
+    "finished_failures": 3,
+    "setup_aborted": 1,
+    "unstarted_trials": 14,
+    "status": "aborted",
+    "definition": "Attempt includes a created trial directory, even if stopped before started.json was written; no missing measurements are synthesized"
+  },
+  "performance_rows": [
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "A",
+      "policy_variant": "None",
+      "model_id": "",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "356",
+      "foreground_p50_ms": "4.225433333333333",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "5.234093333333331",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.5807",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "5.6999566666666635",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "60.945107085675716",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "17.052066666666665",
+      "reaccess_ms_n_blocks": "3"
+    },
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "B",
+      "policy_variant": "None",
+      "model_id": "804d1ce02908dc4fd95386288b4223ecf89fae8a142be7910f1a3dda303e2fbc",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "342",
+      "foreground_p50_ms": "4.27355",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "5.37808",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.668533333333333",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "5.990576666666667",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "59.52631674067673",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "16.532966666666667",
+      "reaccess_ms_n_blocks": "3"
+    },
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "C",
+      "policy_variant": "None",
+      "model_id": "",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "335",
+      "foreground_p50_ms": "4.437433333333333",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "6.3397049999999995",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.872566666666667",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "6.818203333333332",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "59.065977271023456",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "16.827233333333332",
+      "reaccess_ms_n_blocks": "3"
+    },
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "D",
+      "policy_variant": "None",
+      "model_id": "",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "341",
+      "foreground_p50_ms": "4.250333333333333",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "4.8015316666666665",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.6297500000000005",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "5.341933333333332",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "60.42115560454363",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "17.448233333333334",
+      "reaccess_ms_n_blocks": "3"
+    },
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "E",
+      "policy_variant": "None",
+      "model_id": "804d1ce02908dc4fd95386288b4223ecf89fae8a142be7910f1a3dda303e2fbc",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "351",
+      "foreground_p50_ms": "4.243133333333334",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "5.032039999999999",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.647166666666667",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "5.611866666666666",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "60.91819945278283",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "16.4249",
+      "reaccess_ms_n_blocks": "3"
+    },
+    {
+      "split": "pilot",
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "workload_id": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+      "regime": "healthy",
+      "condition": "F",
+      "policy_variant": "WithoutBackgroundCost",
+      "model_id": "804d1ce02908dc4fd95386288b4223ecf89fae8a142be7910f1a3dda303e2fbc",
+      "n_blocks": "3",
+      "n_requests_diagnostic": "350",
+      "foreground_p50_ms": "4.266566666666667",
+      "foreground_p50_ms_n_blocks": "3",
+      "foreground_p95_ms": "4.883818333333333",
+      "foreground_p95_ms_n_blocks": "3",
+      "foreground_p99_ms": "",
+      "foreground_p99_ms_n_blocks": "0",
+      "foreground_wall_p50_ms": "4.672033333333333",
+      "foreground_wall_p50_ms_n_blocks": "3",
+      "foreground_wall_p95_ms": "5.432758333333333",
+      "foreground_wall_p95_ms_n_blocks": "3",
+      "foreground_wall_p99_ms": "",
+      "foreground_wall_p99_ms_n_blocks": "0",
+      "background_throughput_units_per_s": "60.85345539258196",
+      "background_throughput_units_per_s_n_blocks": "3",
+      "background_completion_seconds": "",
+      "background_completion_seconds_n_blocks": "0",
+      "reaccess_ms": "16.779",
+      "reaccess_ms_n_blocks": "3"
+    }
+  ],
+  "full_product_overhead_measured": false,
+  "missing": [
+    "validated CPU/RAM/mixed models",
+    "real-app adapters",
+    "steady-state engine-only/tray/service overhead",
+    "physical 8/16GB replication",
+    "full empirical six-way ablations",
+    "frozen confirmatory plan"
+  ],
+  "raw_archive": {
+    "name": "RamFlow-phase2-raw-evidence.zip",
+    "bytes": 7427341,
+    "sha256": "0a79c30c8d2c65ad98142c96d4850dedf55287d4fec3a46c0942092d40becef6",
+    "excluded_generated_binaries": true
+  }
+}

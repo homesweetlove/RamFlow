@@ -1,0 +1,380 @@
+{
+  "SchemaVersion": 3,
+  "ModelId": "804d1ce02908dc4fd95386288b4223ecf89fae8a142be7910f1a3dda303e2fbc",
+  "HardwareId": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+  "WorkloadId": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads1:units0:gap5:observer-independent-v1",
+  "Options": {
+    "MinFitBlocks": 3,
+    "MinValidationBlocks": 3,
+    "Neighbours": 3,
+    "SupportRadius": 0.15,
+    "MaxValidationMae": 0.15,
+    "MinQuality": 0.8
+  },
+  "FitBlockIds": [
+    "1e08c8b47aad46f194935dc7026e628c",
+    "8a80d3c9a75241ddb39774274ba7f9ed",
+    "8d2717bcbc154ee68d6f5ac2feb34eac"
+  ],
+  "ValidationBlockIds": [
+    "04c3952426b84f959fa591279fadb0de",
+    "60fc2763500e499089c40746bfe26be7",
+    "798fb6ff64544192b6d47158f3a17eeb"
+  ],
+  "Cells": [
+    {
+      "Contention": "Healthy",
+      "Action": "LowerCpu",
+      "Fit": [
+        {
+          "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+          "Features": {
+            "CpuPercent": 21.735537190082642,
+            "AvailableFraction": 0.3838922138135399,
+            "CommitFraction": 0.6033978194295743,
+            "PagesInputPerSecond": 0.8380508613067728,
+            "Valid": true
+          },
+          "ForegroundGain": -0.1257965102099634,
+          "BackgroundLoss": 0.02152831786987741,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.031007811934495026
+        },
+        {
+          "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+          "Features": {
+            "CpuPercent": 21.03004291845494,
+            "AvailableFraction": 0.3836510990612792,
+            "CommitFraction": 0.6032845824931082,
+            "PagesInputPerSecond": 0.8800419251973164,
+            "Valid": true
+          },
+          "ForegroundGain": 0.2532928931405187,
+          "BackgroundLoss": -0.0010672304391745602,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.009238221268660413
+        },
+        {
+          "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+          "Features": {
+            "CpuPercent": 19.63979416809606,
+            "AvailableFraction": 0.38382794875933013,
+            "CommitFraction": 0.6029806307162784,
+            "PagesInputPerSecond": 0.8798430852648016,
+            "Valid": true
+          },
+          "ForegroundGain": 0.14579757409314553,
+          "BackgroundLoss": 0.005426216986091581,
+          "ReaccessRisk": 0.05095952581232033,
+          "ControlCost": 0.006819424604291938
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": 0.05308581461026801,
+      "BackgroundMae": 0.011236763038708797,
+      "ReaccessMae": 0.09724318108847241,
+      "OverheadMae": 0.007413834108011848,
+      "ErrorBounds": [
+        0.0789613171076432,
+        0.020947599573127418,
+        0.1764416777436455,
+        0.007881965730293223
+      ],
+      "Quality": 0.8235583222563545,
+      "Accepted": false,
+      "Reason": "validation-outside-fit-support",
+      "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+    },
+    {
+      "Contention": "Healthy",
+      "Action": "LowerCpu, EcoQos",
+      "Fit": [
+        {
+          "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+          "Features": {
+            "CpuPercent": 19.293712316968126,
+            "AvailableFraction": 0.38374806037113957,
+            "CommitFraction": 0.6033618681441427,
+            "PagesInputPerSecond": 0.8763795638451715,
+            "Valid": true
+          },
+          "ForegroundGain": -0.40063742988271267,
+          "BackgroundLoss": 0.05053343733583726,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.007772898249354276
+        },
+        {
+          "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+          "Features": {
+            "CpuPercent": 21.67952013710368,
+            "AvailableFraction": 0.3831197446406327,
+            "CommitFraction": 0.6035149975497373,
+            "PagesInputPerSecond": 10.548556588259245,
+            "Valid": true
+          },
+          "ForegroundGain": -0.05875725357579875,
+          "BackgroundLoss": 0.07631453926299214,
+          "ReaccessRisk": 0.1441172295422577,
+          "ControlCost": 0.0077970112371773485
+        },
+        {
+          "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+          "Features": {
+            "CpuPercent": 21.52117545375972,
+            "AvailableFraction": 0.38373694686552434,
+            "CommitFraction": 0.6032097000028646,
+            "PagesInputPerSecond": 0.8792725391403775,
+            "Valid": true
+          },
+          "ForegroundGain": -0.1414006179196705,
+          "BackgroundLoss": 0.045382823324829014,
+          "ReaccessRisk": 0.05412860188970847,
+          "ControlCost": 0.012658156380668006
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": null,
+      "BackgroundMae": null,
+      "ReaccessMae": null,
+      "OverheadMae": null,
+      "ErrorBounds": null,
+      "Quality": 0,
+      "Accepted": false,
+      "Reason": "validation-outside-fit-support",
+      "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+    },
+    {
+      "Contention": "Healthy",
+      "Action": "LowerMemory",
+      "Fit": [
+        {
+          "BlockId": "8a80d3c9a75241ddb39774274ba7f9ed",
+          "Features": {
+            "CpuPercent": 21.553228621291453,
+            "AvailableFraction": 0.3827596026325801,
+            "CommitFraction": 0.6038108747063097,
+            "PagesInputPerSecond": 1.7806220246918858,
+            "Valid": true
+          },
+          "ForegroundGain": 0.019914418109660215,
+          "BackgroundLoss": 0.010368466137091192,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.008263746855280717
+        },
+        {
+          "BlockId": "1e08c8b47aad46f194935dc7026e628c",
+          "Features": {
+            "CpuPercent": 19.204152249134943,
+            "AvailableFraction": 0.3831203889018278,
+            "CommitFraction": 0.6036718758861656,
+            "PagesInputPerSecond": 0.889264118824183,
+            "Valid": true
+          },
+          "ForegroundGain": -0.023820841612168797,
+          "BackgroundLoss": 0.0006203707979274276,
+          "ReaccessRisk": 0.03240459936249018,
+          "ControlCost": 0.009222647455865868
+        },
+        {
+          "BlockId": "8d2717bcbc154ee68d6f5ac2feb34eac",
+          "Features": {
+            "CpuPercent": 22.489270386266092,
+            "AvailableFraction": 0.3836847617087224,
+            "CommitFraction": 0.6031271273980902,
+            "PagesInputPerSecond": 0.877913487595609,
+            "Valid": true
+          },
+          "ForegroundGain": -0.12576763168936234,
+          "BackgroundLoss": 0.013430725111774455,
+          "ReaccessRisk": 0.015656279139524054,
+          "ControlCost": 0.009740938539459449
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": 0.11281165276607263,
+      "BackgroundMae": 0.0011175751616833152,
+      "ReaccessMae": 0.016020292834004746,
+      "OverheadMae": 0.0006743764904924704,
+      "ErrorBounds": [
+        0.21445675343301226,
+        0.0014540791218021765,
+        0.016020292834004746,
+        0.0006798605363538684
+      ],
+      "Quality": 0.7855432465669877,
+      "Accepted": false,
+      "Reason": "validation-outside-fit-support",
+      "ReferenceBackgroundUnitsPerSecond": 62.91040080647691
+    }
+  ],
+  "DatasetSha256": "d7f9be921830549383188a7242ff6d81abe2d6a3afb03781fc7135ffc2d26169",
+  "ValidationPredictions": [
+    {
+      "BlockId": "04c3952426b84f959fa591279fadb0de",
+      "Contention": "Healthy",
+      "Action": "LowerCpu",
+      "Actual": [
+        -0.1364937937495121,
+        -0.0018900253659197563,
+        0,
+        0.009263254802607973
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "60fc2763500e499089c40746bfe26be7",
+      "Contention": "Healthy",
+      "Action": "LowerCpu",
+      "Actual": [
+        0.11830829778745977,
+        -0.012318498100862607,
+        0.035031193037406094,
+        0.008742783450085318
+      ],
+      "Predicted": [
+        0.09109798567456695,
+        0.00862910147226481,
+        0.016986508604106776,
+        0.01568848593581579
+      ],
+      "AbsoluteErrors": [
+        0.02721031211289282,
+        0.020947599573127418,
+        0.01804468443329932,
+        0.006945702485730473
+      ],
+      "Status": "predicted-held-out-block"
+    },
+    {
+      "BlockId": "798fb6ff64544192b6d47158f3a17eeb",
+      "Contention": "Healthy",
+      "Action": "LowerCpu",
+      "Actual": [
+        0.17005930278221015,
+        0.007103174967974635,
+        0.19342818634775227,
+        0.007806520205522569
+      ],
+      "Predicted": [
+        0.09109798567456695,
+        0.00862910147226481,
+        0.016986508604106776,
+        0.01568848593581579
+      ],
+      "AbsoluteErrors": [
+        0.0789613171076432,
+        0.001525926504290176,
+        0.1764416777436455,
+        0.007881965730293223
+      ],
+      "Status": "predicted-held-out-block"
+    },
+    {
+      "BlockId": "04c3952426b84f959fa591279fadb0de",
+      "Contention": "Healthy",
+      "Action": "LowerCpu, EcoQos",
+      "Actual": [
+        -0.36850815790158564,
+        0.05535140544567896,
+        0.052453121306008654,
+        0.01022122898094791
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "60fc2763500e499089c40746bfe26be7",
+      "Contention": "Healthy",
+      "Action": "LowerCpu, EcoQos",
+      "Actual": [
+        -0.16165188572130185,
+        0.0314249547861033,
+        0.08366280711663387,
+        0.00927120574823438
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "798fb6ff64544192b6d47158f3a17eeb",
+      "Contention": "Healthy",
+      "Action": "LowerCpu, EcoQos",
+      "Actual": [
+        -0.10473013837315848,
+        0.038887688947103594,
+        0.10921310215706237,
+        0.00927260081468329
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "04c3952426b84f959fa591279fadb0de",
+      "Contention": "Healthy",
+      "Action": "LowerMemory",
+      "Actual": [
+        -0.25768143849696923,
+        0.006685774893795515,
+        0,
+        0.00974467006149975
+      ],
+      "Predicted": [
+        -0.04322468506395697,
+        0.008139854015597692,
+        0.016020292834004746,
+        0.009075777616868678
+      ],
+      "AbsoluteErrors": [
+        0.21445675343301226,
+        0.0014540791218021765,
+        0.016020292834004746,
+        0.0006688924446310723
+      ],
+      "Status": "predicted-held-out-block"
+    },
+    {
+      "BlockId": "60fc2763500e499089c40746bfe26be7",
+      "Contention": "Healthy",
+      "Action": "LowerMemory",
+      "Actual": [
+        -0.18913984104090797,
+        -0.008462554964843605,
+        0.008234705142358356,
+        0.008291426862214051
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "798fb6ff64544192b6d47158f3a17eeb",
+      "Contention": "Healthy",
+      "Action": "LowerMemory",
+      "Actual": [
+        -0.03205813296482396,
+        0.007358782814033238,
+        0,
+        0.009755638153222546
+      ],
+      "Predicted": [
+        -0.04322468506395697,
+        0.008139854015597692,
+        0.016020292834004746,
+        0.009075777616868678
+      ],
+      "AbsoluteErrors": [
+        0.01116655209913301,
+        0.0007810712015644539,
+        0.016020292834004746,
+        0.0006798605363538684
+      ],
+      "Status": "predicted-held-out-block"
+    }
+  ],
+  "Scope": "paired instrumented task effects; not physical user input latency; quality is not a probability"
+}

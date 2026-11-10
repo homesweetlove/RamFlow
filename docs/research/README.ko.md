@@ -1,5 +1,7 @@
 # RAM Flow KCI 연구 작업 안내
 
+추가 개발: [실측 비용 모델](MEASURED_MODEL.ko.md) · [실행 가능한 Windows 경로](RESEARCHLAB.ko.md) · [starvation/소거](STARVATION_ABLATIONS.ko.md) · [추가 실측·실패·검증](PHASE2_RESULTS.ko.md). 아래 기존 단계 기록과 새 파일럿 결과를 구분한다.
+
 목표는 TKIPS를 우선 대상으로 한 KCI 등재 학술지의 정규 연구논문이다. 현재 산출물은 비용 정책의 구현·안전 검증·실험 골격이며 **CARP의 성능 우위나 논문 채택을 입증한 결과는 없다**.
 
 ## 읽을 순서

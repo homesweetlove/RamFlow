@@ -4,7 +4,7 @@ namespace RamFlow.Core;
 
 public sealed class Engine : IDisposable
 {
-    private sealed record Original(ProcessSample Process, ResourceValues Values);
+    private sealed record Original(ProcessSample Process, ResourceValues Values, DateTimeOffset? AppliedAt = null);
     private readonly object gate = new();
     private readonly IResourceProvider provider;
     private readonly string root;
@@ -12,6 +12,7 @@ public sealed class Engine : IDisposable
     private readonly BackgroundJobQueue jobs;
     private readonly IPolicyObservationSource? observations;
     private readonly IResearchAuditSink? audit;
+    private readonly IResourcePolicy? researchPolicy;
     private IResourcePolicy resourcePolicy = new V1ResourcePolicy();
     private readonly Dictionary<(int, long), ResourceAction> appliedActions = new();
     private string settingsHash = FileResearchAuditSink.Hash(new Settings());
@@ -45,10 +46,13 @@ public sealed class Engine : IDisposable
         if(disposed)return; jobs.Dispose();provider.Dispose();disposed=true;
     }
     public Engine(IResourceProvider provider, string? dataRoot = null, bool persist = true, bool allowRemote = true, IBackgroundJobLauncher? jobLauncher = null,
-        IPolicyObservationSource? observations = null, IResearchAuditSink? audit = null)
+        IPolicyObservationSource? observations = null, IResearchAuditSink? audit = null, IResourcePolicy? researchPolicy = null)
     {
         this.provider = provider; this.persist = persist;
         this.observations = observations; this.audit = audit;
+        this.researchPolicy = researchPolicy;
+        if (researchPolicy is not null && (allowRemote || dataRoot is null))
+            throw new ArgumentException("A research policy override requires an isolated explicit dataRoot and allowRemote:false.");
         if ((observations is not null || audit is not null) && provider is WindowsResourceProvider && (allowRemote || dataRoot is null))
             throw new ArgumentException("A research Windows host must use allowRemote:false and an isolated explicit dataRoot.");
         jobs = new(jobLauncher);
@@ -106,9 +110,9 @@ public sealed class Engine : IDisposable
         if(value.BackgroundConcurrency is <1 or >16 || value.BackgroundReserveMiB is <256 or >65536) throw new ArgumentException("동시 실행은 1–16개, 메모리 여유는 256–65536 MiB로 지정하세요.");
         return value;
     }
-    private static IResourcePolicy CreatePolicy(Settings value) => value.PolicyName switch {
+    private IResourcePolicy CreatePolicy(Settings value) => researchPolicy ?? (value.PolicyName switch {
         "carp" => new CarpPolicy(value.Carp), "fixed" => new FixedResourcePolicy(), _ => new V1ResourcePolicy()
-    };
+    });
     private bool Audit(string kind, DateTimeOffset time, ProcessSample? process, string result, object? detail = null) {
         if (audit is null) return true;
         try { audit.Write(new(kind, time, resourcePolicy.Name, resourcePolicy.Version, settingsHash,
@@ -204,17 +208,25 @@ public sealed class Engine : IDisposable
                 string? priorityProtection = designated ? Policy.Protect(p, foreground, settings, mode, true) : protection;
                 CarpEvidence? evidence = null;
                 if (settings.PolicyName == "carp" && designated && priorityProtection is null) {
-                    try { evidence = observations?.Read(p, snap); }
+                    try {
+                        var kind = (cpuPressure, pressure.Level >= PressureLevel.Moderate) switch {
+                            (true, true) => ContentionKind.Mixed, (true, false) => ContentionKind.Cpu,
+                            (false, true) => ContentionKind.Ram, _ => ContentionKind.Healthy };
+                        evidence = observations is IPolicyContextObservationSource contextual ? contextual.Read(p, snap, kind) : observations?.Read(p, snap);
+                        if (observations is IPolicyContextObservationSource diagnostic) Audit("model-observation", now, p, diagnostic.Diagnostic);
+                    }
                     catch (Exception e) { Audit("observation", now, p, "source-failed", new { Error = e.Message }); }
                 }
                 var input = new PolicyInput(snap, p, settings, foreground.Pid, foreground.Name, fullscreen, mode,
                     pressure.Level, cpuPressure, idle, designated, ownedJob, appliedActions.GetValueOrDefault((p.Pid, p.Identity)), evidence);
                 PolicyDecision decision;
+                var decisionClock = System.Diagnostics.Stopwatch.StartNew();
                 try { decision = resourcePolicy.Decide(input); }
                 catch (Exception e) { decision = new(ResourceAction.None, "policy-failed-restore", ContentionKind.Unknown, []); Audit("policy-error", now, p, "failed", new { Error = e.Message }); }
                 // Learned future-app protection stays outside the swappable policy.
                 if (!designated && protection is not null) decision = decision with { Action = ResourceAction.None, Reason = protection };
-                bool recorded = Audit("decision", now, p, decision.Reason, new { Input = input, Decision = decision, DryRun = settings.DryRun });
+                double decisionMs = decisionClock.Elapsed.TotalMilliseconds;
+                bool recorded = Audit("decision", now, p, decision.Reason, new { Input = input, Decision = decision, DryRun = settings.DryRun, DecisionElapsedMs = decisionMs });
                 if (decision.Action == ResourceAction.None || !recorded) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); }
                 else if (settings.DryRun) Log($"{p.Name} · {resourcePolicy.Name} · {decision.Action} 조정 예상", true);
                 else {
@@ -284,7 +296,7 @@ public sealed class Engine : IDisposable
             PowerControl = action.HasFlag(ResourceAction.EcoQos) ? old.PowerControl | 1U : old.PowerControl,
             PowerState = action.HasFlag(ResourceAction.EcoQos) ? old.PowerState | 1U : old.PowerState, CpuSets = sets };
         if (!SafeValues(old) || !Audit("apply-intent", now, process, "journal-before-write", new { Original = old, Requested = value, Action = action })) return;
-        originals[process.Pid] = new(process, old);
+        originals[process.Pid] = new(process, old, PolicyNow);
         // 일부 성공이나 강제 종료에 대비해 API 호출 전에 복원할 값을 보존한다.
         if (persist) SaveJournal();
         // A sensor/model/log/journal stall must not turn old observations into
@@ -321,7 +333,8 @@ public sealed class Engine : IDisposable
             Log($"{original.Process.Name} · 원래 자원 설정 복원");
         }
         else pending.Add(pid);
-        Audit("restore", DateTimeOffset.UtcNow, original.Process, restored ? "restored" : "write-failed-pending", new { Original = original.Values });
+        Audit("restore", DateTimeOffset.UtcNow, original.Process, restored ? "restored" : "write-failed-pending", new {
+            Original = original.Values, RestrictedDurationMs = original.AppliedAt is {} since ? (double?)Math.Max(0, (PolicyNow - since).TotalMilliseconds) : null });
     }
     private static bool SafeValues(ResourceValues value) => value.MemoryPriority is >= 1 and <= 5 && value.CpuPriority is 0x20 or 0x4000 or 0x40 &&
         (value.PowerControl & ~5U) == 0 && (value.PowerState & ~5U) == 0 && value.CpuSets is { Length: <= 4096 };
