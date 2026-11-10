@@ -63,7 +63,7 @@ This is a *simplified decision model*, not a line-by-line diagram of every branc
 ### Bounded intervention
 
 - Memory/CPU/EcoQoS priority changes require **30 minutes of observed inactivity**, an eligible workload and a pressure/CPU/battery condition.
-- Working-set trims require at least **High** pressure, a candidate working set of at least **150 MiB**, inactivity of **10 minutes (High)**, **3 minutes (Severe)** or **1 minute (Critical)**, plus pre-action revalidation.
+- Working-set trims require **less than 1 GiB of available physical RAM**, at least **High** pressure, a candidate working set of at least **150 MiB**, inactivity of **10 minutes (High)**, **3 minutes (Severe)** or **1 minute (Critical)**, plus pre-action revalidation. With physical headroom available, resident pages are preserved to avoid unnecessary resume costs.
 - Trim attempts are rate-limited to **one every 120 seconds globally** and **one every 900 seconds per PID**; only one candidate is attempted per scan.
 - Dry Run is the default. Prediction is protection-oriented: it does not authorize preemptive trims.
 
@@ -108,9 +108,15 @@ The existing [validation record](VALIDATION.md) reports **three runs of launchin
 
 The recorded optimization choices were process-level software rendering, delaying unused instrumentation initialization, and limiting icon decoding. These figures are specific to **RamFlow's own process and this test procedure**. They do **not** measure total system RAM saved, application latency, background-page faults, user productivity or causality in a randomized experiment.
 
-**Evidence quality:** the repository includes this summary but not raw per-run samples, hardware specification, a paired experiment log or confidence intervals. This is a documented internal measurement, **not an independently reproduced benchmark**.
+**Evidence quality:** the v0.3.3 → v0.3.4 UI comparison above remains a documented internal measurement, **not an independently reproduced benchmark**. Its raw repetitions are not supplied with this table. Later engine performance experiments are separate studies and do not retrospectively reproduce these UI figures.
 
 ## 5. Evidence map: claims and code
+
+A later [actual-app workflow study](REAL_APP_STUDY.ko.md) ran isolated Chrome and VS Code instances under the same synthetic background load. Five paired sessions/app showed Chrome generated-dashboard search p95 medians of88.15→48.14ms and VS Code generated-document completion API medians of99.36→50.52ms, with about60% lower background progress. These are controlled workflows inside real apps under mixed CPU/memory contention.
+
+After the explicit-background controller redesign, a [separate controlled mixed-load study](BACKGROUND_CONTROL_STUDY.ko.md) found foreground request p95 medians of232.85ms without the engine/tray and131.32ms with them across five paired blocks (43.6% shorter). Background processing rate fell59.6%. This demonstrates a foreground/background tradeoff in one synthetic CPU-and-memory workload, not isolated RAM efficacy or greater total productivity. Queue child execution and disposable-UI engine continuity were tested separately.
+
+A subsequent [actual-clock low-memory feasibility study (Korean)](SCARCITY_STUDY.ko.md) measured foreground task completion directly: 1,896.05ms without RamFlow versus 1,877.65ms with management enabled, medians of two trials each. The trimming trial showed no gain, the faster trial did not trim, and initial pressure differed. These observations do not establish a product performance benefit and are separate from the UI-footprint comparison above.
 
 | Engineering claim | Implementation or verification artifact | What it does *not* prove |
 | --- | --- | --- |
@@ -121,7 +127,7 @@ The recorded optimization choices were process-level software rendering, delayin
 | Separate UI/native packaging | [native architecture](NATIVE_ARCHITECTURE.md), [native workflow](../.github/workflows/native.yml) | Latest pipeline passed on this particular edit |
 | Process footprint comparison | [VALIDATION.md](VALIDATION.md) | System-wide performance gain |
 
-The source contains mock-based regression cases and Windows-only self-tests. Their existence is not a claim that those tests were executed as part of this documentation update.
+On 2026-11-09, local validation reproduced a failing regression before the warm-page fix and passed **171 assertions including real Windows API and IPC checks** afterward. Storage (26), observer (38), legacy Python (70), and isolated packaged UI/install/uninstall checks also passed. Mutations were restricted to disposable test processes and files. Passing these checks does not establish a foreground-workload performance benefit; see the [validation record](VALIDATION.md).
 
 ## 6. Failure modes and open questions
 

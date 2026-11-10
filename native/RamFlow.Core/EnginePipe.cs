@@ -6,7 +6,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace RamFlow.Core;
 
-public sealed record PipeRequest(string Command, Settings? Settings = null);
+public sealed record PipeRequest(string Command, Settings? Settings = null, BackgroundJobRequest? Job = null, Guid? JobId = null);
 public static class EnginePipe
 {
     [StructLayout(LayoutKind.Sequential)] private struct SecurityAttributes { public int Length; public IntPtr Descriptor; public int Inherit; }
@@ -72,6 +72,10 @@ public static class EnginePipe
                                 case "ping": data = true; break;
                                 case "state": data = engine.GetState(); break;
                                 case "settings": data = engine.Settings; break;
+                                case "enqueue":
+                                    if(!admin) throw new UnauthorizedAccessException("작업 실행에는 관리자 UI가 필요합니다.");
+                                    data=engine.EnqueueBackgroundJob(request.Job ?? throw new ArgumentException("작업 누락"));break;
+                                case "cancel-job": data=engine.CancelBackgroundJob(request.JobId ?? throw new ArgumentException("작업 ID 누락"));break;
                                 case "apply":
                                     var settings = request.Settings ?? throw new ArgumentException("설정 누락");
                                     if (!admin && !settings.DryRun && !settings.Paused) throw new UnauthorizedAccessException("실제 최적화 활성화에는 관리자 UI가 필요합니다.");

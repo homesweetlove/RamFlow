@@ -9,6 +9,7 @@ public sealed class Engine : IDisposable
     private readonly IResourceProvider provider;
     private readonly string root;
     private readonly bool persist;
+    private readonly BackgroundJobQueue jobs;
     private Settings settings = new();
     private readonly Pressure pressure = new();
     private readonly Dictionary<int, Original> originals = new();
@@ -23,15 +24,22 @@ public sealed class Engine : IDisposable
     private State state = new(new(), 0, PressureLevel.Normal, "background", "", [], [], 0, [], []);
     private DateTimeOffset lastScan = DateTimeOffset.MinValue, lastTrim = DateTimeOffset.MinValue;
     private int trimCount;
+    private bool cpuPressure;
     private ulong lastWorkingSetReduction;
     private Task? worker;
     private CancellationTokenSource? cancellation;
     private bool disposed;
     private bool remote;
     private string lastForeground = "";
-    public Engine(IResourceProvider provider, string? dataRoot = null, bool persist = true, bool allowRemote = true)
+    public bool IsRemote => remote;
+    public void Detach() {
+        if(!remote)throw new InvalidOperationException("로컬 엔진 소유자는 복원 없이 분리할 수 없습니다.");
+        if(disposed)return; jobs.Dispose();provider.Dispose();disposed=true;
+    }
+    public Engine(IResourceProvider provider, string? dataRoot = null, bool persist = true, bool allowRemote = true, IBackgroundJobLauncher? jobLauncher = null)
     {
         this.provider = provider; this.persist = persist;
+        jobs = new(jobLauncher);
         root = dataRoot ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RamFlowNative");
         if (persist && allowRemote && provider is WindowsResourceProvider) {
             try { remote = EnginePipe.Request<bool>(new("ping"), 250); } catch { }
@@ -55,14 +63,20 @@ public sealed class Engine : IDisposable
             try { foreach (var item in JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(Path.Combine(root, "usage.json"))) ?? []) learning[item.Key] = item.Value; } catch { }
         }
     }
-    public Settings Settings { get { if (remote) return EnginePipe.Request<Settings>(new("settings")); lock (gate) return settings with { Whitelist = settings.Whitelist.ToArray() }; } }
-    public State GetState() { if (remote) return EnginePipe.Request<State>(new("state")); lock (gate) return state with { Events = events.ToArray(), PendingRestores = pending.Count }; }
+    private static Settings CopySettings(Settings value) => value with { Whitelist = value.Whitelist.ToArray(), BackgroundApps = value.BackgroundApps.ToArray() };
+    public Settings Settings { get { if (remote) return EnginePipe.Request<Settings>(new("settings")); lock (gate) return CopySettings(settings); } }
+    public State GetState() { if (remote) return EnginePipe.Request<State>(new("state")); lock (gate) return state with { Events = events.ToArray(), PendingRestores = pending.Count, BackgroundJobs = jobs.Summaries }; }
+    public BackgroundJobSummary EnqueueBackgroundJob(BackgroundJobRequest request) {
+        if(remote) return EnginePipe.Request<BackgroundJobSummary>(new("enqueue", Job:request));
+        lock(gate) { if(settings.DryRun || settings.Paused) throw new InvalidOperationException("실제 관리 모드에서 일시정지를 해제한 뒤 실행하세요."); return jobs.Enqueue(request); }
+    }
+    public bool CancelBackgroundJob(Guid id) { if(remote)return EnginePipe.Request<bool>(new("cancel-job",JobId:id));lock(gate)return jobs.Cancel(id); }
     public void ApplySettings(Settings next)
     {
         if (remote) { EnginePipe.Request<Settings>(new("apply", Validate(next))); return; }
         lock (gate) {
             next = Validate(next);
-            RestoreAll(); settings = next with { Whitelist = next.Whitelist.ToArray() };
+            RestoreAll(); settings = CopySettings(next);
             lastScan = DateTimeOffset.MinValue;
             if (persist) Save("settings.json", settings);
             Log("설정 변경 · 원래 자원 설정 복원 요청", next.DryRun);
@@ -71,6 +85,8 @@ public sealed class Engine : IDisposable
     public static Settings Validate(Settings value)
     {
         if (!Display.Modes.Contains(value.Mode) || value.Whitelist is null || value.Whitelist.Length > 256 || value.Whitelist.Any(x => string.IsNullOrWhiteSpace(x) || x.Length > 260)) throw new ArgumentException("설정 모드 또는 예외 목록이 올바르지 않습니다.");
+        if (value.BackgroundApps is null || value.BackgroundApps.Length > 256 || value.BackgroundApps.Any(x => string.IsNullOrWhiteSpace(x) || x.Length > 32767 || x.IndexOf('\0') >= 0 || !Path.IsPathFullyQualified(x))) throw new ArgumentException("배경 작업은 실행 파일의 전체 경로로 지정하세요.");
+        if(value.BackgroundConcurrency is <1 or >16 || value.BackgroundReserveMiB is <256 or >65536) throw new ArgumentException("동시 실행은 1–16개, 메모리 여유는 256–65536 MiB로 지정하세요.");
         return value;
     }
     public void Start()
@@ -78,6 +94,7 @@ public sealed class Engine : IDisposable
         if (remote) return;
         lock (gate) {
             if (worker is { IsCompleted: false }) return;
+            jobs.Start();
             cancellation = new(); var token = cancellation.Token;
             worker = Task.Run(async () => {
                 DateTimeOffset next = DateTimeOffset.MinValue;
@@ -101,6 +118,10 @@ public sealed class Engine : IDisposable
             foreach (int pid in pending.ToArray()) Restore(pid);
             if (settings.Paused || settings.DryRun) RestoreAll();
             var snap = provider.Sample(); var now = snap.Time;
+            cpuPressure = snap.CpuPercent >= 80 || cpuPressure && snap.CpuPercent >= 60;
+            var count = jobs.Summaries.Count(x=>x.Status=="Running");
+            jobs.Tick(snap,settings);
+            if(jobs.Summaries.Count(x=>x.Status=="Running")!=count) lastScan=DateTimeOffset.MinValue;
             var foreground = provider.Foreground(); bool fullscreen = provider.Fullscreen();
             if (foreground.Name.Length > 0) activity[foreground.Name] = now;
             if (foreground.Name != lastForeground) {
@@ -119,6 +140,7 @@ public sealed class Engine : IDisposable
             var rows = new List<ProcessRow>();
             var alive = new HashSet<(int, long)>();
             int trimDelay = Policy.TrimIdleSeconds(pressure.Level);
+            bool needsMemoryRelief = Policy.NeedsWorkingSetRelief(snap, pressure.Level);
             int trimCandidates = 0;
             bool trimAttempted = false;
             double? nextIdleSeconds = null;
@@ -136,13 +158,17 @@ public sealed class Engine : IDisposable
                 string? protection = Policy.Protect(p, foreground, settings, mode);
                 if (protection is null && predictions.Contains(p.Name)) protection = "시간대 사용 예측 보호";
                 rows.Add(new(p.Pid, p.Identity, p.Name, p.WorkingSet, p.PrivateBytes, category, protection, p.CpuPercent, p.IoBytesPerSecond));
-                bool eligible = protection is null && idle >= 1800 && canManage &&
-                    (pressure.Level >= PressureLevel.Moderate || snap.CpuPercent >= 80 || snap.OnBattery);
+                bool ownedJob = jobs.Owns(p);
+                bool designated = ownedJob || settings.BackgroundApps.Contains(p.Path, StringComparer.OrdinalIgnoreCase);
+                string? priorityProtection = designated ? Policy.Protect(p, foreground, settings, mode, true) : protection;
+                bool priorityContext = canManage || designated && foreground.Pid > 0 && foreground.Name.Length > 0 && !settings.Paused;
+                bool eligible = priorityProtection is null && (designated || idle >= 1800) && priorityContext &&
+                    (ownedJob || pressure.Level >= PressureLevel.Moderate || cpuPressure || snap.OnBattery);
                 if (!eligible) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); }
                 else if (settings.DryRun) Log($"{p.Name} · {category} · Memory Priority / CPU / EcoQoS 조정 예상", true);
-                else if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, now);
+                else if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, now, designated);
                 bool memoryCandidate = protection is null && canManage && settings.WorkingSetTrim &&
-                    pressure.Level >= PressureLevel.High && p.WorkingSet >= 150 * 1048576UL;
+                    needsMemoryRelief && p.WorkingSet >= 150 * 1048576UL;
                 if (!memoryCandidate) continue;
                 if (idle < trimDelay) { nextIdleSeconds = Math.Min(nextIdleSeconds ?? double.MaxValue, trimDelay - idle); continue; }
                 trimCandidates++;
@@ -168,6 +194,7 @@ public sealed class Engine : IDisposable
             if (persist) SaveJournal();
             string memoryStatus = settings.Paused ? "메모리 관리 일시정지" : !settings.WorkingSetTrim ? "RAM 정리 꺼짐" :
                 !canManage ? "활성 창 확인 또는 전체화면 종료 대기" : pressure.Level < PressureLevel.High ? "메모리 여유 · 정리하지 않음" :
+                !needsMemoryRelief ? "앱 복귀 보호 · 가용 RAM 여유로 강제 정리 보류" :
                 trimCandidates > 0 ? $"RAM 정리 대상 {trimCandidates}개 · 전역 2분 / 같은 앱 15분 간격" :
                 nextIdleSeconds.HasValue ? $"비활성 확인 대기 · 가장 빠른 후보 {Math.Ceiling(nextIdleSeconds.Value)}초 후" : "현재 정리할 비활성 앱 없음 · 사용 중인 작업 보호";
             if (settings.DryRun) memoryStatus = "시뮬레이션 · 실제 RAM 정리 없음 · " + memoryStatus;
@@ -178,9 +205,11 @@ public sealed class Engine : IDisposable
             return state;
         }
     }
-    private void Apply(ProcessSample process, DateTimeOffset now)
+    private void Apply(ProcessSample process, DateTimeOffset now, bool designated = false)
     {
         if (!provider.Validate(process)) return;
+        var foreground = provider.Foreground(); bool fullscreen = provider.Fullscreen();
+        if (foreground.Pid <= 0 || foreground.Name.Length == 0 || fullscreen && !designated || Policy.Protect(process, foreground, settings, Policy.Mode(settings, foreground.Name, state.Snapshot, fullscreen), designated) is not null) return;
         var old = provider.ReadValues(process.Pid);
         if (old is null || old.CpuPriority is not (0x40 or 0x4000 or 0x20) || provider.Identity(process.Pid) != process.Identity) return;
         uint[] sets = old.CpuSets;
@@ -238,7 +267,7 @@ public sealed class Engine : IDisposable
         Task? task;
         lock (gate) { cancellation?.Cancel(); task = worker; }
         if (task is not null && Task.CurrentId != task.Id) try { task.Wait(TimeSpan.FromSeconds(5)); } catch (AggregateException) { }
-        lock (gate) { RestoreAll(); }
+        lock (gate) { jobs.Stop(); RestoreAll(); }
     }
-    public void Dispose() { if (disposed) return; Stop(); provider.Dispose(); cancellation?.Dispose(); disposed = true; }
+    public void Dispose() { if (disposed) return; Stop(); jobs.Dispose(); provider.Dispose(); cancellation?.Dispose(); disposed = true; }
 }

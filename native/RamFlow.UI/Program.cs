@@ -16,11 +16,14 @@ internal static class Program
         string? dataRoot = null;
         string? screenshot = null;
         int? restartFrom = null;
+        Guid? ipcScope = null; string? readyEvent = null;
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--smoke-test") smoke = true;
             else if (args[i] == "--startup-check") startupCheck = true;
             else if (args[i] == "--data-root" && i + 1 < args.Length) dataRoot = args[++i];
+            else if(args[i]=="--ipc-namespace" && i+1<args.Length && Guid.TryParseExact(args[i+1],"N",out var scope) && scope!=Guid.Empty){ipcScope=scope;i++;}
+            else if(args[i]=="--ready-event" && i+1<args.Length && UiHandoff.ValidReadyName(args[i+1]))readyEvent=args[++i];
             else if (args[i] == "--screenshot" && i + 1 < args.Length)
             {
                 screenshot = args[++i];
@@ -36,9 +39,10 @@ internal static class Program
             }
         }
 
-        if (startupCheck && string.IsNullOrWhiteSpace(dataRoot) || !startupCheck && dataRoot is not null)
+        if (startupCheck && string.IsNullOrWhiteSpace(dataRoot) || !startupCheck && dataRoot is not null && ipcScope is null)
         { Console.Error.WriteLine("Startup verification requires an isolated data root."); return 2; }
-        if (startupCheck) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
+        if(ipcScope is {} selectedScope)EnginePipe.ConfigureVerificationNamespace(selectedScope);
+        else if (startupCheck) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
 
         Mutex? mutex = null;
         bool ownsMutex = false;
@@ -62,7 +66,7 @@ internal static class Program
                 }
                 using var identity = WindowsIdentity.GetCurrent();
                 string sid = identity.User?.Value ?? Environment.UserName;
-                string uiName = @"Local\RamFlow.UI." + sid + (startupCheck ? ".Test." + EnginePipe.VerificationNamespace : "");
+                string uiName = @"Local\RamFlow.UI." + sid + (EnginePipe.VerificationNamespace is {} activeScope ? ".Test." + activeScope : "");
                 mutex = new Mutex(false, uiName);
                 try { ownsMutex = mutex.WaitOne(0); }
                 catch (AbandonedMutexException) { ownsMutex = true; }
@@ -77,6 +81,7 @@ internal static class Program
             }
 
             app = new App(smoke, screenshot, startupCheck, dataRoot);
+            app.ReadyEventName=readyEvent;
             return app.Run();
         }
         catch (Exception ex)

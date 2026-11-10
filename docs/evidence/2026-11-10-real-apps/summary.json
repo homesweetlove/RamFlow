@@ -1,0 +1,1155 @@
+{
+  "manifest": {
+    "clientDate": "2026-11-10",
+    "startedUTC": "2026-11-10T01:09:59.010759+00:00",
+    "seed": 20261110,
+    "schedule": [
+      {
+        "app": "chrome",
+        "block": 1,
+        "order": [
+          "off",
+          "on"
+        ]
+      },
+      {
+        "app": "chrome",
+        "block": 2,
+        "order": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "app": "chrome",
+        "block": 3,
+        "order": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "app": "chrome",
+        "block": 4,
+        "order": [
+          "off",
+          "on"
+        ]
+      },
+      {
+        "app": "chrome",
+        "block": 5,
+        "order": [
+          "off",
+          "on"
+        ]
+      },
+      {
+        "app": "vscode",
+        "block": 1,
+        "order": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "app": "vscode",
+        "block": 2,
+        "order": [
+          "off",
+          "on"
+        ]
+      },
+      {
+        "app": "vscode",
+        "block": 3,
+        "order": [
+          "off",
+          "on"
+        ]
+      },
+      {
+        "app": "vscode",
+        "block": 4,
+        "order": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "app": "vscode",
+        "block": 5,
+        "order": [
+          "off",
+          "on"
+        ]
+      }
+    ],
+    "clocks": "Real elapsed clocks; no sensor/idle-time substitution. Native foreground ownership checked during all intervals.",
+    "foregroundApps": {
+      "chrome": "chrome.exe",
+      "vscode": "Code.exe"
+    },
+    "appExecutableHashes": {
+      "chrome": "d6632baf469a92188e7459bb5a7b109261c5b20e6c38fea1e7a9fe2473725e79",
+      "vscode": "96851792952c34ead53462ad36d973356af2e737b5ed4e433e23c4647e0d6318"
+    },
+    "coreSHA256": "d64160b80aa90ad478ce83599386dd82e22ecce3304955dedba36e261bb38b93",
+    "packagedCoreSHA256": "d64160b80aa90ad478ce83599386dd82e22ecce3304955dedba36e261bb38b93",
+    "comparison": "Five paired fresh isolated app sessions per app. Off: no optimizer engine/tray. On: tested production Core in an owned-PID-only test host plus actual packaged lightweight tray. Same eight background child PIDs and fixed external memory allocation within each pair. No app/renderer is mutated.",
+    "background": "Eight disposable SHA-256 load processes, two worker threads and64MiB each. Synthetic background contention retained to isolate transfer to actual foreground apps. Background progress reported.",
+    "memory": "External pressure actor calibrated once per pair toward768MiB available and held fixed. Continues one byte/page reads every2s. Actual headroom recorded; no per-condition rematching. Reserve1GiB Commit before allocation; >90%Commit or <128MiB available for2s releases pressure and censors the pair.",
+    "chrome": "Local deterministic dashboard:20,000 records,1,000 filtered DOM rows. Thirty trusted search-input events and thirty trusted sort clicks/condition. Primary endpoint client dispatch→observed double-requestAnimationFrame boundary; JS event→frame and script time secondary. This is a browser UI workflow fixture, not a live website or physical screen-presentation measurement.",
+    "vscode": "Actual built-in TypeScript completion and document edit/save via isolated Extension Development Host. Generated5,000-row TypeScript document. Thirty edit→completion and thirty edit→save operations/condition; internal VS Code API promise times. Completion must include id/label/score/group; disk must match editor; final paired hashes must match.",
+    "warmup": "Initial idle5-operation readiness warmup before background load. Each condition:12s settle, reset,5 unreported warmup operations,reset,1s settle. Startup/indexing excluded; the cold preflight observation is separately retained.",
+    "analysis": "Block p95 primary, medians/ranges and every paired difference across5 blocks. Technical requests are not independent app/machine replicates. All outcomes preserved, including no action/regression/safety. No post-result tuning or significance claim. Games and LLM workloads are outside this run.",
+    "sourceHashes": {
+      "run_study.py": "b36462fda7aed77a344864f784df2605bdc9e6191aea4ee23e7cac3ee155fb91",
+      "apps.py": "95c23d3e223d7b5f2066097552d97a8026271c6fbb612ac3738a875468acdca4",
+      "browser.html": "a92a7249b4a3d88794fd30886fc6404c50a63779950506733db91f1aa8259bd0",
+      "extension\\package.json": "a41b2d17691a8c9964fc3785e14981cd78fab22845b0132cefff637c38dc1a7f",
+      "extension\\extension.js": "97de3289759a6ec85a19f647331c7d4b25d2375ea416dc13766b80dfe41df72a"
+    },
+    "observedVersions": {
+      "chrome": {
+        "protocolVersion": "1.3",
+        "product": "Chrome/156.0.8078.49",
+        "revision": "@29eb03535d5f2f4f899b95f22a92413ffde5284e",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "jsVersion": "15.6.75.19"
+      },
+      "vscode": "1.140.0"
+    }
+  },
+  "results": {
+    "completion": {
+      "complete": true,
+      "trials": 20
+    },
+    "groups": {
+      "chrome": {
+        "search": {
+          "conditions": {
+            "off": {
+              "blocks": 5,
+              "p50Ms": 76.54800004092976,
+              "p95Ms": 88.14830001210794,
+              "p95RangeMs": [
+                79.12329997634515,
+                118.17549995612353
+              ],
+              "backgroundRate": 267405.3212295523
+            },
+            "on": {
+              "blocks": 5,
+              "p50Ms": 38.73040003236383,
+              "p95Ms": 48.136700002942234,
+              "p95RangeMs": [
+                45.85230001248419,
+                52.05019999993965
+              ],
+              "backgroundRate": 107055.6472216139
+            }
+          },
+          "pairs": [
+            {
+              "block": 1,
+              "p95ReductionPercent": 57.324826183202816,
+              "p50ReductionPercent": 55.61460832948588,
+              "backgroundRateReductionPercent": 61.073160006505134,
+              "safetyReleased": false
+            },
+            {
+              "block": 2,
+              "p95ReductionPercent": 39.162421161234086,
+              "p50ReductionPercent": 50.36237440651136,
+              "backgroundRateReductionPercent": 58.688239479481425,
+              "safetyReleased": false
+            },
+            {
+              "block": 3,
+              "p95ReductionPercent": 51.66227061727918,
+              "p50ReductionPercent": 51.59507761472753,
+              "backgroundRateReductionPercent": 60.67028797269691,
+              "safetyReleased": false
+            },
+            {
+              "block": 4,
+              "p95ReductionPercent": 40.951555511802155,
+              "p50ReductionPercent": 49.20015663005918,
+              "backgroundRateReductionPercent": 59.26961094127407,
+              "safetyReleased": false
+            },
+            {
+              "block": 5,
+              "p95ReductionPercent": 40.62698821543469,
+              "p50ReductionPercent": 46.5424812288613,
+              "backgroundRateReductionPercent": 59.72343151590186,
+              "safetyReleased": false
+            }
+          ],
+          "p95MedianReductionPercent": 45.391232733552165,
+          "backgroundMedianRateReductionPercent": 59.96502734898357,
+          "improvedPairs": 5
+        },
+        "sort": {
+          "conditions": {
+            "off": {
+              "blocks": 5,
+              "p50Ms": 76.44059997983277,
+              "p95Ms": 88.5621999623254,
+              "p95RangeMs": [
+                78.55059998109937,
+                101.34200000902638
+              ],
+              "backgroundRate": 267405.3212295523
+            },
+            "on": {
+              "blocks": 5,
+              "p50Ms": 39.34850002406165,
+              "p95Ms": 48.95039997063577,
+              "p95RangeMs": [
+                47.45020001428202,
+                53.44879999756813
+              ],
+              "backgroundRate": 107055.6472216139
+            }
+          },
+          "pairs": [
+            {
+              "block": 1,
+              "p95ReductionPercent": 53.178149227313746,
+              "p50ReductionPercent": 52.906872881762986,
+              "backgroundRateReductionPercent": 61.073160006505134,
+              "safetyReleased": false
+            },
+            {
+              "block": 2,
+              "p95ReductionPercent": 37.18744632370827,
+              "p50ReductionPercent": 47.21057273824296,
+              "backgroundRateReductionPercent": 58.688239479481425,
+              "safetyReleased": false
+            },
+            {
+              "block": 3,
+              "p95ReductionPercent": 46.9109174299647,
+              "p50ReductionPercent": 49.514381592417536,
+              "backgroundRateReductionPercent": 60.67028797269691,
+              "safetyReleased": false
+            },
+            {
+              "block": 4,
+              "p95ReductionPercent": 39.64829236366599,
+              "p50ReductionPercent": 47.06399474238175,
+              "backgroundRateReductionPercent": 59.26961094127407,
+              "safetyReleased": false
+            },
+            {
+              "block": 5,
+              "p95ReductionPercent": 37.68297125367077,
+              "p50ReductionPercent": 45.93096215794138,
+              "backgroundRateReductionPercent": 59.72343151590186,
+              "safetyReleased": false
+            }
+          ],
+          "p95MedianReductionPercent": 44.727660343284825,
+          "backgroundMedianRateReductionPercent": 59.96502734898357,
+          "improvedPairs": 5
+        }
+      },
+      "vscode": {
+        "completion": {
+          "conditions": {
+            "off": {
+              "blocks": 5,
+              "p50Ms": 65.14480000000185,
+              "p95Ms": 99.36190000000352,
+              "p95RangeMs": [
+                86.273199999996,
+                119.7016999999978
+              ],
+              "backgroundRate": 220064.0893822417
+            },
+            "on": {
+              "blocks": 5,
+              "p50Ms": 38.79909999999654,
+              "p95Ms": 50.51790000000619,
+              "p95RangeMs": [
+                46.744400000003225,
+                55.45810000000347
+              ],
+              "backgroundRate": 87370.94772633596
+            }
+          },
+          "pairs": [
+            {
+              "block": 1,
+              "p95ReductionPercent": 43.74727399241148,
+              "p50ReductionPercent": 42.2827222582969,
+              "backgroundRateReductionPercent": 68.02863344597715,
+              "safetyReleased": false
+            },
+            {
+              "block": 2,
+              "p95ReductionPercent": 57.79683997803947,
+              "p50ReductionPercent": 40.29285530081141,
+              "backgroundRateReductionPercent": 58.08295994136515,
+              "safetyReleased": false
+            },
+            {
+              "block": 3,
+              "p95ReductionPercent": 58.05717290320988,
+              "p50ReductionPercent": 42.28203217463126,
+              "backgroundRateReductionPercent": 60.09802813246335,
+              "safetyReleased": false
+            },
+            {
+              "block": 4,
+              "p95ReductionPercent": 45.377938919617485,
+              "p50ReductionPercent": 39.262998880727345,
+              "backgroundRateReductionPercent": 61.022240905730456,
+              "safetyReleased": false
+            },
+            {
+              "block": 5,
+              "p95ReductionPercent": 45.22367225264496,
+              "p50ReductionPercent": 39.82302129934783,
+              "backgroundRateReductionPercent": 63.94632298238448,
+              "safetyReleased": false
+            }
+          ],
+          "p95MedianReductionPercent": 49.157675124968016,
+          "backgroundMedianRateReductionPercent": 60.297498800644185,
+          "improvedPairs": 5
+        },
+        "editSave": {
+          "conditions": {
+            "off": {
+              "blocks": 5,
+              "p50Ms": 34.96970000000147,
+              "p95Ms": 62.45830000000569,
+              "p95RangeMs": [
+                47.64509999999427,
+                83.7644999999975
+              ],
+              "backgroundRate": 220064.0893822417
+            },
+            "on": {
+              "blocks": 5,
+              "p50Ms": 23.49760000000242,
+              "p95Ms": 31.5963999999949,
+              "p95RangeMs": [
+                30.424800000000687,
+                47.11699999999837
+              ],
+              "backgroundRate": 87370.94772633596
+            }
+          },
+          "pairs": [
+            {
+              "block": 1,
+              "p95ReductionPercent": 50.146097476238225,
+              "p50ReductionPercent": 33.50796788357685,
+              "backgroundRateReductionPercent": 68.02863344597715,
+              "safetyReleased": false
+            },
+            {
+              "block": 2,
+              "p95ReductionPercent": 63.67816915280149,
+              "p50ReductionPercent": 42.23284277604242,
+              "backgroundRateReductionPercent": 58.08295994136515,
+              "safetyReleased": false
+            },
+            {
+              "block": 3,
+              "p95ReductionPercent": 35.78084953732009,
+              "p50ReductionPercent": 35.517033317414665,
+              "backgroundRateReductionPercent": 60.09802813246335,
+              "safetyReleased": false
+            },
+            {
+              "block": 4,
+              "p95ReductionPercent": 32.20624996063821,
+              "p50ReductionPercent": 30.898151116176287,
+              "backgroundRateReductionPercent": 61.022240905730456,
+              "safetyReleased": false
+            },
+            {
+              "block": 5,
+              "p95ReductionPercent": 26.29873126261613,
+              "p50ReductionPercent": 39.679458836995124,
+              "backgroundRateReductionPercent": 63.94632298238448,
+              "safetyReleased": false
+            }
+          ],
+          "p95MedianReductionPercent": 49.41200769154457,
+          "backgroundMedianRateReductionPercent": 60.297498800644185,
+          "improvedPairs": 5
+        }
+      }
+    },
+    "rows": [
+      {
+        "app": "chrome",
+        "block": 1,
+        "condition": "off",
+        "metric": "search",
+        "p50Ms": 89.52449995558709,
+        "p95Ms": 118.17549995612353,
+        "maxMs": 122.9530000127852,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 267821.9301343165,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 983.99609375,
+        "availableAfterMiB": 977.62109375,
+        "pressureMiB": 10944.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 105.5
+      },
+      {
+        "app": "chrome",
+        "block": 1,
+        "condition": "off",
+        "metric": "sort",
+        "p50Ms": 85.63669997965917,
+        "p95Ms": 101.34200000902638,
+        "maxMs": 110.21740001160651,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 267821.9301343165,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 983.99609375,
+        "availableAfterMiB": 977.62109375,
+        "pressureMiB": 10944.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 93.19999998807907
+      },
+      {
+        "app": "chrome",
+        "block": 1,
+        "condition": "on",
+        "metric": "search",
+        "p50Ms": 39.735799946356565,
+        "p95Ms": 50.431600015144795,
+        "maxMs": 51.16079997969791,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 104254.61421087499,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 869.44921875,
+        "availableAfterMiB": 741.5859375,
+        "pressureMiB": 10944.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 47.59999996423721
+      },
+      {
+        "app": "chrome",
+        "block": 1,
+        "condition": "on",
+        "metric": "sort",
+        "p50Ms": 40.32899998128414,
+        "p95Ms": 47.45020001428202,
+        "maxMs": 47.80699999537319,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 104254.61421087499,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 869.44921875,
+        "availableAfterMiB": 741.5859375,
+        "pressureMiB": 10944.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 42.90000003576279
+      },
+      {
+        "app": "chrome",
+        "block": 2,
+        "condition": "on",
+        "metric": "search",
+        "p50Ms": 37.22399997059256,
+        "p95Ms": 48.136700002942234,
+        "maxMs": 52.30969999684021,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107520.87045122539,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 809.36328125,
+        "availableAfterMiB": 682.84375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 44.40000003576279
+      },
+      {
+        "app": "chrome",
+        "block": 2,
+        "condition": "on",
+        "metric": "sort",
+        "p50Ms": 39.34850002406165,
+        "p95Ms": 50.80159998033196,
+        "maxMs": 54.77809999138117,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107520.87045122539,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 809.36328125,
+        "availableAfterMiB": 682.84375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 48.40000003576279
+      },
+      {
+        "app": "chrome",
+        "block": 2,
+        "condition": "off",
+        "metric": "search",
+        "p50Ms": 74.99149994691834,
+        "p95Ms": 79.12329997634515,
+        "maxMs": 80.7127999723889,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 260266.97748168427,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 938.35546875,
+        "availableAfterMiB": 890.52734375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 68.90000003576279
+      },
+      {
+        "app": "chrome",
+        "block": 2,
+        "condition": "off",
+        "metric": "sort",
+        "p50Ms": 74.53859999077395,
+        "p95Ms": 80.87810000870377,
+        "maxMs": 89.65169999282807,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 260266.97748168427,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 938.35546875,
+        "availableAfterMiB": 890.52734375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 75.80000001192093
+      },
+      {
+        "app": "chrome",
+        "block": 3,
+        "condition": "on",
+        "metric": "search",
+        "p50Ms": 37.05300000729039,
+        "p95Ms": 45.85230001248419,
+        "maxMs": 45.97100004320964,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107055.6472216139,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 791.9296875,
+        "availableAfterMiB": 664.609375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 43.299999952316284
+      },
+      {
+        "app": "chrome",
+        "block": 3,
+        "condition": "on",
+        "metric": "sort",
+        "p50Ms": 38.61649997998029,
+        "p95Ms": 48.12090005725622,
+        "maxMs": 51.58949998440221,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107055.6472216139,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 791.9296875,
+        "availableAfterMiB": 664.609375,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 45.19999998807907
+      },
+      {
+        "app": "chrome",
+        "block": 3,
+        "condition": "off",
+        "metric": "search",
+        "p50Ms": 76.54800004092976,
+        "p95Ms": 94.85819999827072,
+        "maxMs": 116.7394999647513,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 272200.4349975784,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 922.86328125,
+        "availableAfterMiB": 887.67578125,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 72.69999998807907
+      },
+      {
+        "app": "chrome",
+        "block": 3,
+        "condition": "off",
+        "metric": "sort",
+        "p50Ms": 76.49009994929656,
+        "p95Ms": 90.6418000231497,
+        "maxMs": 91.33200003998354,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 272200.4349975784,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 922.86328125,
+        "availableAfterMiB": 887.67578125,
+        "pressureMiB": 10976.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 84.89999997615814
+      },
+      {
+        "app": "chrome",
+        "block": 4,
+        "condition": "off",
+        "metric": "search",
+        "p50Ms": 76.59000001149252,
+        "p95Ms": 88.14830001210794,
+        "maxMs": 103.45739999320358,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 259928.63707765526,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 817.30078125,
+        "availableAfterMiB": 829.36328125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 79.20000004768372
+      },
+      {
+        "app": "chrome",
+        "block": 4,
+        "condition": "off",
+        "metric": "sort",
+        "p50Ms": 76.44059997983277,
+        "p95Ms": 88.5621999623254,
+        "maxMs": 88.59279996249825,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 259928.63707765526,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 817.30078125,
+        "availableAfterMiB": 829.36328125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 83
+      },
+      {
+        "app": "chrome",
+        "block": 4,
+        "condition": "on",
+        "metric": "search",
+        "p50Ms": 38.907600042875856,
+        "p95Ms": 52.05019999993965,
+        "maxMs": 63.28619999112561,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 105869.94515677274,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 797.265625,
+        "availableAfterMiB": 661.05078125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 49
+      },
+      {
+        "app": "chrome",
+        "block": 4,
+        "condition": "on",
+        "metric": "sort",
+        "p50Ms": 40.46460002427921,
+        "p95Ms": 53.44879999756813,
+        "maxMs": 57.977400021627545,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 105869.94515677274,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 797.265625,
+        "availableAfterMiB": 661.05078125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 51.5
+      },
+      {
+        "app": "chrome",
+        "block": 5,
+        "condition": "off",
+        "metric": "search",
+        "p50Ms": 72.45080004213378,
+        "p95Ms": 80.47360001364723,
+        "maxMs": 82.3258999735117,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 267405.3212295523,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 819.6953125,
+        "availableAfterMiB": 785.703125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 69.69999998807907
+      },
+      {
+        "app": "chrome",
+        "block": 5,
+        "condition": "off",
+        "metric": "sort",
+        "p50Ms": 71.15809997776523,
+        "p95Ms": 78.55059998109937,
+        "maxMs": 81.1659999890253,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 267405.3212295523,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 819.6953125,
+        "availableAfterMiB": 785.703125,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 72.80000001192093
+      },
+      {
+        "app": "chrome",
+        "block": 5,
+        "condition": "on",
+        "metric": "search",
+        "p50Ms": 38.73040003236383,
+        "p95Ms": 47.779600019566715,
+        "maxMs": 51.168100035283715,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107701.68733514327,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 642.50390625,
+        "availableAfterMiB": 567.0,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 44.09999996423721
+      },
+      {
+        "app": "chrome",
+        "block": 5,
+        "condition": "on",
+        "metric": "sort",
+        "p50Ms": 38.47450000466779,
+        "p95Ms": 48.95039997063577,
+        "maxMs": 53.42519999248907,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 107701.68733514327,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 642.50390625,
+        "availableAfterMiB": 567.0,
+        "pressureMiB": 11008.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": 46.89999997615814
+      },
+      {
+        "app": "vscode",
+        "block": 1,
+        "condition": "on",
+        "metric": "completion",
+        "p50Ms": 37.952400000001944,
+        "p95Ms": 55.45810000000347,
+        "maxMs": 58.34990000000107,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 72214.03803192983,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1128.75,
+        "availableAfterMiB": 990.0703125,
+        "pressureMiB": 9696.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 1,
+        "condition": "on",
+        "metric": "editSave",
+        "p50Ms": 22.80689999999595,
+        "p95Ms": 31.137900000001537,
+        "maxMs": 42.274499999999534,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 72214.03803192983,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1128.75,
+        "availableAfterMiB": 990.0703125,
+        "pressureMiB": 9696.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 1,
+        "condition": "off",
+        "metric": "completion",
+        "p50Ms": 65.75570000000153,
+        "p95Ms": 98.5873999999967,
+        "maxMs": 102.20530000000144,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 225870.97711293597,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1249.609375,
+        "availableAfterMiB": 1186.828125,
+        "pressureMiB": 9696.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 1,
+        "condition": "off",
+        "metric": "editSave",
+        "p50Ms": 34.30019999999786,
+        "p95Ms": 62.45830000000569,
+        "maxMs": 64.4233000000022,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 225870.97711293597,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1249.609375,
+        "availableAfterMiB": 1186.828125,
+        "pressureMiB": 9696.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 2,
+        "condition": "off",
+        "metric": "completion",
+        "p50Ms": 65.14480000000185,
+        "p95Ms": 119.7016999999978,
+        "maxMs": 122.3289999999979,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 208704.38457409941,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1295.1171875,
+        "availableAfterMiB": 898.87109375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 2,
+        "condition": "off",
+        "metric": "editSave",
+        "p50Ms": 42.747300000002724,
+        "p95Ms": 83.7644999999975,
+        "maxMs": 99.68389999999636,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 208704.38457409941,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1295.1171875,
+        "availableAfterMiB": 898.87109375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 2,
+        "condition": "on",
+        "metric": "completion",
+        "p50Ms": 38.896099999998114,
+        "p95Ms": 50.51790000000619,
+        "maxMs": 53.191600000005565,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87482.70048605258,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1166.54296875,
+        "availableAfterMiB": 929.99609375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 2,
+        "condition": "on",
+        "metric": "editSave",
+        "p50Ms": 24.693899999998393,
+        "p95Ms": 30.424800000000687,
+        "maxMs": 34.52100000000064,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87482.70048605258,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1166.54296875,
+        "availableAfterMiB": 929.99609375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 3,
+        "condition": "off",
+        "metric": "completion",
+        "p50Ms": 68.43899999999849,
+        "p95Ms": 111.44789999999921,
+        "maxMs": 127.61239999999816,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 220064.0893822417,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1215.80078125,
+        "availableAfterMiB": 1173.34375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 3,
+        "condition": "off",
+        "metric": "editSave",
+        "p50Ms": 34.96970000000147,
+        "p95Ms": 49.20090000000346,
+        "maxMs": 57.881799999995565,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 220064.0893822417,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1215.80078125,
+        "availableAfterMiB": 1173.34375,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 3,
+        "condition": "on",
+        "metric": "completion",
+        "p50Ms": 39.501600000003236,
+        "p95Ms": 46.744400000003225,
+        "maxMs": 52.776200000000244,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87809.9110358528,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1054.70703125,
+        "availableAfterMiB": 841.8515625,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 3,
+        "condition": "on",
+        "metric": "editSave",
+        "p50Ms": 22.54950000000099,
+        "p95Ms": 31.5963999999949,
+        "maxMs": 37.48979999999574,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87809.9110358528,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1054.70703125,
+        "availableAfterMiB": 841.8515625,
+        "pressureMiB": 9728.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 4,
+        "condition": "on",
+        "metric": "completion",
+        "p50Ms": 38.79909999999654,
+        "p95Ms": 47.12419999999838,
+        "maxMs": 89.25559999999678,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87370.94772633596,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1071.08203125,
+        "availableAfterMiB": 719.453125,
+        "pressureMiB": 9760.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 4,
+        "condition": "on",
+        "metric": "editSave",
+        "p50Ms": 23.49760000000242,
+        "p95Ms": 32.30040000000008,
+        "maxMs": 34.11779999999999,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 87370.94772633596,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1071.08203125,
+        "availableAfterMiB": 719.453125,
+        "pressureMiB": 9760.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 4,
+        "condition": "off",
+        "metric": "completion",
+        "p50Ms": 63.8804999999993,
+        "p95Ms": 86.273199999996,
+        "maxMs": 104.58389999999781,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 224155.9026393108,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1133.47265625,
+        "availableAfterMiB": 906.0078125,
+        "pressureMiB": 9760.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 4,
+        "condition": "off",
+        "metric": "editSave",
+        "p50Ms": 34.00430000000051,
+        "p95Ms": 47.64509999999427,
+        "maxMs": 59.426699999996345,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 224155.9026393108,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1133.47265625,
+        "availableAfterMiB": 906.0078125,
+        "pressureMiB": 9760.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 5,
+        "condition": "off",
+        "metric": "completion",
+        "p50Ms": 63.973799999999756,
+        "p95Ms": 99.36190000000352,
+        "maxMs": 99.80140000000392,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 219690.07305148774,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1162.3984375,
+        "availableAfterMiB": 917.60546875,
+        "pressureMiB": 9824.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 5,
+        "condition": "off",
+        "metric": "editSave",
+        "p50Ms": 40.03230000000622,
+        "p95Ms": 63.92969999999332,
+        "maxMs": 98.89029999999912,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 219690.07305148774,
+        "writes": 0,
+        "denied": 0,
+        "availableBeforeMiB": 1162.3984375,
+        "availableAfterMiB": 917.60546875,
+        "pressureMiB": 9824.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 5,
+        "condition": "on",
+        "metric": "completion",
+        "p50Ms": 38.49749999999767,
+        "p95Ms": 54.426800000001094,
+        "maxMs": 55.14770000000135,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 79206.349377747,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1012.859375,
+        "availableAfterMiB": 941.13671875,
+        "pressureMiB": 9824.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      },
+      {
+        "app": "vscode",
+        "block": 5,
+        "condition": "on",
+        "metric": "editSave",
+        "p50Ms": 24.14770000000135,
+        "p95Ms": 47.11699999999837,
+        "maxMs": 48.26299999999901,
+        "samples": 30,
+        "backgroundCyclesPerSecond": 79206.349377747,
+        "writes": 8,
+        "denied": 0,
+        "availableBeforeMiB": 1012.859375,
+        "availableAfterMiB": 941.13671875,
+        "pressureMiB": 9824.0,
+        "safetyReleased": false,
+        "resourcesRestored": true,
+        "eventToFrameP95Ms": null
+      }
+    ],
+    "scope": "Five paired fresh isolated app sessions/app, one PC. 30 technical samples/metric/condition/block. Generated Chrome dashboard and VS Code TypeScript-document workflows under synthetic background CPU+memory contention."
+  }
+}

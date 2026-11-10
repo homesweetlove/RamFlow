@@ -23,6 +23,7 @@ if (args.Contains("--serve")) {
     using var lifetime = new CancellationTokenSource();
     Console.CancelKeyPress += (_, e) => { e.Cancel = true; lifetime.Cancel(); };
     using var engine = new Engine(new WindowsResourceProvider(), dataRoot, allowRemote: false);
+    engine.ApplySettings(engine.Settings with { DryRun = true });
     engine.Start();
     try { await EnginePipe.ServeAsync(engine, lifetime); } finally { engine.Stop(); }
     return;

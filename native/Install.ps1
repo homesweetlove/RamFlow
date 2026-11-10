@@ -16,6 +16,7 @@ if (-not $ramParent -or $ramTarget -eq [IO.Path]::GetPathRoot($ramTarget).TrimEn
 foreach ($ramAncestor in @($ramTarget, $ramParent)) { if ((Test-Path -LiteralPath $ramAncestor) -and ((Get-Item -LiteralPath $ramAncestor).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw '연결된 경로에는 설치하지 않습니다.' } }
 if (-not (Test-Path -LiteralPath (Join-Path $ramSource 'RamFlow.exe')) -or -not (Test-Path -LiteralPath (Join-Path $ramSource 'RamFlow.Service.exe'))) { throw '완전한 RamFlow 배포 폴더를 선택하세요.' }
 if ($WaitPid -gt 0) { Wait-Process -Id $WaitPid -Timeout 30 -ErrorAction SilentlyContinue; if (Get-Process -Id $WaitPid -ErrorAction SilentlyContinue) { throw 'RamFlow 종료를 기다린 뒤 다시 실행하세요.' } }
+foreach ($ramTray in Get-Process -Name 'RamFlow.Tray' -ErrorAction SilentlyContinue) { if ($ramTray.Path -eq (Join-Path $ramTarget 'RamFlow.Tray.exe')) { throw '트레이에서 RamFlow를 종료한 뒤 설치하세요.' } }
 foreach ($ramEngineProcess in Get-Process -Name 'RamFlow.Service' -ErrorAction SilentlyContinue) { if ($ramEngineProcess.Path -eq (Join-Path $ramTarget 'RamFlow.Service.exe')) { Wait-Process -Id $ramEngineProcess.Id -Timeout 5 -ErrorAction SilentlyContinue; if (Get-Process -Id $ramEngineProcess.Id -ErrorAction SilentlyContinue) { throw '설치 폴더의 엔진을 종료한 뒤 다시 실행하세요.' } } }
 $ramMarker = Join-Path $ramTarget 'RamFlow-install.json'
 if ((Test-Path -LiteralPath $ramTarget) -and $ramTarget -ne $ramSource -and -not (Test-Path -LiteralPath $ramMarker)) { throw '다른 파일이 있는 폴더를 덮어쓰지 않습니다.' }

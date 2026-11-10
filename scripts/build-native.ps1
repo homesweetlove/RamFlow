@@ -1,4 +1,4 @@
-param([string]$Dotnet = 'dotnet', [switch]$SkipTests)
+param([string]$Dotnet = 'dotnet', [switch]$SkipTests, [string]$ArchiveName = 'RamFlow-0.3.4-windows-x64.zip')
 $ErrorActionPreference = 'Stop'
 $ramRoot = Split-Path -Parent $PSScriptRoot
 $ramDotnet = $Dotnet
@@ -20,6 +20,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Native UI publish failed' }
     & $ramDotnet publish native/RamFlow.Service/RamFlow.Service.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o dist/RamFlow-native
     if ($LASTEXITCODE -ne 0) { throw 'Native service publish failed' }
+    & $ramDotnet publish native/RamFlow.Tray/RamFlow.Tray.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:UseSharedCompilation=false -nodeReuse:false -o dist/RamFlow-native
+    if ($LASTEXITCODE -ne 0) { throw 'Native tray publish failed' }
     Copy-Item -LiteralPath native/Install.ps1,native/Uninstall.ps1,README.md,README.ko.md -Destination dist/RamFlow-native -Force
     Copy-Item -LiteralPath scripts/benchmark-observer.py,docs/BENCHMARK.md -Destination dist/RamFlow-native -Force
     New-Item -ItemType Directory -Path dist/RamFlow-native/licenses -Force | Out-Null
@@ -27,7 +29,10 @@ try {
     foreach ($ramNotice in @('LICENSE.txt','ThirdPartyNotices.txt')) { if (Test-Path -LiteralPath (Join-Path $ramSdkRoot $ramNotice)) { Copy-Item -LiteralPath (Join-Path $ramSdkRoot $ramNotice) -Destination dist/RamFlow-native/licenses -Force } }
     python scripts/verify-native.py
     if ($LASTEXITCODE -ne 0) { throw 'Native packaged validation failed' }
-    Compress-Archive -LiteralPath dist/RamFlow-native -DestinationPath dist/RamFlow-0.3.4-windows-x64.zip -Force
-    $ramHash = (Get-FileHash -LiteralPath dist/RamFlow-0.3.4-windows-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-    Set-Content -LiteralPath dist/SHA256SUMS-native.txt -Value "$ramHash  RamFlow-0.3.4-windows-x64.zip" -Encoding ascii
+    if ([IO.Path]::GetFileName($ArchiveName) -ne $ArchiveName -or -not $ArchiveName.EndsWith('.zip')) { throw 'ArchiveName must be a ZIP filename' }
+    $ramArchive = Join-Path (Join-Path $ramRoot 'dist') $ArchiveName
+    Compress-Archive -LiteralPath dist/RamFlow-native -DestinationPath $ramArchive -Force
+    $ramHash = (Get-FileHash -LiteralPath $ramArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+    $ramSumName = if ($ArchiveName -eq 'RamFlow-0.3.4-windows-x64.zip') { 'SHA256SUMS-native.txt' } else { $ArchiveName + '.sha256.txt' }
+    Set-Content -LiteralPath (Join-Path (Join-Path $ramRoot 'dist') $ramSumName) -Value "$ramHash  $ArchiveName" -Encoding ascii
 } finally { Pop-Location }

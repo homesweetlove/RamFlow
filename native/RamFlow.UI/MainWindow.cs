@@ -15,7 +15,7 @@ using RamFlow.Core;
 
 namespace RamFlow.UI;
 
-public sealed class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     private const double GiB = 1073741824d;
     private readonly Engine _engine;
@@ -53,6 +53,7 @@ public sealed class MainWindow : Window
     private readonly TextBox _filter = Input("");
     private readonly TextBox _aiSize = Input("4");
     private readonly TextBox _whitelist = Input("");
+    private readonly TextBox _backgroundApps = Input("");
     private readonly CheckBox _dryRun = Check("DryRun · 변경 없이 분석만 수행");
     private readonly CheckBox _paused = Check("Paused · 자동 관리 일시정지");
     private readonly CheckBox _cpuManagement = Check("CPU 관리");
@@ -68,6 +69,7 @@ public sealed class MainWindow : Window
     private Settings _loadedSettings = new();
 
     public bool AllowClose { get; set; }
+    public Action? CloseToTray { get; set; }
     internal void StopBenchmark()
     {
         _benchmark.Dispose();
@@ -164,6 +166,8 @@ public sealed class MainWindow : Window
         _tabs.Items.Add(_settingsTab);
         _tabs.Items.Add(Tab("활동 로그", LogsPage()));
         _benchmark = FeaturePages.Add(_tabs, engine);
+        _jobsTab = Tab("배경 작업", BackgroundJobsPage());
+        _tabs.Items.Add(_jobsTab);
         if (smokeTest) foreach (TabItem feature in _tabs.Items.Cast<TabItem>().Skip(5)) if (feature.Content is UIElement element) element.IsEnabled = false;
         ConfigureNavigation();
         _tabs.SelectionChanged += OnPageSelectionChanged;
@@ -198,6 +202,7 @@ public sealed class MainWindow : Window
         {
             State state = _engine.GetState();
             _state = state;
+            if (ReferenceEquals(_tabs.SelectedItem, _jobsTab)) _jobsTable.ItemsSource = state.BackgroundJobs;
             Snapshot s = state.Snapshot;
             double ramPercent = Percent(s.RamTotal > s.Available ? s.RamTotal - s.Available : 0, s.RamTotal);
             double commitPercent = Percent(s.Commit, s.CommitLimit);
@@ -544,6 +549,12 @@ public sealed class MainWindow : Window
         _whitelist.Height = 110;
         _whitelist.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         options.Children.Add(_whitelist);
+        options.Children.Add(Label("양보 가능한 배경 작업 · 실행 파일 전체 경로를 한 줄에 하나씩 입력", 14));
+        options.Children.Add(Label("지정한 작업은 자원 부족 시 CPU·메모리 우선순위를 양보합니다. 작업 완료가 늦어질 수 있으며, 사용 중인 앱·보호 목록·시스템은 계속 보호합니다.", 13, UiTheme.Muted));
+        _backgroundApps.AcceptsReturn = true; _backgroundApps.Height = 100;
+        _backgroundApps.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        AutomationProperties.SetName(_backgroundApps, "양보 가능한 배경 실행 파일 전체 경로");
+        options.Children.Add(_backgroundApps);
         options.IsEnabled = !_smokeTest;
         page.Children.Add(Card(options));
         var actions = new StackPanel { Orientation = Orientation.Horizontal };
@@ -647,13 +658,17 @@ public sealed class MainWindow : Window
         _trim.IsChecked = settings.WorkingSetTrim;
         _mode.SelectedItem = _mode.Items.Cast<ComboBoxItem>().FirstOrDefault(i => (string?)i.Tag == settings.Mode);
         _whitelist.Text = string.Join(Environment.NewLine, settings.Whitelist);
-        _loadedSettings = settings with { Whitelist = settings.Whitelist.ToArray() };
+        _backgroundApps.Text = string.Join(Environment.NewLine, settings.BackgroundApps);
+        _backgroundConcurrency.Text = settings.BackgroundConcurrency.ToString(CultureInfo.InvariantCulture);
+        _backgroundReserve.Text = settings.BackgroundReserveMiB.ToString(CultureInfo.InvariantCulture);
+        _loadedSettings = settings with { Whitelist = settings.Whitelist.ToArray(), BackgroundApps = settings.BackgroundApps.ToArray() };
         _settingsMessage.Text = _smokeTest ? "Smoke test에서는 설정을 변경할 수 없습니다." : "현재 엔진 설정을 불러왔습니다.";
     }
 
     private void SaveSettings()
     {
         if (_smokeTest) return;
+        if (!int.TryParse(_backgroundConcurrency.Text, out int concurrency) || !int.TryParse(_backgroundReserve.Text, out int reserve)) { _settingsMessage.Text = "배경 동시 실행 수와 메모리 여유를 정수로 입력하세요."; return; }
         Settings current = _engine.Settings;
         if (!SameSettings(current, _loadedSettings))
         {
@@ -670,6 +685,8 @@ public sealed class MainWindow : Window
             Learning = _learning.IsChecked == true,
             WorkingSetTrim = _trim.IsChecked == true,
             Mode = (_mode.SelectedItem as ComboBoxItem)?.Tag as string ?? current.Mode,
+            BackgroundApps = _backgroundApps.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+            BackgroundConcurrency = concurrency, BackgroundReserveMiB = reserve,
             Whitelist = _whitelist.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
         };
@@ -682,7 +699,7 @@ public sealed class MainWindow : Window
         left.CpuSets == right.CpuSets && left.Learning == right.Learning &&
         left.WorkingSetTrim == right.WorkingSetTrim &&
         string.Equals(left.Mode, right.Mode, StringComparison.Ordinal) &&
-        left.Whitelist.SequenceEqual(right.Whitelist, StringComparer.Ordinal);
+        left.Whitelist.SequenceEqual(right.Whitelist, StringComparer.Ordinal) && left.BackgroundApps.SequenceEqual(right.BackgroundApps, StringComparer.Ordinal) && left.BackgroundConcurrency == right.BackgroundConcurrency && left.BackgroundReserveMiB == right.BackgroundReserveMiB;
 
     private void ApplySettings(Settings next)
     {
@@ -728,6 +745,7 @@ public sealed class MainWindow : Window
         if (AllowClose) { StopRefresh(); return; }
         e.Cancel = true;
         Hide();
+        CloseToTray?.Invoke();
     }
 
     private static string Number(double value) => double.IsFinite(value) ? $"{Math.Max(0, value):0.0}%" : "미지원";

@@ -5,6 +5,7 @@ $ramParent = Split-Path -Parent $ramTarget
 if (-not $ramParent -or $ramTarget -eq [IO.Path]::GetPathRoot($ramTarget).TrimEnd('\')) { throw '제거 경로 검증 실패' }
 if ((Get-Item -LiteralPath $ramTarget).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw '연결된 경로를 제거하지 않습니다.' }
 $ramMarker = Join-Path $ramTarget 'RamFlow-install.json'
+foreach ($ramTray in Get-Process -Name 'RamFlow.Tray' -ErrorAction SilentlyContinue) { if ($ramTray.Path -eq (Join-Path $ramTarget 'RamFlow.Tray.exe')) { throw '트레이에서 RamFlow를 종료한 뒤 제거하세요.' } }
 if (-not (Test-Path -LiteralPath $ramMarker) -or (Get-Content -LiteralPath $ramMarker -Raw | ConvertFrom-Json).product -ne 'homesweetlove.RamFlow') { throw '설치 기록이 없어 자동 제거하지 않습니다.' }
 foreach ($ramProcess in Get-Process -Name RamFlow -ErrorAction SilentlyContinue) { if ($ramProcess.Path -eq (Join-Path $ramTarget 'RamFlow.exe')) { throw '트레이에서 RamFlow를 종료한 뒤 제거하세요.' } }
 foreach ($ramItem in Get-ChildItem -LiteralPath $ramTarget -Recurse -Force) { if ($ramItem.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw '설치 폴더의 연결 파일을 먼저 제거하세요.' } }
