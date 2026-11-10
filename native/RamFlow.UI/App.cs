@@ -13,7 +13,7 @@ using Forms = System.Windows.Forms;
 
 namespace RamFlow.UI;
 
-internal sealed class App : Application
+internal sealed partial class App : Application
 {
     private readonly bool _smoke;
     private readonly bool _verify;
@@ -33,6 +33,8 @@ internal sealed class App : Application
     private DispatcherTimer? _smokeTimer;
     private int _cleaned;
     private bool _cleanupFailed;
+    private bool _detachEngine, _handoffBusy;
+    internal string? ReadyEventName { get; set; }
 
     internal App(bool smoke, string? screenshot, bool startupCheck = false, string? dataRoot = null)
     {
@@ -69,9 +71,10 @@ internal sealed class App : Application
                 largeMock.Items.Add(new(990000 + index, index + 100, $"idle-{index:D4}.exe", "D:\\Apps\\mock.exe", 1,
                     200 * 1048576UL, 180 * 1048576UL, 0, 0, true));
         _engine = new Engine(_provider, dataRoot: _dataRoot, persist: !_smoke);
+        if(!_smoke && !_engine.IsRemote) _engine.ApplySettings(_engine.Settings with { DryRun = true });
         TraceMemory("engine");
-        if (!_smoke) _engine.ApplySettings(_engine.Settings with { DryRun = true });
         _window = new MainWindow(_engine, () => ExitApplication(0), _verify, RestartElevated) { Icon = BrandAssets.Logo };
+        if(!_verify) _window.CloseToTray = MoveToLightweightTray;
         TraceMemory("window");
         _window.SourceInitialized += (_, _) =>
         {
@@ -85,6 +88,7 @@ internal sealed class App : Application
         TraceMemory("show");
         _window.RefreshState();
         TraceMemory("refresh");
+        if(!_verify) { UiHandoff.DismissTray(); UiHandoff.SignalReady(ReadyEventName); }
         if (_verify)
         {
             _smokeTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle)
@@ -304,7 +308,7 @@ internal sealed class App : Application
         try
         {
             // Engine owns its worker, cancellation source, and provider after construction.
-            if (_engine is not null) _engine.Dispose();
+            if (_engine is not null) { if(_detachEngine)_engine.Detach();else _engine.Dispose(); }
             else _provider?.Dispose();
         }
         catch (Exception ex)

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows.Interop;
+using RamFlow.Core;
 
 namespace RamFlow.UI;
 
@@ -74,7 +75,7 @@ internal sealed class WindowActivation : IDisposable
     private static string UserName()
     {
         using var identity = WindowsIdentity.GetCurrent();
-        return "RamFlow.UI.Show." + (identity.User?.Value ?? Environment.UserName);
+        return "RamFlow.UI.Show." + (identity.User?.Value ?? Environment.UserName) + (EnginePipe.VerificationNamespace is {} scope ? ".Test."+scope : "");
     }
 
     private delegate bool EnumerateWindow(IntPtr handle, IntPtr parameter);

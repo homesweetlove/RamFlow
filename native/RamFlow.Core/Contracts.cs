@@ -11,6 +11,9 @@ public sealed record Settings
     public bool WorkingSetTrim { get; init; } = true;
     public bool Learning { get; init; }
     public string[] Whitelist { get; init; } = [];
+    public string[] BackgroundApps { get; init; } = [];
+    public int BackgroundConcurrency { get; init; } = 1;
+    public int BackgroundReserveMiB { get; init; } = 1024;
 }
 public enum PressureLevel { Normal, Moderate, High, Severe, Critical }
 public sealed record CpuCore(uint Id, ushort Group, byte LogicalIndex, byte Efficiency, bool Parked, bool Allocated);
@@ -45,6 +48,7 @@ public sealed record State(Snapshot Snapshot, double PressureScore, PressureLeve
     int PendingRestores, IReadOnlyList<CpuCore> CpuTopology, IReadOnlyList<string> Predictions)
 {
     public int EnginePid { get; init; } = Environment.ProcessId;
+    public IReadOnlyList<BackgroundJobSummary> BackgroundJobs { get; init; } = [];
     public string MemoryStatus { get; init; } = "";
     public int TrimCount { get; init; }
     public ulong LastWorkingSetReduction { get; init; }

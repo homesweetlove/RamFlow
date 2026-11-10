@@ -1,5 +1,36 @@
 # RamFlow
 
+## Protecting the work in the foreground
+
+When background work competes with the active app, RamFlow lets explicitly selected background jobs yield resources. On one PC, five paired fresh sessions per app compared a generated dashboard in real Chrome and a generated TypeScript document in real VS Code under fixed synthetic background CPU/memory contention. These are **medians of the five block-level p95 latencies**.
+
+| Reproduced workflow | Without | With | p95 reduction |
+| --- | ---: | ---: | ---: |
+| Chrome search → rendering boundary | 88.15ms | 48.14ms | 45.4% |
+| Chrome sort → rendering boundary | 88.56ms | 48.95ms | 44.7% |
+| VS Code edit → completion API | 99.36ms | 50.52ms | 49.2% |
+| VS Code edit → save API | 62.46ms | 31.60ms | 49.4% |
+
+All four features improved in 5/5 paired blocks. Background processing rate decreased about 60%. The study completed 20 conditions and 1,200 feature operations, verifying result correctness and restoration of changed resource settings.
+
+**[Actual-app study](docs/REAL_APP_STUDY.ko.md)** · [Per-block CSV](docs/evidence/2026-11-10-real-apps/trials.csv) · [Protocol and summary JSON](docs/evidence/2026-11-10-real-apps/summary.json)
+
+![Paired Chrome and VS Code workflow measurements](docs/evidence/2026-11-10-real-apps/comparison.png)
+
+## Development: explicit background control
+
+The current working branch and separate test ZIP add opt-in background executable paths, a memory-aware job queue, and a disposable WPF UI backed by `RamFlow.Tray.exe`. These additions are not claimed to be present in the existing public v0.3.4 ZIP.
+
+Explicit background targets may yield CPU/memory priority without the 30-minute idle wait, including during fullscreen foreground activity. Foreground/same-name foreground, system, whitelist, unknown activity and process-identity protections remain mandatory; busy-app trimming is not enabled by this opt-in. CPU demand uses 80% entry/60% release hysteresis. Background throughput may decrease.
+
+The background-job screen accepts an executable, a JSON argument array and an estimated memory requirement. Default concurrency is 1; admission requires the default 1024MiB reserve plus the declared estimate and projected Commit <=85%. Estimates are not enforced allocation limits. Cancellation affects waiting jobs only; running work is not killed on manager exit. Waiting jobs are not automatically replayed after restart. Arbitrary external-app cache deletion is not provided.
+
+Closing the window transfers control to a readiness-confirmed lightweight tray, exits WPF, and keeps the same engine and jobs. Reopening preserves settings; a newly started engine defaults to Dry Run. Keep all three executables and their DLLs together. Handoff failure retains the existing UI.
+
+[Measured follow-up](docs/BACKGROUND_CONTROL_STUDY.ko.md): in five paired blocks of one synthetic mixed CPU/memory workload, foreground request p95 fell about44% while background processing rate fell about60%. This is a resource-yielding tradeoff, not a promise of total speed or memory-only improvement.
+
+[Actual-app follow-up](docs/REAL_APP_STUDY.ko.md): five paired sessions/app exercised a generated dashboard in real Chrome and generated-document features in real VS Code under synthetic background contention. Feature p95 medians fell about45–49%, with about60% lower background progress.
+
 [![English](https://img.shields.io/badge/Language-English-2F81F7)](README.md)
 [![한국어](https://img.shields.io/badge/언어-한국어-2F81F7)](README.ko.md)
 
@@ -19,7 +50,7 @@ RamFlow is designed around a question: **how can a low-memory Windows PC protect
 | Process state must recover | Original priority settings journaled before writes, identity checks and retrying restores | Restore cannot instantly reverse a working-set trim |
 | The tool itself consumes RAM | v0.3.3 → v0.3.4 process-footprint comparison | Internal 3-run medians: **347.6 → 165.0 MiB resident** and **263.5 → 80.6 MiB private** |
 
-The recorded memory figures concern **RamFlow's own process**, not total Windows RAM saved or improvement to foreground app speed. Raw repetitions and confidence intervals are not currently published. General real-world performance benefits require further measurement.
+The recorded memory figures concern **RamFlow's own process**, not total Windows RAM saved or improvement to foreground app speed. Raw repetitions and confidence intervals are not currently published. The later foreground-workflow comparison is reported separately above, with per-block results and background processing cost.
 
 **Read the full evidence-backed [Engineering Case Study](docs/ENGINEERING_CASE_STUDY.md)** ([한국어](docs/ENGINEERING_CASE_STUDY.ko.md)) · [Native architecture](docs/NATIVE_ARCHITECTURE.md) · [Validation](docs/VALIDATION.md) · [Controlled measurement plan](docs/MEASUREMENT_PROTOCOL.md)
 
@@ -51,6 +82,8 @@ The default mode is **Dry Run**. On every launch, real optimization is disabled 
 ## Protection and limited intervention
 
 RamFlow protects system, service, security, driver, AI, music, download, render, compile, server, and insufficiently identified applications. Whitelisting is name-based. It does not intervene when memory conditions are healthy, and it also considers CPU load and battery state. New changes are suspended while a full-screen application is active. Working Set reduction is limited to one application at a time, at least two minutes apart globally, and at least 15 minutes apart for the same PID. Observed inactivity is required for 10 minutes under high memory pressure, 3 minutes under severe pressure, or 1 minute under critical pressure. CPU and power adjustments retain the 30-minute inactivity requirement. RamFlow does not use automatic process termination, Realtime Priority, kernel hooking, or Standby List clearing.
+
+Working Set reduction additionally requires **less than 1 GiB of available physical RAM**. With at least 1 GiB available, RamFlow preserves resident pages even if relative or Commit pressure is high, to avoid unnecessary page faults when returning to an app. The existing inactivity, protection, and cooldown checks still apply below this limit. This headroom limit is a conservative policy guard, not a measured optimum for every PC.
 
 Immediately before applying a real change and again during restoration, RamFlow verifies the PID creation time, user ownership, session, system path, and Critical status. Restoration uses the first observed value, and restore records are retained even if a query temporarily fails. Immediate restoration after a power loss or forced shutdown is impossible, but the restore journal is replayed on the next launch. The OS itself reloads Working Set pages when they are accessed again.
 

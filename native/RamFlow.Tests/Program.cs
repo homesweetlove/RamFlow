@@ -5,8 +5,12 @@ using System.Security.Principal;
 using System.Text.Json;
 
 int passed = 0;
+if(args.Length>=3 && args[0]=="--queue-echo") { await Task.Delay(1000);File.WriteAllText(args[1],JsonSerializer.Serialize(args.Skip(2).ToArray()));return; }
 if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
 void Check(bool value, string message) { if (!value) throw new Exception(message); passed++; }
+BackgroundControlTests.Run(Check);
+BackgroundJobsTests.Run(Check);
+UiHandoffTests.Run(Check);
 await BenchmarkTests.RunAsync(Check);
 await BenchmarkLifetimeTests.RunAsync(Check);
 (MockResourceProvider P, Engine E) Busy(bool dry = false)
@@ -111,6 +115,34 @@ Console.WriteLine($"Native regression: {passed} assertions passed; no live Windo
     Console.WriteLine($"Native safety regression: {passed} assertions passed.");
 }
 
+// Preserve warm pages when physical memory is still available, even if the
+// relative/Commit pressure score is high. These use real policy decisions and
+// a controlled clock; the provider substitutes only Windows resource effects.
+foreach (var scenario in new[] {
+    (Name: "24-GiB PC with 2.5 GiB available", Available: 2684354560UL, Commit: 8UL * 1073741824, Level: PressureLevel.High),
+    (Name: "exactly one GiB available", Available: 1073741824UL, Commit: 8UL * 1073741824, Level: PressureLevel.High),
+    (Name: "Commit crisis with physical headroom", Available: 2684354560UL, Commit: 39UL * 1073741824, Level: PressureLevel.Critical)
+}) {
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { RamTotal = 24UL * 1073741824, Available = scenario.Available,
+        Commit = scenario.Commit, CommitLimit = 40UL * 1073741824, Standby = 0, PagesInput = 0 };
+    using var e = new Engine(p, persist: false); e.ApplySettings(new() { DryRun = false });
+    for (int i = 0; i < 360; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    Check(e.GetState().Level == scenario.Level, "Warm-page regression pressure precondition: " + scenario.Name);
+    Check(p.Trims == 0, "Physical headroom unnecessarily evicted warm pages: " + scenario.Name);
+    Check(p.Items[0].WorkingSet == 500 * 1048576UL, "Idle app lost resident pages despite physical headroom");
+    Check(p.Writes == 0, "Warm-page protection changed CPU/power settings before thirty minutes");
+}
+{
+    var p = new MockResourceProvider();
+    p.Current = p.Current with { RamTotal = 24UL * 1073741824, Available = 1073741823,
+        Commit = 8UL * 1073741824, CommitLimit = 40UL * 1073741824, Standby = 0, PagesInput = 0 };
+    using var e = new Engine(p, persist: false); e.ApplySettings(new() { DryRun = false });
+    for (int i = 0; i < 301; i++) { e.Tick(); p.Current = p.Current with { Time = p.Current.Time.AddSeconds(2) }; }
+    Check(p.Trims == 1, "Physical shortage below one GiB lost pressure-dependent relief");
+}
+Console.WriteLine($"Native warm-page protection regression: {passed} assertions passed.");
+
 // Pressure-dependent memory relief uses only mock processes and a controlled clock.
 {
     var p = new MockResourceProvider();
@@ -188,6 +220,7 @@ foreach (string siblingActivity in new[] { "cpu", "io", "unknown", "new" }) {
 Console.WriteLine($"Native app-group activity regression: {passed} assertions passed.");
 
 if (args.Contains("--windows")) {
+    await BackgroundJobsWindowsTests.RunAsync(Check);
     using var provider = new WindowsResourceProvider();
     var snapshot = provider.Sample(); Check(snapshot.RamTotal > 0 && snapshot.CommitLimit >= snapshot.Commit, "Windows telemetry invalid");
     Check(provider.Topology().Count > 0, "CPU topology empty");
@@ -234,9 +267,14 @@ if (args.Contains("--ipc")) {
         var state = EnginePipe.Request<State>(new("state")); Check(state.Processes.Count == 2, "IPC state wrong");
         EnginePipe.Request<Settings>(new("apply", new() { DryRun = true }));
         if (!Pagefile.IsAdministrator()) {
+            try { EnginePipe.Request<BackgroundJobSummary>(new("enqueue", Job:new(){ Executable=@"D:\Apps\worker.exe" })); throw new Exception("Nonadmin queued execution accepted"); } catch (InvalidOperationException) { passed++; }
             try { EnginePipe.Request<Settings>(new("apply", new() { DryRun = false })); throw new Exception("Nonadmin live optimization accepted"); } catch (InvalidOperationException) { passed++; }
         }
         Check(mock.Writes == 0, "IPC test touched process resources");
+        using(var proxy=new Engine(new WindowsResourceProvider(),Path.Combine(Path.GetTempPath(),"RamFlow.Detach-"+Guid.NewGuid().ToString("N")))) {
+            Check(proxy.IsRemote,"Proxy did not connect to existing isolated engine");proxy.Detach();
+            Check(EnginePipe.Request<bool>(new("ping")),"Closing UI proxy stopped the background engine");
+        }
         var (busyProvider, busyEngine) = Busy();
         using (busyEngine) { busyProvider.FailWrite = true; busyEngine.Stop(); Check(busyEngine.GetState().PendingRestores > 0, "Failed stop lost pending restorations"); busyProvider.FailWrite = false; busyEngine.Stop(); Check(busyEngine.GetState().PendingRestores == 0, "Stop retry failed"); }
         EnginePipe.Request<bool>(new("stop"));

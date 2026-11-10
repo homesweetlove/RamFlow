@@ -1,11 +1,13 @@
 # .NET 10 아키텍처
 
 ```text
-RamFlow.UI (WPF / 트레이)
+RamFlow.UI (열려 있는 설정·도구 화면 / WPF)
+  ↔ 준비 확인 후 RamFlow.Tray (경량 WinForms / WPF 종료)
   → 사용자 SID별 Named Pipe
   → RamFlow.Service --serve (사용자 세션)
       → Core Engine / WindowsResourceProvider
       → Pressure / Policy / Prediction
+      → BackgroundJobQueue (메모리 여유·Commit·동시 실행 제한)
       → 우선순위 / EcoQoS / CPU Sets / 복원 저널
 
 UI 기능 페이지
@@ -23,6 +25,14 @@ Core는 외부 NuGet 라이브러리 없이 .NET과 Windows API를 사용합니�
 자원 변경 전 복원할 원래 값을 원자적인 JSON 저널에 보존합니다. 부분 성공은 복원 대기로 전환합니다. PID/생성 시각, 실제 사용자 소유권/세션, 시스템 경로와 Critical 플래그를 재확인합니다. 복원 재시도는 비활성화된 정책과 독립적입니다. 유효하지 않은 CPU 우선순위/메모리 우선순위/mask는 저널에서 거부합니다.
 
 폴더 저장소는 로컬 검증만 보장합니다. WebDAV는 자동 리디렉션과 기본 Windows 자격 증명을 사용하지 않고, HTTPS와 사용자가 입력한 메모리 내 자격 증명만 사용합니다. 전송/제거/복원/실행은 각각 Dry Run과 확인 값을 요구합니다. 제거 전에 원본 및 백엔드 해시를 다시 확인하고, 손상/충돌/수정/링크/진행 중 기록은 거부합니다.
+
+## 명시적 배경 제어와 화면 수명
+
+사용자가 지정한 실행 파일 경로나 큐에서 시작한 작업만 우선순위 제어의 별도 대상이 됩니다. CPU·메모리 우선순위와 EcoQoS를 조정하되 전경·동일 이름 전경·시스템·화이트리스트·활동 미확인·프로세스 신원 보호를 유지합니다. 기본 자동 관리의 비활성 조건과 바쁜 앱의 Working Set 보호는 별도로 유지하며, 가용 물리 RAM이 1GiB 이상이면 강제 Working Set 축소를 보류합니다.
+
+큐는 실행 파일과 인수 배열을 직접 전달합니다. 기본 동시 실행 1개, 1024MiB 예약 여유, 선언한 예상 메모리와 projected Commit 85% 기준으로 시작을 허용합니다. 대기 작업만 취소하며 엔진 종료로 실행 중인 작업을 죽이지 않습니다. 관리자 IPC 요청만 작업을 등록할 수 있습니다.
+
+UI를 닫으면 경량 트레이의 준비 신호를 확인한 뒤 WPF를 종료합니다. 동일한 사용자 세션 엔진과 작업은 유지되며, 다시 연 UI는 프록시를 통해 기존 설정을 읽습니다. 새 엔진은 Dry Run으로 시작합니다. 트레이 전환에 실패하면 UI를 유지합니다. [전환·큐 검증](BACKGROUND_CONTROL_STUDY.ko.md)과 [실제 앱 응답 측정](REAL_APP_STUDY.ko.md)을 함께 기록했습니다.
 
 ## 공식 API 근거
 

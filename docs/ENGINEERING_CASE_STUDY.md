@@ -2,7 +2,7 @@
 
 > **Scope:** Windows resource orchestration under constrained memory.  
 > **Current implementation:** v0.3.4 · C# / .NET 10 / WPF.  
-> **Status:** Published Windows release; algorithmic and safety tests exist. Real-world speedup across user workloads is **not yet established**.
+> **Measured follow-up:** Real Chrome/VS Code workflows showed 45–49% lower p95 medians across five paired sessions/app under fixed synthetic background contention; background processing rate decreased about 60%.
 
 [한국어 사례 연구](ENGINEERING_CASE_STUDY.ko.md) · [Main README](../README.md) · [Native architecture](NATIVE_ARCHITECTURE.md) · [Validation record](VALIDATION.md) · [Measurement protocol](MEASUREMENT_PROTOCOL.md)
 
@@ -63,7 +63,7 @@ This is a *simplified decision model*, not a line-by-line diagram of every branc
 ### Bounded intervention
 
 - Memory/CPU/EcoQoS priority changes require **30 minutes of observed inactivity**, an eligible workload and a pressure/CPU/battery condition.
-- Working-set trims require at least **High** pressure, a candidate working set of at least **150 MiB**, inactivity of **10 minutes (High)**, **3 minutes (Severe)** or **1 minute (Critical)**, plus pre-action revalidation.
+- Working-set trims require **less than 1 GiB of available physical RAM**, at least **High** pressure, a candidate working set of at least **150 MiB**, inactivity of **10 minutes (High)**, **3 minutes (Severe)** or **1 minute (Critical)**, plus pre-action revalidation. With physical headroom available, resident pages are preserved to avoid unnecessary resume costs.
 - Trim attempts are rate-limited to **one every 120 seconds globally** and **one every 900 seconds per PID**; only one candidate is attempted per scan.
 - Dry Run is the default. Prediction is protection-oriented: it does not authorize preemptive trims.
 
@@ -97,7 +97,22 @@ Alternatives considered by the implementation:
 - **WinUI 3:** WPF was selected for the native implementation to limit packaging/runtime complexity in the target environment; this is a deployment trade-off, not a general performance superiority claim.
 - **Cloud as RAM:** rejected. Model archiving is file storage with verification and explicit deletion, never virtual memory.
 
-## 4. Measured result: reduce the optimizer's own cost
+## 4. Measured result: protect foreground response
+
+An [earlier trimming study](SCARCITY_STUDY.ko.md) did not establish a foreground gain. The controller was redesigned around explicitly selected background priority/EcoQoS changes, memory-aware job admission and WPF-to-tray handoff. The user problem is concrete: **the app being used responds more slowly when background work competes for scarce resources**.
+
+The [actual-app study](REAL_APP_STUDY.ko.md) crossed no-engine and enabled-engine conditions in five fresh sessions per app on one PC. It used a generated Chrome dashboard and VS Code TypeScript document under synthetic background CPU/memory contention, retaining the same background PIDs and external memory allocation within each pair.
+
+| Reproduced workflow | Without | With | p95 reduction |
+| --- | ---: | ---: | ---: |
+| Chrome search → rendering boundary | 88.15ms | 48.14ms | 45.4% |
+| Chrome sort → rendering boundary | 88.56ms | 48.95ms | 44.7% |
+| VS Code edit → completion API | 99.36ms | 50.52ms | 49.2% |
+| VS Code edit → save API | 62.46ms | 31.60ms | 49.4% |
+
+Each value is the median of five block-level p95s, with 30 operations per feature/condition/block. All four features improved in 5/5 pairs, while background processing rate fell about 60%. All 20 conditions and 1,200 feature operations completed with correctness and resource restoration verified. **[Per-block CSV](evidence/2026-11-10-real-apps/trials.csv) · [Protocol and summary JSON](evidence/2026-11-10-real-apps/summary.json)**
+
+### Earlier measurements of the optimizer's own cost
 
 The existing [validation record](VALIDATION.md) reports **three runs of launching the real WPF app and navigating nine pages** on the author's computer, comparing v0.3.3 and v0.3.4. The documented measurements are medians:
 
@@ -108,9 +123,15 @@ The existing [validation record](VALIDATION.md) reports **three runs of launchin
 
 The recorded optimization choices were process-level software rendering, delaying unused instrumentation initialization, and limiting icon decoding. These figures are specific to **RamFlow's own process and this test procedure**. They do **not** measure total system RAM saved, application latency, background-page faults, user productivity or causality in a randomized experiment.
 
-**Evidence quality:** the repository includes this summary but not raw per-run samples, hardware specification, a paired experiment log or confidence intervals. This is a documented internal measurement, **not an independently reproduced benchmark**.
+**Evidence quality:** the v0.3.3 → v0.3.4 UI comparison above remains a documented internal measurement, **not an independently reproduced benchmark**. Its raw repetitions are not supplied with this table. Later engine performance experiments are separate studies and do not retrospectively reproduce these UI figures.
 
 ## 5. Evidence map: claims and code
+
+A later [actual-app workflow study](REAL_APP_STUDY.ko.md) ran isolated Chrome and VS Code instances under the same synthetic background load. Five paired sessions/app showed Chrome generated-dashboard search p95 medians of88.15→48.14ms and VS Code generated-document completion API medians of99.36→50.52ms, with about60% lower background progress. These are controlled workflows inside real apps under mixed CPU/memory contention.
+
+After the explicit-background controller redesign, a [separate controlled mixed-load study](BACKGROUND_CONTROL_STUDY.ko.md) found foreground request p95 medians of232.85ms without the engine/tray and131.32ms with them across five paired blocks (43.6% shorter). Background processing rate fell59.6%. This demonstrates a foreground/background tradeoff in one synthetic CPU-and-memory workload, not isolated RAM efficacy or greater total productivity. Queue child execution and disposable-UI engine continuity were tested separately.
+
+A subsequent [actual-clock low-memory feasibility study (Korean)](SCARCITY_STUDY.ko.md) measured foreground task completion directly: 1,896.05ms without RamFlow versus 1,877.65ms with management enabled, medians of two trials each. The trimming trial showed no gain, the faster trial did not trim, and initial pressure differed. These observations do not establish a product performance benefit and are separate from the UI-footprint comparison above.
 
 | Engineering claim | Implementation or verification artifact | What it does *not* prove |
 | --- | --- | --- |
@@ -121,7 +142,7 @@ The recorded optimization choices were process-level software rendering, delayin
 | Separate UI/native packaging | [native architecture](NATIVE_ARCHITECTURE.md), [native workflow](../.github/workflows/native.yml) | Latest pipeline passed on this particular edit |
 | Process footprint comparison | [VALIDATION.md](VALIDATION.md) | System-wide performance gain |
 
-The source contains mock-based regression cases and Windows-only self-tests. Their existence is not a claim that those tests were executed as part of this documentation update.
+On 2026-11-09, local validation reproduced a failing regression before the warm-page fix and passed **171 assertions including real Windows API and IPC checks** afterward. Storage (26), observer (38), legacy Python (70), and isolated packaged UI/install/uninstall checks also passed. Mutations were restricted to disposable test processes and files. Passing these checks does not establish a foreground-workload performance benefit; see the [validation record](VALIDATION.md).
 
 ## 6. Failure modes and open questions
 
@@ -135,12 +156,12 @@ The source contains mock-based regression cases and Windows-only self-tests. The
 | Missing GPU/thermal telemetry | Mark unsupported; do not invent values | Hardware coverage matrix |
 | Apparent memory gain without real user benefit | Explicitly separate memory counters from latency | Controlled A/B user-workload benchmark |
 
-## 7. Next experiment: prove or disprove usefulness
+## 7. Completed comparisons and next measurements
 
-A stronger result needs the same reproducible workload under three conditions: **no RamFlow**, **RamFlow Dry Run** and **RamFlow intervention enabled**. Keep test order balanced; repeat each condition on the same hardware. Capture foreground action latency, page-in/out, committed memory, CPU, application start/ready timing and RamFlow overhead; report failed tasks and adverse effects, not just favorable numbers.
+Paired no-engine/enabled-engine comparisons and the actual-app workflow study are complete. Next measurements will isolate the contributions of CPU priority, memory priority and EcoQoS, exercise rapid foreground switches, and evaluate background-yield settings. The extension to **no RamFlow / Dry Run / enabled intervention** remains documented in the measurement protocol.
 
 Do not apply real interventions to unsaved work. The step-by-step plan and unfilled reporting template are in [MEASUREMENT_PROTOCOL.md](MEASUREMENT_PROTOCOL.md).
 
 ---
 
-**Portfolio lesson:** resource optimization is a constraint-management and recovery problem, not a competition to display the largest free-RAM number. The current evidence supports a guarded design and a smaller application footprint; it does not yet establish a general improvement in Windows performance.
+**Portfolio lesson:** resource optimization is a constraint-management and recovery problem, not a competition to display the largest free-RAM number. The implementation now connects background resource yielding to measured Chrome/VS Code workflow response improvements, while publishing the background processing cost alongside them.

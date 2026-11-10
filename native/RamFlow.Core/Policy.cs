@@ -14,6 +14,10 @@ public static class Policy
         ["office"] = new(StringComparer.OrdinalIgnoreCase) { "winword", "excel", "powerpnt", "outlook", "onenote", "hwp" },
         ["media"] = new(StringComparer.OrdinalIgnoreCase) { "vlc", "spotify", "ffmpeg", "blender", "obs64", "photoshop", "premiere" } };
     public static string Base(string name) => Path.GetFileNameWithoutExtension(name).ToLowerInvariant();
+    // Keep warm pages while physical headroom remains. A high relative/Commit
+    // score alone does not justify eviction, and trimming cannot free Commit.
+    public static bool NeedsWorkingSetRelief(Snapshot snapshot, PressureLevel level) =>
+        level >= PressureLevel.High && snapshot.Available < 1073741824UL;
     public static int TrimIdleSeconds(PressureLevel level) => level switch {
         PressureLevel.Critical => 60,
         PressureLevel.Severe => 180,
@@ -27,16 +31,17 @@ public static class Policy
         foreach (string group in new[] { "developer", "ai", "media", "office", "browser" }) if (Groups[group].Contains(name)) return group;
         return fullscreen ? "gaming" : snap.OnBattery ? "battery" : "background";
     }
-    public static string? Protect(ProcessSample p, (int Pid, string Name) foreground, Settings settings, string mode)
+    public static string? Protect(ProcessSample p, (int Pid, string Name) foreground, Settings settings, string mode, bool explicitBackground = false)
     {
         string name = Base(p.Name);
-        if (p.Pid <= 4 || p.Pid == Environment.ProcessId || name is "ramflow" or "ramflow.service" || ProtectedNames.Contains(name) || p.Session <= 0) return "시스템·서비스·보안 프로세스";
+        if (p.Pid <= 4 || p.Pid == Environment.ProcessId || name is "ramflow" or "ramflow.service" or "ramflow.tray" || ProtectedNames.Contains(name) || p.Session <= 0) return "시스템·서비스·보안 프로세스";
         if (p.Pid == foreground.Pid || string.Equals(p.Name, foreground.Name, StringComparison.OrdinalIgnoreCase)) return "현재 사용 중인 앱";
         if (settings.Whitelist.Any(x => Base(x) == name)) return "사용자 예외";
         if (!p.ActivityKnown) return "활동 정보 확인 불가";
+        if (p.Path.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return "Windows 시스템 경로";
+        if (explicitBackground) return null;
         if (ActiveNames.Contains(name) || p.CpuPercent >= 2 || p.IoBytesPerSecond >= 1048576) return "AI·미디어·컴파일·서버 또는 활성 작업";
         if (Groups.TryGetValue(mode, out var group) && group.Contains(name)) return "현재 작업 그룹 보호";
-        if (p.Path.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return "Windows 시스템 경로";
         if (p.WorkingSet > 209715200 && p.PrivateBytes < p.WorkingSet * .4) return "파일 매핑 비중이 큰 앱";
         return null;
     }

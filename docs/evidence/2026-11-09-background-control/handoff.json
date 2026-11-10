@@ -1,0 +1,14 @@
+{
+  "ui": {
+    "rssMiB": 134.453125,
+    "privateMiB": 55.2734375
+  },
+  "tray": {
+    "rssMiB": 53.35546875,
+    "privateMiB": 12.5703125
+  },
+  "passed": true,
+  "uiExitedOnClose": true,
+  "sameEngineOnReopen": true,
+  "liveSettingPreserved": true
+}

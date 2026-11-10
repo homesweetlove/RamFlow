@@ -1,0 +1,623 @@
+{
+  "manifest": {
+    "startedUTC": "2026-11-09T07:04:37.749526+00:00",
+    "schedule": [
+      [
+        "cpu",
+        1,
+        [
+          "old",
+          "new"
+        ]
+      ],
+      [
+        "cpu",
+        2,
+        [
+          "old",
+          "new"
+        ]
+      ],
+      [
+        "cpu",
+        3,
+        [
+          "old",
+          "new"
+        ]
+      ],
+      [
+        "cpu",
+        4,
+        [
+          "new",
+          "old"
+        ]
+      ],
+      [
+        "cpu",
+        5,
+        [
+          "old",
+          "new"
+        ]
+      ],
+      [
+        "memory-mixed",
+        1,
+        [
+          "absent",
+          "new"
+        ]
+      ],
+      [
+        "memory-mixed",
+        2,
+        [
+          "new",
+          "absent"
+        ]
+      ],
+      [
+        "memory-mixed",
+        3,
+        [
+          "new",
+          "absent"
+        ]
+      ],
+      [
+        "memory-mixed",
+        4,
+        [
+          "new",
+          "absent"
+        ]
+      ],
+      [
+        "memory-mixed",
+        5,
+        [
+          "new",
+          "absent"
+        ]
+      ]
+    ],
+    "seed": 20261111,
+    "clocks": "Real elapsed clocks; no eligibility clock offset. 12s policy settle, 60 consecutive foreground SHA-256 requests on a prewarmed 256 MiB buffer.",
+    "load": "8 disposable background processes, 2 SHA-256 worker threads each, 64 MiB data each; same children and fixed pressure allocation for each pair. Background progress is reported, not assumed unchanged.",
+    "conditions": "CPU: previous warm-page-guard Core vs new Core (headless policy isolation, no WPF/tray in either). Memory-mixed: no engine/tray vs new actual Core plus packaged lightweight tray. UI startup is separately tested, not part of latency window.",
+    "memoryPressure": "Mixed blocks allocate an external fixed amount targeting 768MiB at calibration, keep page reads every2s. Freeze allocation across both conditions; record drift. Reserve1GiB Commit before allocations; >90%Commit or <128MiB available for2s releases all pressure and censors that block.",
+    "criteria": "5 randomized paired blocks per regime, all outcomes retained. Foreground request p95 primary, digest equality required, native foreground/fullscreen checks, actual writes/readback/restore and zero denied mutations. CPU/mixed-load gain is not RAM-only efficacy.",
+    "coreHashes": {
+      "old": "205163c897d364c03610a1c1814c627bdbac3ac5025587fb66e46506fce48996",
+      "new": "d64160b80aa90ad478ce83599386dd82e22ecce3304955dedba36e261bb38b93"
+    },
+    "sourceHashes": {
+      "run.py": "5626d573965f61ae4e2de5e463eab6f9ba56894232f9f90f904abc7c72b0480f",
+      "lab\\engine\\Program.cs": "8a1c1969f39e18aeebfa1a1efa537ccc2f7121ba298b6602d41c93661037e683",
+      "lab\\foreground\\Program.cs": "97387457b43a309c7e57253162c91e1b82aabdc41c2dd19a8fc8ce1ea9f73dc0",
+      "lab\\engine\\Lab.csproj": "e0c5b2656ea4c356d3c5a8d56f3cb0a5a39b5929dd93e50636ae8de0435ec0aa",
+      "lab\\foreground\\Foreground.csproj": "3c50c9a2eaedecea86f241aba0281c9a9972f9e156dee170573dbe223f3ed018"
+    }
+  },
+  "results": {
+    "completion": {
+      "complete": true,
+      "trials": 20
+    },
+    "groups": {
+      "cpu": {
+        "conditions": {
+          "new": {
+            "blocks": 5,
+            "p50Ms": 128.98545002099127,
+            "p95Ms": 219.7603000095114,
+            "backgroundCyclesPerSecond": 174459.72843775383,
+            "p95RangeMs": [
+              216.35090000927448,
+              220.96830001100898
+            ]
+          },
+          "old": {
+            "blocks": 5,
+            "p50Ms": 227.61815000558272,
+            "p95Ms": 230.78119999263436,
+            "backgroundCyclesPerSecond": 283169.635013116,
+            "p95RangeMs": [
+              218.36360002635047,
+              232.672999962233
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "block": 1,
+            "p95ReductionPercent": 0.9217195617003513,
+            "p50ReductionPercent": 40.2953230308661,
+            "backgroundRateReductionPercent": 39.774336344047114,
+            "safetyReleased": false
+          },
+          {
+            "block": 2,
+            "p95ReductionPercent": 6.0304305698068115,
+            "p50ReductionPercent": 43.3325286152147,
+            "backgroundRateReductionPercent": 39.088942246751884,
+            "safetyReleased": false
+          },
+          {
+            "block": 3,
+            "p95ReductionPercent": 4.210153304358907,
+            "p50ReductionPercent": 40.85644851425449,
+            "backgroundRateReductionPercent": 38.67742026976936,
+            "safetyReleased": false
+          },
+          {
+            "block": 4,
+            "p95ReductionPercent": 5.030536397916351,
+            "p50ReductionPercent": 43.97970149995018,
+            "backgroundRateReductionPercent": 39.00862610172077,
+            "safetyReleased": false
+          },
+          {
+            "block": 5,
+            "p95ReductionPercent": 4.7186265491474595,
+            "p50ReductionPercent": 43.414606948622605,
+            "backgroundRateReductionPercent": 37.872373583858085,
+            "safetyReleased": false
+          }
+        ],
+        "p95MedianReductionPercent": 4.775475638169266,
+        "p50MedianReductionPercent": 43.3325286152147,
+        "backgroundMedianRateReductionPercent": 38.39038270128324
+      },
+      "memory-mixed": {
+        "conditions": {
+          "absent": {
+            "blocks": 5,
+            "p50Ms": 223.60060003120452,
+            "p95Ms": 232.8533999971114,
+            "backgroundCyclesPerSecond": 284223.78290720563,
+            "p95RangeMs": [
+              224.8925999738276,
+              234.04650000156835
+            ]
+          },
+          "new": {
+            "blocks": 5,
+            "p50Ms": 129.01459998101927,
+            "p95Ms": 131.32290000794455,
+            "backgroundCyclesPerSecond": 114939.87979978253,
+            "p95RangeMs": [
+              130.96620002761483,
+              136.28460001200438
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "block": 1,
+            "p95ReductionPercent": 43.317215470627744,
+            "p50ReductionPercent": 43.58407253631369,
+            "backgroundRateReductionPercent": 59.045736568331236,
+            "safetyReleased": false
+          },
+          {
+            "block": 2,
+            "p95ReductionPercent": 39.73914660373673,
+            "p50ReductionPercent": 41.36133127619248,
+            "backgroundRateReductionPercent": 61.090600983020174,
+            "safetyReleased": false
+          },
+          {
+            "block": 3,
+            "p95ReductionPercent": 43.75594256762431,
+            "p50ReductionPercent": 40.65888486975873,
+            "backgroundRateReductionPercent": 58.54761732668835,
+            "safetyReleased": false
+          },
+          {
+            "block": 4,
+            "p95ReductionPercent": 43.78175369914294,
+            "p50ReductionPercent": 42.28806529964964,
+            "backgroundRateReductionPercent": 59.57322785438544,
+            "safetyReleased": false
+          },
+          {
+            "block": 5,
+            "p95ReductionPercent": 41.770289232656275,
+            "p50ReductionPercent": 42.29655465369784,
+            "backgroundRateReductionPercent": 59.94012607774336,
+            "safetyReleased": false
+          }
+        ],
+        "p95MedianReductionPercent": 43.60275606472843,
+        "p50MedianReductionPercent": 42.3013176337565,
+        "backgroundMedianRateReductionPercent": 59.56007670290262
+      }
+    },
+    "rows": [
+      {
+        "regime": "cpu",
+        "block": 1,
+        "condition": "old",
+        "p50Ms": 215.95334997982718,
+        "p95Ms": 218.36360002635047,
+        "maxMs": 219.4459000020288,
+        "backgroundCyclesPerSecond": 294555.02476676175,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14430.48046875,
+        "availableAfterMiB": 14429.921875,
+        "enginePrivateMiB": 24.0390625,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 1,
+        "condition": "new",
+        "p50Ms": 128.934250009479,
+        "p95Ms": 216.35090000927448,
+        "maxMs": 219.50829995330423,
+        "backgroundCyclesPerSecond": 177397.71849773865,
+        "writes": 24,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14425.9296875,
+        "availableAfterMiB": 14428.96875,
+        "enginePrivateMiB": 23.390625,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 2,
+        "condition": "old",
+        "p50Ms": 227.61815000558272,
+        "p95Ms": 230.78119999263436,
+        "maxMs": 231.38979997020215,
+        "backgroundCyclesPerSecond": 283169.635013116,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14530.4375,
+        "availableAfterMiB": 14540.21875,
+        "enginePrivateMiB": 23.91015625,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 2,
+        "condition": "new",
+        "p50Ms": 128.98545002099127,
+        "p95Ms": 216.86409995891154,
+        "maxMs": 221.23259998625144,
+        "backgroundCyclesPerSecond": 172481.61992250098,
+        "writes": 24,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14539.75390625,
+        "availableAfterMiB": 14534.86328125,
+        "enginePrivateMiB": 23.14453125,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 3,
+        "condition": "old",
+        "p50Ms": 218.37740001501516,
+        "p95Ms": 229.4192000408657,
+        "maxMs": 234.80740003287792,
+        "backgroundCyclesPerSecond": 287872.2386155658,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14534.4609375,
+        "availableAfterMiB": 14524.46484375,
+        "enginePrivateMiB": 21.35546875,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 3,
+        "condition": "new",
+        "p50Ms": 129.1561500111129,
+        "p95Ms": 219.7603000095114,
+        "maxMs": 219.95120000792667,
+        "backgroundCyclesPerSecond": 176530.68304623014,
+        "writes": 24,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 15157.5,
+        "availableAfterMiB": 15153.921875,
+        "enginePrivateMiB": 23.69921875,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 4,
+        "condition": "new",
+        "p50Ms": 129.18179997359402,
+        "p95Ms": 220.96830001100898,
+        "maxMs": 223.48200000124052,
+        "backgroundCyclesPerSecond": 172652.49503998458,
+        "writes": 24,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14602.9296875,
+        "availableAfterMiB": 14589.08984375,
+        "enginePrivateMiB": 22.94921875,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 4,
+        "condition": "old",
+        "p50Ms": 230.59819999616593,
+        "p95Ms": 232.672999962233,
+        "maxMs": 236.6586999851279,
+        "backgroundCyclesPerSecond": 283076.9074458506,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14582.9921875,
+        "availableAfterMiB": 14584.6953125,
+        "enginePrivateMiB": 23.71484375,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 5,
+        "condition": "old",
+        "p50Ms": 227.77379999752156,
+        "p95Ms": 231.7454000003636,
+        "maxMs": 233.1646000384353,
+        "backgroundCyclesPerSecond": 280808.6168771224,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14541.1484375,
+        "availableAfterMiB": 14527.36328125,
+        "enginePrivateMiB": 23.828125,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "cpu",
+        "block": 5,
+        "condition": "new",
+        "p50Ms": 128.8866999966558,
+        "p95Ms": 220.81020002951846,
+        "maxMs": 221.1902000126429,
+        "backgroundCyclesPerSecond": 174459.72843775383,
+        "writes": 24,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 14526.3359375,
+        "availableAfterMiB": 14521.53125,
+        "enginePrivateMiB": 25.8359375,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 1,
+        "condition": "absent",
+        "p50Ms": 228.53359999135137,
+        "p95Ms": 231.60629998892546,
+        "maxMs": 250.50119997467846,
+        "backgroundCyclesPerSecond": 281614.1068735934,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 1144.01171875,
+        "availableAfterMiB": 1145.73046875,
+        "enginePrivateMiB": 0.0,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 1,
+        "condition": "new",
+        "p50Ms": 128.9293500012718,
+        "p95Ms": 131.28089997917414,
+        "maxMs": 133.10249999631196,
+        "backgroundCyclesPerSecond": 115332.98318975269,
+        "writes": 8,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 1078.640625,
+        "availableAfterMiB": 1064.98828125,
+        "enginePrivateMiB": 21.69921875,
+        "trayPrivateMiB": 12.0390625,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 2,
+        "condition": "new",
+        "p50Ms": 129.01459998101927,
+        "p95Ms": 135.52219996927306,
+        "maxMs": 143.1668999721296,
+        "backgroundCyclesPerSecond": 113322.77527065338,
+        "writes": 8,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 856.78125,
+        "availableAfterMiB": 813.8828125,
+        "enginePrivateMiB": 21.6796875,
+        "trayPrivateMiB": 12.55859375,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 2,
+        "condition": "absent",
+        "p50Ms": 220.01625000848435,
+        "p95Ms": 224.8925999738276,
+        "maxMs": 226.70659999130294,
+        "backgroundCyclesPerSecond": 291247.81706651393,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 862.33203125,
+        "availableAfterMiB": 862.296875,
+        "enginePrivateMiB": 0.0,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 3,
+        "condition": "new",
+        "p50Ms": 128.90619999961928,
+        "p95Ms": 130.96620002761483,
+        "maxMs": 144.6717000217177,
+        "backgroundCyclesPerSecond": 114939.87979978253,
+        "writes": 8,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 956.453125,
+        "availableAfterMiB": 943.04296875,
+        "enginePrivateMiB": 21.546875,
+        "trayPrivateMiB": 12.62109375,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 3,
+        "condition": "absent",
+        "p50Ms": 217.22915000282228,
+        "p95Ms": 232.8533999971114,
+        "maxMs": 235.51860003499314,
+        "backgroundCyclesPerSecond": 277281.72034314554,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 989.77734375,
+        "availableAfterMiB": 943.265625,
+        "enginePrivateMiB": 0.0,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 4,
+        "condition": "new",
+        "p50Ms": 129.11340000573546,
+        "p95Ms": 131.32290000794455,
+        "maxMs": 154.64139997493476,
+        "backgroundCyclesPerSecond": 115213.58112049641,
+        "writes": 8,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 891.78125,
+        "availableAfterMiB": 877.80859375,
+        "enginePrivateMiB": 21.5546875,
+        "trayPrivateMiB": 12.4375,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 4,
+        "condition": "absent",
+        "p50Ms": 223.72044998337515,
+        "p95Ms": 233.5947999963537,
+        "maxMs": 237.19439998967573,
+        "backgroundCyclesPerSecond": 284993.2730357614,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 898.4140625,
+        "availableAfterMiB": 901.38671875,
+        "enginePrivateMiB": 0.0,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 5,
+        "condition": "new",
+        "p50Ms": 129.0252500330098,
+        "p95Ms": 136.28460001200438,
+        "maxMs": 148.5621999599971,
+        "backgroundCyclesPerSecond": 113859.68908969498,
+        "writes": 8,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 876.2734375,
+        "availableAfterMiB": 838.5078125,
+        "enginePrivateMiB": 21.7734375,
+        "trayPrivateMiB": 12.3125,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      },
+      {
+        "regime": "memory-mixed",
+        "block": 5,
+        "condition": "absent",
+        "p50Ms": 223.60060003120452,
+        "p95Ms": 234.04650000156835,
+        "maxMs": 235.81639997428283,
+        "backgroundCyclesPerSecond": 284223.78290720563,
+        "writes": 0,
+        "denied": 0,
+        "safetyReleased": false,
+        "availableBeforeMiB": 915.57421875,
+        "availableAfterMiB": 913.6875,
+        "enginePrivateMiB": 0.0,
+        "trayPrivateMiB": 0.0,
+        "digest": "5F4D8171110A158AD843A120361BABDB4F173E86E0AF6BDBE2D0CBCAE0C3151C",
+        "requests": 60,
+        "resourcesRestored": true
+      }
+    ],
+    "scope": "One PC, five randomized paired blocks/regime. Each block has60 technical requests; not300 independent replicates. CPU and mixed CPU/memory load, not isolated memory-only efficacy."
+  }
+}
