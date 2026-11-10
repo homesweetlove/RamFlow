@@ -197,6 +197,7 @@ static class Trial
                 actual_apply_count = applies, overhead_samples = independent is null ? observer.Samples : (object)independentSamples.Cast<object>().Concat(audit?.TimingSamples ?? []).ToArray(),
                 controller_internal_samples = observer.Samples, overhead_scope = "independent sampler separates observer; engine-host still includes orchestration, tray/service absent, not measured as zero",
                 model_diagnostic = modelDiagnostic, out_of_scope_requests = outOfScope,
+                observer_control_writes = independent?.ControlWrites,
                 system_snapshots = snapshots, failures, completed_utc = DateTimeOffset.UtcNow });
         }
     }

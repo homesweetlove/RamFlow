@@ -87,7 +87,7 @@ public sealed class IndependentObserver : IAsyncDisposable
         lock (gate)
         {
             if (stopping is not null) throw new ObjectDisposedException(nameof(IndependentObserver));
-            ObserverProtocol.WritePhase(phaseFile, new(phase, checked(++revision)));
+            WriteControl(new(phase, checked(++revision)));
         }
     }
 
@@ -99,7 +99,7 @@ public sealed class IndependentObserver : IAsyncDisposable
     async Task StopCore()
     {
         Exception? failure = null;
-        try { ObserverProtocol.WritePhase(phaseFile, new("stop", checked(++revision))); }
+        try { WriteControl(new("stop", checked(++revision))); }
         catch (Exception e) { failure = e; }
         try { await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5)); }
         catch (TimeoutException)
@@ -136,6 +136,18 @@ public sealed class IndependentObserver : IAsyncDisposable
     {
         try { await StopAsync(); }
         finally { child.Dispose(); }
+    }
+
+    public List<object> ControlWrites { get; } = [];
+    void WriteControl(ObserverPhase phase) {
+        var timer=Stopwatch.StartNew();
+        try {
+            int retries=ObserverProtocol.WritePhase(phaseFile,phase);
+            ControlWrites.Add(new { phase.phase,phase.revision,retries,elapsed_ms=timer.Elapsed.TotalMilliseconds,success=true,error=(string?)null });
+        } catch(Exception e) {
+            ControlWrites.Add(new { phase.phase,phase.revision,retries=(int?)null,elapsed_ms=timer.Elapsed.TotalMilliseconds,success=false,error=e.ToString() });
+            throw;
+        }
     }
 
     static async Task Drain(StreamReader reader, StringBuilder? tail)
@@ -321,14 +333,22 @@ internal static class ObserverProtocol
             throw new InvalidDataException("Invalid or duplicate control properties.");
     }
 
-    internal static void WritePhase(string path, ObserverPhase phase)
+    internal static int WritePhase(string path, ObserverPhase phase)
     {
         string temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
             using (var file = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             { JsonSerializer.Serialize(file, phase); file.Flush(true); }
-            File.Move(temporary, path, overwrite: true);
+            // Shared-delete readers do not prevent transient Windows file-system
+            // contention (e.g. another reader without delete sharing). Keep the
+            // old file intact and retry only bounded, known access/lock errors.
+            for (int retry=0;;retry++) {
+                try { File.Move(temporary,path,overwrite:true); return retry; }
+                catch(Exception e) when(retry<19 && (e is IOException or UnauthorizedAccessException) && (e.HResult & 0xffff) is 5 or 32 or 33) {
+                    Thread.Sleep(10);
+                }
+            }
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }

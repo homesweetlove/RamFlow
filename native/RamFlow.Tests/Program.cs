@@ -13,6 +13,7 @@ BackgroundControlTests.Run(Check);
 ResearchPolicyTests.Run(Check);
 CostModelTests.Run(Check);
 PreInterventionTests.Run(Check);
+ObserverControlTests.Run(Check);
 StarvationTests.Run(Check);
 BackgroundJobsTests.Run(Check);
 UiHandoffTests.Run(Check);

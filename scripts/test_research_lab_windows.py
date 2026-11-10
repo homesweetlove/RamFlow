@@ -45,6 +45,7 @@ assert cost["Features"] == fixed["pre_intervention"]["features"]
 assert cost["Contention"] == json.loads(baseline.read_text(encoding="utf-8"))["Regime"]
 audit = [json.loads(line) for line in (run / "fixed/audit/events.jsonl").read_text(encoding="utf-8").splitlines()]
 assert all(row["Time"] >= fixed["treatment_started_utc"] for row in audit), "Audit action preceded the frozen baseline"
+assert fixed["observer_control_writes"] and all(row["success"] and row["retries"] >= 0 and row["elapsed_ms"] >= 0 for row in fixed["observer_control_writes"])
 assert any(s["role"] == "observer" for s in fixed["overhead_samples"])
 assert any(s.get("status") == "timing-only" and s["log_write_ms"] is not None for s in fixed["overhead_samples"])
 payload = run / "fixed/outcome.json"
