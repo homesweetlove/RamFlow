@@ -36,7 +36,7 @@ def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost"
     config["protocol"]["timeout_seconds"] = max(90, seconds + 60)
     config["binaries"] = [str(lab), str(model)]
     for regime, spec in config["workloads"].items():
-        spec.update(kind="synthetic", description="Intended " + regime + "; actual global pressure is measured and unattained regimes are excluded, never relabelled")
+        spec.update(kind="synthetic", description="Intended " + regime + "; schema-3 eligibility uses observed PRE-intervention pressure; post-treatment transitions remain outcomes")
     config["native_lab"] = dict(scope="Synthetic foreground-role child; not actual OS focus or a real app study",
         model=str(model), ablation=variant, experiment_split="pilot", background_threads=background_threads,
         high_cpu_explicit=allow_high_cpu, core_safety="PID creation, explicit targets, no trim, readback restoration, starvation guard")

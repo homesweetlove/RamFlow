@@ -38,6 +38,39 @@ def synthetic(block="synthetic-b1", condition="A", latency=10, **overrides):
 
 
 class SyntheticAnalysisTests(unittest.TestCase):
+    def pre_value(self, **overrides):
+        baseline=dict(basis="pre-intervention-window-v1",regime="cpu",stable=True,regime_attained=True,
+            started_utc="2026-11-10T00:00:00+00:00",ended_utc="2026-11-10T00:00:02+00:00",
+            samples=[dict(Time="2026-11-10T00:00:0"+str(i//2)+( ".500" if i%2 else "")+"+00:00",CpuPercent=90) for i in range(5)])
+        return synthetic(schema_version=3,eligibility_regime="cpu",pre_intervention=baseline,
+            treatment_started_utc="2026-11-10T00:00:03+00:00",**overrides)
+
+    def test_pre_cpu_candidate_that_becomes_healthy_stays_in_cpu_contrast(self):
+        self.save("A",self.pre_value(condition="A"))
+        self.save("C",self.pre_value(condition="C",regime="healthy",regime_attained=False))
+        report=self.report()
+        self.assertEqual(sum(r["eligible"] for r in report["ledger"]),2)
+        pairs=[r for r in report["comparisons"] if r["metric"]=="foreground_p95_ms"]
+        self.assertEqual(pairs[0]["n_blocks"],1)
+        self.assertEqual(pairs[0]["regime"],"cpu")
+        self.assertEqual({r["observed_regime"] for r in report["blocks"]},{"cpu","healthy"})
+
+    def test_pre_window_timestamp_overlap_and_unattained_baseline_are_rejected(self):
+        value=self.pre_value()
+        value["treatment_started_utc"]="2026-11-10T00:00:01+00:00"
+        self.save("overlap",value)
+        wrong=self.pre_value(session_block_id="different")
+        wrong["pre_intervention"]["regime_attained"]=False
+        self.save("unattained",wrong)
+        self.assertFalse(any(r["eligible"] for r in self.report()["ledger"]))
+
+    def test_legacy_post_window_and_new_pre_window_are_not_pooled(self):
+        self.save("old",synthetic())
+        self.save("new",self.pre_value(condition="C"))
+        report=self.report()
+        self.assertEqual(sum(r["eligible"] for r in report["ledger"]),2)
+        self.assertFalse(any(r["n_blocks"] for r in report["comparisons"]))
+
     def setUp(self):
         self.assertIsNotNone(analyze, "The standard-library analyzer must exist")
         self.temp = tempfile.TemporaryDirectory(prefix="ramflow-synthetic-", dir=SCRIPT.parent.parent.parent)

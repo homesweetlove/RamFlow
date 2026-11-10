@@ -12,6 +12,7 @@ void Check(bool value, string message) { if (!value) throw new Exception(message
 BackgroundControlTests.Run(Check);
 ResearchPolicyTests.Run(Check);
 CostModelTests.Run(Check);
+PreInterventionTests.Run(Check);
 StarvationTests.Run(Check);
 BackgroundJobsTests.Run(Check);
 UiHandoffTests.Run(Check);

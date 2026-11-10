@@ -35,6 +35,16 @@ c, fixed = trial("fixed", "C")
 assert c.returncode == 0, fixed["failures"]
 assert fixed["correctness_passed"] and fixed["restored"] and fixed["actual_apply_count"] >= 1
 assert fixed["out_of_scope_requests"] == 0
+assert fixed["schema_version"] == 3 and fixed["pre_intervention"]["basis"] == "pre-intervention-window-v1"
+assert fixed["pre_intervention"]["stable"] and fixed["pre_intervention"]["regime_attained"]
+assert fixed["pre_intervention"]["ended_utc"] <= fixed["treatment_started_utc"]
+baseline = run / "fixed/pre-intervention.json"
+assert fixed["pre_intervention"]["source_sha256"] == hashlib.sha256(baseline.read_bytes()).hexdigest()
+cost = json.loads((run / "fixed/cost-observation.json").read_text(encoding="utf-8"))
+assert cost["Features"] == fixed["pre_intervention"]["features"]
+assert cost["Contention"] == json.loads(baseline.read_text(encoding="utf-8"))["Regime"]
+audit = [json.loads(line) for line in (run / "fixed/audit/events.jsonl").read_text(encoding="utf-8").splitlines()]
+assert all(row["Time"] >= fixed["treatment_started_utc"] for row in audit), "Audit action preceded the frozen baseline"
 assert any(s["role"] == "observer" for s in fixed["overhead_samples"])
 assert any(s.get("status") == "timing-only" and s["log_write_ms"] is not None for s in fixed["overhead_samples"])
 payload = run / "fixed/outcome.json"

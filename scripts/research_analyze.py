@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only ResearchLab v2 outcome analysis, Python 3.10+ standard library.
+"""Read-only ResearchLab v2/v3 outcome analysis, Python 3.10+ standard library.
 
 No workload execution, engine imports, model training, dependency installation,
 or p-value generation. All uncertainty resamples paired session blocks.
@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from collections import defaultdict
+from datetime import datetime
 import csv
 import hashlib
 from html import escape
@@ -21,7 +22,7 @@ import sys
 import textwrap
 
 
-COHORT = ("split", "hardware_id", "workload_id", "regime")
+COHORT = ("split", "hardware_id", "workload_id", "regime", "regime_basis")
 POLICY = ("condition", "policy_variant", "model_id")
 IDENTITY = COHORT + ("session_block_id",) + POLICY
 METRICS = {"foreground_p50_ms": "ms", "foreground_p95_ms": "ms", "foreground_p99_ms": "ms",
@@ -44,7 +45,7 @@ CAVEATS = [
     "Paired standardized dz = mean(block differences) / sample SD(block differences), without small-sample correction. Zero SD or <2 blocks is undefined; dz is not comparable across dependence structures.",
     "Undefined ratio/dz bootstrap draws are counted; their entire interval is withheld rather than silently dropping draws.",
     "Complete-case contrasts may be biased by missingness. All excluded, failed, aborted, invalid, duplicate and known missing outcomes remain in the ledger.",
-    "Regime is actually observed, not intended. Unattained regimes and calibration outcomes are excluded from efficacy; splits, hardware, workloads and regimes are never pooled.",
+    "Schema 3 cohorts/eligibility use the frozen observed PRE-intervention window. Post-intervention regime remains an outcome and never excludes a trial. Legacy schema 2 keeps its historical post-regime exclusions and is never pooled with schema 3. Calibration is excluded.",
     "Model IDs and policy variants stay separate. No models are fitted or selected; fit/validation/pilot summaries remain exploratory.",
     "Pareto points use exactly the same complete blocks for both policies in each panel; frontiers are descriptive only, without a success claim.",
     "Same-response flags require >=2 complete pairs, explicit foreground p95 tolerance and positive background throughput difference; marginal CI checks do not establish joint coverage or practical equivalence.",
@@ -124,7 +125,7 @@ def validate_outcome(value):
         if name not in value or not valid(value[name]):
             errors.append(name + " " + description)
 
-    require("schema_version", lambda x: type(x) is int and x == 2, "must be integer 2")
+    require("schema_version", lambda x: type(x) is int and x in (2,3), "must be integer 2 or 3")
     for name in ("session_block_id", "hardware_id", "workload_id", "intended_regime", "policy_variant"):
         require(name, lambda x: isinstance(x, str) and bool(x.strip()), "must be a nonempty string")
     for name, options in (("split", ("fit", "validation", "test", "pilot")),
@@ -134,6 +135,27 @@ def validate_outcome(value):
         require(name, lambda x, opts=options: isinstance(x, str) and x in opts, "has an unsupported value")
     for name in ("regime_attained", "correctness_passed", "restored"):
         require(name, lambda x: type(x) is bool, "must be Boolean")
+    if value.get("schema_version") == 3:
+        pre=value.get("pre_intervention")
+        if not isinstance(pre,dict):
+            errors.append("pre_intervention must be a frozen baseline window")
+        else:
+            if pre.get("basis") != "pre-intervention-window-v1" or pre.get("regime") not in ("cpu","ram","mixed","healthy") or value.get("eligibility_regime") != pre.get("regime"):
+                errors.append("pre_intervention basis/regime mismatch")
+            if any(type(pre.get(k)) is not bool for k in ("stable","regime_attained")) or pre.get("regime_attained") != (pre.get("regime")==value.get("intended_regime")):
+                errors.append("pre_intervention stability/attainment flags invalid")
+            try:
+                def date(text):
+                    result=datetime.fromisoformat(text.replace("Z","+00:00"))
+                    if result.tzinfo is None: raise ValueError("Timezone required")
+                    return result
+                start,end,treatment=map(date,(pre["started_utc"],pre["ended_utc"],value["treatment_started_utc"]))
+                samples=pre["samples"]
+                times=[date(s["Time"]) for s in samples]
+                if len(times)<5 or (end-start).total_seconds()<2 or start!=times[0] or end!=times[-1] or end>treatment or any(a>=b for a,b in zip(times,times[1:])) or not all(_finite(s.get("CpuPercent")) and s["CpuPercent"]<=100 for s in samples):
+                    raise ValueError("Invalid window")
+            except (KeyError,ValueError,TypeError,AttributeError,IndexError):
+                errors.append("pre_intervention timestamps/sensors must precede treatment, with >=5 ordered samples over >=2 seconds")
     require("candidate_action", lambda x: type(x) is int and x in (0, 1, 3, 4, 5, 7) or x is None and value.get("condition") in ("D", "E", "F"),
             "must be 0/1/3/4/5/7, or null for a dynamic policy with no single action")
     require("model_id", lambda x: x is None or isinstance(x, str) and bool(x.strip()), "must be null or a nonempty string")
@@ -175,7 +197,17 @@ def _sort_key(value):
 
 
 def _metadata(value):
-    return {name: value.get(name) for name in IDENTITY + ("status", "intended_regime", "regime_attained", "candidate_action")}
+    result={name: value.get(name) for name in IDENTITY + ("status", "intended_regime", "regime_attained", "candidate_action")}
+    result["observed_regime"]=value.get("regime")
+    result["regime_basis"]="legacy-post-intervention-v2"
+    if value.get("schema_version")==3:
+        result["regime"]=value.get("eligibility_regime")
+        result["regime_basis"]="pre-intervention-window-v1"
+        pre=value.get("pre_intervention")
+        if isinstance(pre,dict):
+            result["pre_regime_attained"]=pre.get("regime_attained")
+            result["pre_regime_stable"]=pre.get("stable")
+    return result
 
 
 def _expected(input_dir, path):
@@ -258,7 +290,13 @@ def load_ledger(input_dir, expected_outcomes=None):
             reasons.append("status_" + value["status"])
         if value["condition"] == "calibration":
             reasons.append("calibration")
-        for field in ("regime_attained", "correctness_passed", "restored"):
+        if value["schema_version"]==3:
+            for field in ("stable","regime_attained"):
+                if not value["pre_intervention"][field]:
+                    reasons.append("pre_"+field+"_false")
+        elif not value["regime_attained"]:
+            reasons.append("regime_attained_false")
+        for field in ("correctness_passed", "restored"):
             if not value[field]:
                 reasons.append(field + "_false")
         if value["failures"]:
@@ -269,15 +307,16 @@ def load_ledger(input_dir, expected_outcomes=None):
             reasons.append("nonpositive_measurement_window")
         if row["expected"]:
             for field in IDENTITY:
-                if field in row["expected"] and row["expected"][field] != value[field]:
+                if field in row["expected"] and row["expected"][field] != _metadata(value).get(field):
                     reasons.append("expected_identity_mismatch:" + field)
         row["eligible"] = not reasons
     by_identity = defaultdict(list)
     for row in ledger:
         # Even a malformed-schema duplicate must not permit an optimistic winner.
         if isinstance(row["outcome"], dict) and not row.get("archive_copy_of"):
-            identity = _key(row["outcome"], IDENTITY)
-            if all(x is None or isinstance(x, str) for x in identity) and all(row["outcome"].get(k) is not None for k in IDENTITY if k != "model_id"):
+            metadata=_metadata(row["outcome"])
+            identity = _key(metadata, IDENTITY)
+            if all(x is None or isinstance(x, str) for x in identity) and all(metadata.get(k) is not None for k in IDENTITY if k != "model_id"):
                 by_identity[identity].append(row)
     for rows in by_identity.values():
         if len(rows) > 1:

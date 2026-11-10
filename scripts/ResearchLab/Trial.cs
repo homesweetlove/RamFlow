@@ -12,6 +12,7 @@ static class Trial
         string condition = Options.Get(args, "--condition", "A"), intended = Options.Get(args, "--regime", "healthy");
         string split = Options.Get(args, "--split", "pilot"), block = Options.Get(args, "--block", Guid.NewGuid().ToString("N"));
         int seconds = Options.Int(args, "--seconds", 5, 2, 300), seed = Options.Seed(args);
+        int baselineSeconds = Options.Int(args, "--baseline-seconds", 5, 3, 30);
         int foregroundMiB = Options.Int(args, "--foreground-mib", 8, 4, 64), backgroundMiB = Options.Int(args, "--background-mib", 32, 4, 256);
         bool highCpu = args.Contains("--allow-high-cpu");
         int maxThreads = highCpu ? Math.Min(32, Environment.ProcessorCount) : Math.Min(8, Math.Max(1, Environment.ProcessorCount / 2));
@@ -23,9 +24,9 @@ static class Trial
             split is not ("fit" or "validation" or "test" or "pilot") || candidate is not (0 or 1 or 3 or 4 or 5 or 7)) throw new ArgumentException("Invalid condition, split, candidate or regime.");
         string modelPath = Options.Get(args, "--model", ""), variant = Options.Get(args, "--variant", "None");
         string mode = intended == "healthy" ? "cpu" : intended;
-        string workloadId = $"synthetic-sha-pagewalk-v1:{mode}:fg{foregroundMiB}:bg{backgroundMiB}:threads{threads}:units{targetUnits}:gap{gapMs}:observer-independent-v1";
+        string workloadId = $"synthetic-sha-pagewalk-v2:{mode}:fg{foregroundMiB}:bg{backgroundMiB}:threads{threads}:units{targetUnits}:gap{gapMs}:observer-independent-v1:pre{baselineSeconds}";
         Options.WriteNew(Path.Combine(directory, "started.json"), new { condition, intended, split, block, seed, seconds, foregroundMiB, backgroundMiB, threads, workloadId,
-            HighCpuExplicit = highCpu,
+            HighCpuExplicit = highCpu, BaselineSeconds = baselineSeconds, ConditioningBasis = PreInterventionWindow.Basis,
             SourceCommit = Options.Get(args, "--commit", "unknown"), ControllerSha256 = FileResearchAuditSink.FileHash(typeof(Trial).Assembly.Location),
             CoreSha256 = FileResearchAuditSink.FileHash(typeof(Engine).Assembly.Location), ModelSha256 = modelPath.Length == 0 ? null : FileResearchAuditSink.FileHash(modelPath),
             Sources = Options.CaptureSources(directory), RawSessionSeed = Options.Get(args, "--seed", "1"),
@@ -41,6 +42,8 @@ static class Trial
         string hardware = "unavailable", actual = "unknown"; bool attained = false; string? modelId = null; int applies = 0;
         double? completion = null; TimedAudit? audit = null; Engine? engine = null; string modelDiagnostic = "not-read"; int outOfScope = 0;
         ResourceValues? original = null;
+        PreInterventionWindow? baseline = null; DateTimeOffset? treatmentStartedUtc = null;
+        string? baselineSha256 = null; bool postStable = false;
         FixtureChild? ownedForeground = null, ownedBackground = null; OwnedProvider? ownedProvider = null;
         IndependentObserver? independent = null; JsonElement[] independentSamples = [];
         using var self = Process.GetCurrentProcess(); using var observer = new ResourceObserver(Path.Combine(directory, "overhead.jsonl"));
@@ -64,6 +67,28 @@ static class Trial
             original = provider.ReadValues(background.Process.Id) ?? throw new IOException("Cannot read original child settings.");
             string? expected = null;
             for (int i = 0; i < 5; i++) { var warmup = await foreground.Request("work"); expected ??= warmup.Checksum; if (warmup.Checksum != expected) throw new IOException("Warmup correctness mismatch."); }
+            // No Engine exists during this window: configuration cannot act or
+            // change the sensors used to define the experimental cohort.
+            independent.SetPhase("observe"); var preSamples = new List<Snapshot>();
+            var preClock = Stopwatch.StartNew(); double nextPreSample = 0;
+            while (preClock.Elapsed.TotalSeconds < baselineSeconds || preSamples.Count < 5) {
+                if (preClock.Elapsed.TotalSeconds > baselineSeconds + 15) throw new TimeoutException("Bounded pre-intervention window timed out.");
+                if (preClock.Elapsed.TotalSeconds >= nextPreSample) {
+                    var sample = provider.Sample(); preSamples.Add(sample);
+                    if (sample.Available < 512 * 1048576UL || (double)sample.Commit / Math.Max(1,sample.CommitLimit) > .9)
+                        throw new InvalidOperationException("Safety headroom release during baseline.");
+                    nextPreSample = preClock.Elapsed.TotalSeconds + .5;
+                }
+                var reply = await foreground.Request("work");
+                if (reply.Checksum != expected) throw new IOException("Pre-intervention correctness mismatch.");
+                if (gapMs > 0) await Task.Delay(gapMs);
+            }
+            baseline = PreInterventionWindow.Freeze(preSamples,intended);
+            string baselinePath = Path.Combine(directory,"pre-intervention.json");
+            Options.WriteNew(baselinePath,baseline);
+            baselineSha256 = FileResearchAuditSink.FileHash(baselinePath);
+            if (!baseline.Eligible) throw new InvalidOperationException("Observed pre-intervention window is unstable or does not attain intended pressure; no intervention applied.");
+            treatmentStartedUtc = DateTimeOffset.UtcNow;
             bool usesModel = condition is "B" or "E" or "F";
             CalibratedObservationSource? modelSource = modelPath.Length == 0 || !usesModel ? null : new(CostModelTrainer.Load(modelPath), hardware, workloadId,
                 (process, snapshot) => process.Pid == background.Process.Id && process.Identity == background.Identity && background.Progress is { ObservedUtc: {} time } progress && time <= snapshot.Time ?
@@ -125,14 +150,15 @@ static class Trial
             if ((condition == "C" || condition == "calibration" && candidate != 0) && applies == 0)
                 failures.Add("The declared fixed/calibration intervention was not applied; do not train on a nominal treatment.");
             outOfScope = provider.OutOfScopeRequests;
-            bool stable = kinds.Count > 0 && kinds.Count(x => x.ToString().Equals(actual, StringComparison.OrdinalIgnoreCase)) >= .8 * kinds.Count;
-            if (!stable) failures.Add("Observed pressure regime changed within trial; retained as invalid calibration.");
+            postStable = kinds.Count > 0 && kinds.Count(x => x.ToString().Equals(actual, StringComparison.OrdinalIgnoreCase)) >= .8 * kinds.Count;
+            // Pressure transitions after treatment are outcomes, never an
+            // exclusion or a replacement for the frozen baseline features.
             await independent.StopAsync(); independentSamples = independent.ReadSamples();
             string status = failures.Count == 0 ? "completed" : "invalid";
             Options.WriteNew(Path.Combine(directory, "cost-observation.json"), new CostObservation(block, split, hardware, workloadId,
-                Enum.TryParse<ContentionKind>(actual, true, out var regime) ? regime : ContentionKind.Unknown,
+                baseline.Regime,
                 condition == "calibration" ? (ResourceAction)candidate : ResourceAction.None,
-                snapshots.Count == 0 ? CostFeatures.From(initial) : CostFeatures.From(snapshots[snapshots.Count / 2]),
+                baseline.Features,
                 Quantile(latencies, .95), units / elapsed, reaccess, controlCost, status == "completed" && condition == "calibration"));
             SaveOutcome(status); return new(status, directory, actual, attained);
         } catch (Exception error) {
@@ -155,8 +181,14 @@ static class Trial
         }
 
         void SaveOutcome(string status) {
-            Options.WriteNew(Path.Combine(directory, "outcome.json"), new { schema_version = 2, session_block_id = block, hardware_id = hardware,
+            Options.WriteNew(Path.Combine(directory, "outcome.json"), new { schema_version = 3, session_block_id = block, hardware_id = hardware,
                 workload_id = workloadId, split, condition, regime = actual, intended_regime = intended, regime_attained = attained,
+                eligibility_regime = baseline?.Regime.ToString().ToLowerInvariant(), treatment_started_utc = treatmentStartedUtc,
+                pre_intervention = baseline is null ? null : new { basis = PreInterventionWindow.Basis,
+                    regime = baseline.Regime.ToString().ToLowerInvariant(), stable = baseline.Stable, regime_attained = baseline.Attained,
+                    started_utc = baseline.StartedUtc, ended_utc = baseline.EndedUtc, samples = baseline.Samples,
+                    features = baseline.Features, feature_basis = "pre-intervention-component-medians-v1", source_sha256 = baselineSha256 },
+                post_regime_stable = postStable, post_regime_samples = kinds.Select(x=>x.ToString().ToLowerInvariant()).ToArray(),
                 candidate_action = condition == "calibration" ? (int?)candidate : condition == "C" ? 3 : condition is "A" or "B" ? 0 : null, status, foreground_latency_ms = latencies,
                 foreground_wall_ms = wall, background_units = units, measurement_seconds = elapsed, background_completion_seconds = completion,
                 background_completion_scope = targetUnits == 0 ? "continuous fixture; completion not applicable" : "right censored if target not completed during observation",
