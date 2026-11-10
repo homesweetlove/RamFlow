@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import uuid
+import research_logcheck
 
 root = Path(__file__).resolve().parents[1]
 app = root / "scripts/ResearchLab/bin/Release/net10.0-windows/ResearchLab.exe"
@@ -31,10 +32,19 @@ if a.returncode and any("Insufficient safe headroom" in s or "existing RAM Flow 
     print("SKIP ResearchLab live smoke: environment headroom/existing instance; failure evidence retained at", run)
     raise SystemExit(0)
 assert a.returncode == 0 and absent["actual_apply_count"] == 0 and absent["restored"]
+assert research_logcheck.check_run(run/'absent')['performance_ready']
 c, fixed = trial("fixed", "C")
 assert c.returncode == 0, fixed["failures"]
 assert fixed["correctness_passed"] and fixed["restored"] and fixed["actual_apply_count"] >= 1
 assert fixed["out_of_scope_requests"] == 0
+assert research_logcheck.check_run(run/'fixed')['performance_ready']
+assert fixed['cleanup_completed'] and fixed['evidence_schema_version']==1
+started=json.loads((run/'fixed/started.json').read_text())
+assert started['SourceCommit']==started['Sources']['Commit'] and started['SourceCommit']!='unknown'
+events=[json.loads(line) for line in (run/'fixed/trial-events.jsonl').read_text().splitlines()]
+assert sum(e['kind']=='foreground-observation' for e in events)==len(fixed['foreground_latency_ms'])
+assert sum(e['kind']=='process-owned' for e in events)==2
+assert sum(e['kind']=='process-exited' for e in events)==2
 assert fixed["schema_version"] == 3 and fixed["pre_intervention"]["basis"] == "pre-intervention-window-v1"
 assert fixed["pre_intervention"]["stable"] and fixed["pre_intervention"]["regime_attained"]
 assert fixed["pre_intervention"]["ended_utc"] <= fixed["treatment_started_utc"]

@@ -17,7 +17,7 @@ static class Options
         Cpu = Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString", "unknown"),
         Os = Environment.OSVersion.VersionString, Runtime = Environment.Version.ToString(), Architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString() });
     public static object CaptureSources(string directory) {
-        var root = new DirectoryInfo(AppContext.BaseDirectory); while (root is not null && !System.IO.Directory.Exists(Path.Combine(root.FullName, ".git"))) root = root.Parent;
+        var root = new DirectoryInfo(AppContext.BaseDirectory); while (root is not null && !System.IO.Directory.Exists(Path.Combine(root.FullName, ".git")) && !File.Exists(Path.Combine(root.FullName,".git"))) root = root.Parent;
         if (root is null) return new { Status = "unavailable", Note = "No Git checkout found; binary hashes remain recorded." };
         string Query(params string[] args) { var start = new ProcessStartInfo("git") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
             start.ArgumentList.Add("-C"); start.ArgumentList.Add(root.FullName); foreach (string arg in args) start.ArgumentList.Add(arg);
@@ -27,6 +27,10 @@ static class Options
             .Where(x => x.EndsWith(".cs") || x.EndsWith(".csproj"))) {
             string name = Path.GetRelativePath(root.FullName, path), target = Path.Combine(directory, "source", name); System.IO.Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             File.Copy(path, target); files[name] = FileResearchAuditSink.FileHash(target);
+        }
+        foreach(string relative in new[] { "native/Directory.Build.props","scripts/research_lab_adapter.py","scripts/research_matrix.py","scripts/research_analyze.py","scripts/research_logcheck.py" }) {
+            string path=Path.Combine(root.FullName,relative);if(!File.Exists(path))continue;
+            string target=Path.Combine(directory,"source",relative);Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);
         }
         return new { Status = "recorded", Commit = Query("rev-parse", "HEAD"), Dirty = Query("status", "--porcelain") != "", SourceFilesSha256 = FileResearchAuditSink.Hash(files), Files = files };
     }

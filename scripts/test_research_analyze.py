@@ -38,6 +38,11 @@ def synthetic(block="synthetic-b1", condition="A", latency=10, **overrides):
 
 
 class SyntheticAnalysisTests(unittest.TestCase):
+    def test_new_evidence_without_final_seal_is_not_eligible(self):
+        self.save("unsealed",synthetic(evidence_schema_version=1))
+        report=self.report()
+        self.assertFalse(report["ledger"][0]["eligible"])
+        self.assertIn("evidence_integrity_failed",report["ledger"][0]["exclusion_reasons"])
     def pre_value(self, **overrides):
         baseline=dict(basis="pre-intervention-window-v1",regime="cpu",stable=True,regime_attained=True,
             started_utc="2026-11-10T00:00:00+00:00",ended_utc="2026-11-10T00:00:02+00:00",

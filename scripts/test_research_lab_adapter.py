@@ -4,6 +4,9 @@ import pathlib
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch, MagicMock
+from types import SimpleNamespace
+import json
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import research_lab_adapter as adapter
@@ -11,6 +14,25 @@ import research_matrix as matrix
 
 
 class AdapterTests(unittest.TestCase):
+    def args(self,root):
+        root=pathlib.Path(root)
+        return SimpleNamespace(outcome=root/'outcome.json',native_dir=root/'native',lab=root/'lab.exe',model=root/'model.json',
+            condition='A',regime='healthy',block='SYNTHETIC',seed='1',seconds=2,background_threads=1,variant='None',allow_high_cpu=False)
+    def test_launch_error_preserves_adapter_start_and_stream_files(self):
+        with self.temporary() as root, patch.object(adapter.subprocess,'Popen',side_effect=OSError('SYNTHETIC launch denial')):
+            self.assertEqual(adapter.run_adapter(self.args(root)),2)
+            path=pathlib.Path(root)
+            self.assertTrue((path/'adapter.started.json').is_file())
+            self.assertTrue((path/'native.stdout.log').is_file() and (path/'native.stderr.log').is_file())
+            done=json.loads((path/'adapter.finished.json').read_text())
+            self.assertIn('SYNTHETIC',done['error']);self.assertFalse(done['evidence']['ok'])
+            self.assertFalse((path/'outcome.json').exists())
+    def test_native_success_without_seal_is_rejected(self):
+        with self.temporary() as root:
+            fake=MagicMock(pid=123);fake.wait.return_value=0
+            with patch.object(adapter.subprocess,'Popen',return_value=fake):
+                self.assertEqual(adapter.run_adapter(self.args(root)),2)
+            self.assertFalse(json.loads((pathlib.Path(root)/'adapter.finished.json').read_text())['evidence']['ok'])
     def temporary(self):
         root = pathlib.Path(__file__).resolve().parents[1] / "work" / "test-lab-adapter"
         root.mkdir(parents=True, exist_ok=True)

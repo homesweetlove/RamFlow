@@ -54,20 +54,36 @@ static class FixtureWorker
 
 sealed class FixtureChild : IAsyncDisposable
 {
-    readonly Process process; readonly Task reader;
+    readonly Process process; readonly Task reader,stderr;
     readonly System.Collections.Concurrent.ConcurrentDictionary<int, TaskCompletionSource<WorkerReply>> pending = new();
     readonly TaskCompletionSource ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
     readonly StreamWriter raw;
+    readonly EvidenceJournal? evidence;
+    readonly string role;
+    volatile bool stopping;
+    Exception? readerError;
     int nextId;
     public WorkerReply? Progress { get; private set; }
     public Process Process => process;
     public long Identity { get; }
-    public FixtureChild(string executable, string role, string mode, int mib, int threads, int seed, int targetUnits, string rawPath) {
+    public FixtureChild(string executable, string role, string mode, int mib, int threads, int seed, int targetUnits, string rawPath,EvidenceJournal? evidence=null) {
+        this.evidence=evidence;this.role=role;
         var start = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (string arg in new[] { "worker", "--role", role, "--mode", mode, "--mib", mib.ToString(), "--threads", threads.ToString(), "--seed", seed.ToString(), "--units", targetUnits.ToString() }) start.ArgumentList.Add(arg);
         raw = new(new FileStream(rawPath, FileMode.CreateNew)) { AutoFlush = true };
-        process = Process.Start(start) ?? throw new IOException("Fixture child failed to launch."); Identity = process.StartTime.ToFileTimeUtc();
+        Process? created=null;StreamWriter? errorWriter=null;
+        try {
+            errorWriter=new(new FileStream(rawPath+".stderr.jsonl",FileMode.CreateNew,FileAccess.Write,FileShare.Read)) { AutoFlush=true };
+            process=created=Process.Start(start) ?? throw new IOException("Fixture child failed to launch.");Identity=process.StartTime.ToFileTimeUtc();
+            evidence?.Write("process-owned",new { role,pid=process.Id,creation_filetime=Identity,executable,sha256=RamFlow.Core.FileResearchAuditSink.FileHash(executable),arguments=start.ArgumentList.ToArray() },true);
+        } catch {
+            if(created is not null) { try { if(!created.HasExited) { created.Kill();created.WaitForExit(5000); } } finally {created.Dispose();} }
+            errorWriter?.Dispose();raw.Dispose();throw;
+        }
+        stderr=Task.Run(async()=> { using(errorWriter) {
+            while(await process.StandardError.ReadLineAsync() is string line) await errorWriter.WriteLineAsync(JsonSerializer.Serialize(new { time_utc=DateTimeOffset.UtcNow,text=line }));
+        } });
         reader = Task.Run(async () => {
             try {
                 while (await process.StandardOutput.ReadLineAsync() is string line) {
@@ -77,21 +93,36 @@ sealed class FixtureChild : IAsyncDisposable
                     if (reply.Kind == "progress") Progress = reply;
                     if (reply.Id != 0 && pending.TryRemove(reply.Id, out var waiter)) waiter.TrySetResult(reply);
                 }
-                throw new IOException("Fixture output closed: " + await process.StandardError.ReadToEndAsync());
-            } catch (Exception e) { ready.TrySetException(e); foreach (var waiter in pending.Values) waiter.TrySetException(e); }
+                if(!stopping) throw new IOException("Fixture output closed unexpectedly; inspect the persisted stderr stream.");
+            } catch (Exception e) { readerError=e;ready.TrySetException(e); foreach (var waiter in pending.Values) waiter.TrySetException(e);
+                evidence?.TryWrite("worker-stream-error",new { role,pid=process.Id,creation_filetime=Identity,error=e.ToString() }); }
         });
     }
     public Task Ready() => ready.Task.WaitAsync(TimeSpan.FromSeconds(15));
     public async Task<WorkerReply> Request(string verb) {
+        if(readerError is not null) throw new IOException("Fixture reader failed",readerError);
         int id = Interlocked.Increment(ref nextId); var reply = new TaskCompletionSource<WorkerReply>(TaskCreationOptions.RunContinuationsAsynchronously);
         pending[id] = reply;
-        try { await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new { id, verb })); await process.StandardInput.FlushAsync();
-            return await reply.Task.WaitAsync(TimeSpan.FromSeconds(15)); }
+        var clock=Stopwatch.StartNew();
+        try {
+            evidence?.Write("request-begin",new { role,pid=process.Id,creation_filetime=Identity,id,verb });
+            await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new { id, verb })); await process.StandardInput.FlushAsync();
+            var value=await reply.Task.WaitAsync(TimeSpan.FromSeconds(15));double wallMs=clock.Elapsed.TotalMilliseconds;
+            evidence?.Write("request-end",new { role,pid=process.Id,creation_filetime=Identity,id,verb,wall_ms=wallMs,reply=value });
+            return value;
+        } catch(Exception e) { evidence?.TryWrite("request-error",new { role,pid=process.Id,creation_filetime=Identity,id,verb,error=e.ToString(),wall_ms=clock.Elapsed.TotalMilliseconds });throw; }
         finally { pending.TryRemove(id, out _); }
     }
     public async ValueTask DisposeAsync() {
+        bool exitedBeforeStop=process.HasExited;
+        stopping=true;
         try { if (!process.HasExited) { await process.StandardInput.WriteLineAsync("{\"id\":0,\"verb\":\"stop\"}"); await process.StandardInput.FlushAsync(); await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5)); } }
-        catch (Exception) { if (!process.HasExited) { process.Kill(); await process.WaitForExitAsync(); } }
-        await reader; raw.Dispose(); process.Dispose();
+        catch (Exception) { if (!process.HasExited) { evidence?.TryWrite("owned-child-forced-stop",new { role,pid=process.Id,creation_filetime=Identity });process.Kill(); await process.WaitForExitAsync(); } }
+        try {
+            await reader;await stderr;
+            evidence?.TryWrite("process-exited",new { role,pid=process.Id,creation_filetime=Identity,exit_code=process.ExitCode });
+            if(readerError is not null) throw new IOException("Fixture reader failed; preserve raw output",readerError);
+            if(exitedBeforeStop || process.ExitCode!=0) throw new IOException("Fixture exited unexpectedly or with a nonzero exit code.");
+        } finally { raw.Dispose();process.Dispose(); }
     }
 }

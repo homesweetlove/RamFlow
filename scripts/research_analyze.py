@@ -20,6 +20,7 @@ import random
 import statistics
 import sys
 import textwrap
+import research_logcheck
 
 
 COHORT = ("split", "hardware_id", "workload_id", "regime", "regime_basis")
@@ -290,6 +291,12 @@ def load_ledger(input_dir, expected_outcomes=None):
             reasons.append("status_" + value["status"])
         if value["condition"] == "calibration":
             reasons.append("calibration")
+        evidence_root=path.parent
+        if (path.parent/"native/run-manifest.json").is_file():evidence_root=path.parent/"native"
+        if value.get("evidence_schema_version")==1 or str(value.get("workload_id","")).endswith(":evidence-v1") or any((evidence_root/name).exists() for name in ("run-manifest.json","completion.json","artifact-index.json","trial-events.jsonl")):
+            validation=research_logcheck.check_run(evidence_root)
+            row["evidence_integrity"]=validation
+            if not validation["ok"]:reasons.append("evidence_integrity_failed")
         if value["schema_version"]==3:
             for field in ("stable","regime_attained"):
                 if not value["pre_intervention"][field]:

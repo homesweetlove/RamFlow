@@ -299,7 +299,9 @@ def create_run(run, config, supplied_bytes, schedule, binaries, execute):
                "scripts/BenchmarkLab/Program.cs", "scripts/BenchmarkLab/BenchmarkLab.csproj",
                "src/winmemoryflow/core/benchmark.py", "scripts/research/README.md", "scripts/research/plan.example.json",
                "scripts/research_lab_adapter.py", "scripts/research_analyze.py", "native/RamFlow.Core/MeasuredCostModel.cs",
-               "native/RamFlow.Core/StarvationGuard.cs", "scripts/ResearchLab/Trial.cs")
+               "native/RamFlow.Core/StarvationGuard.cs", "scripts/ResearchLab/Trial.cs",
+               "scripts/ResearchLab/EvidenceJournal.cs","scripts/ResearchLab/FixtureWorker.cs","scripts/ResearchLab/PreInterventionWindow.cs",
+               "scripts/ResearchLab/IndependentObserver.cs","scripts/ResearchLab/Program.cs","scripts/ResearchLab/LabInfrastructure.cs","scripts/research_logcheck.py")
     for relative in sources:
         artifacts.append(snapshot(run, ROOT / relative, "source/" + relative, "source"))
     binary_records = [snapshot(run, path, "binaries/%03d-%s" % (i, path.name), "binary")

@@ -5,6 +5,11 @@ using System.Security.Principal;
 using System.Text.Json;
 
 int passed = 0;
+if(args.Length==2 && args[0]=="--evidence-open-child") {
+    Directory.CreateDirectory(args[1]);using var evidence=new ResearchLab.EvidenceJournal(args[1],args);
+    evidence.Write("diagnostic-ready",new { scope="SYNTHETIC logger interruption test; no resource action" },true);
+    Console.WriteLine("ready");await Task.Delay(TimeSpan.FromMinutes(2));return;
+}
 if (args.Contains("--research-disposable-child")) { await Task.Delay(TimeSpan.FromMinutes(2)); return; }
 if(args.Length>=3 && args[0]=="--queue-echo") { await Task.Delay(1000);File.WriteAllText(args[1],JsonSerializer.Serialize(args.Skip(2).ToArray()));return; }
 if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
@@ -14,6 +19,7 @@ ResearchPolicyTests.Run(Check);
 CostModelTests.Run(Check);
 PreInterventionTests.Run(Check);
 ObserverControlTests.Run(Check);
+EvidenceJournalTests.Run(Check);
 StarvationTests.Run(Check);
 BackgroundJobsTests.Run(Check);
 UiHandoffTests.Run(Check);

@@ -34,10 +34,20 @@ jobs:
           dotnet build scripts/ResearchLab -c Release
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/test_research_lab_windows.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/test_research_logging_windows.py
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: RamFlow-native-windows-x64
           path: |
             dist/RamFlow-0.4.0-carp.2-research-windows-x64.zip
             dist/RamFlow-0.4.0-carp.2-research-windows-x64.zip.sha256.txt
             artifacts/native-dashboard.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: RamFlow-research-logging-diagnostics
+          path: |
+            work/logging-integration-*/
+            work/lab-windows-smoke-*/

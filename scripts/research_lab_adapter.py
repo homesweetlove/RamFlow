@@ -2,11 +2,14 @@
 import argparse
 import hashlib
 import json
+import os
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 import sys
 
 import research_matrix
+import research_logcheck
 
 
 def make_config(lab, model, seconds=5, blocks=6, variant="WithoutBackgroundCost", background_threads=1, allow_high_cpu=False):
@@ -54,21 +57,54 @@ def run_adapter(args):
         "--variant", args.variant, "--split", "pilot"]
     if args.allow_high_cpu:
         command.append("--allow-high-cpu")
-    child = subprocess.Popen(command, shell=False, stdin=subprocess.DEVNULL)
-    try:
-        code = child.wait()
-    except KeyboardInterrupt:
-        child.terminate()
-        child.wait(timeout=10)
-        code = 130
+    def record(name, value):
+        with (destination.parent/name).open('x',encoding='utf-8') as target:
+            json.dump(value,target,ensure_ascii=False,indent=2);target.flush();os.fsync(target.fileno())
+    record('adapter.started.json',dict(command=command,host_pid=os.getpid(),started_utc=datetime.now(timezone.utc).isoformat(),
+        scope='Native stdout/stderr retained even if parsing/startup fails'))
+    child=None;error=None;forced=False
+    def stop_owned():
+        nonlocal error,forced
+        if child is None or child.poll() is not None:return
+        try:
+            if args.native_dir.is_dir() and not (args.native_dir/'cancel.request').exists():
+                with (args.native_dir/'cancel.request').open('x',encoding='utf-8') as cancel:
+                    json.dump(dict(reason='adapter interrupted or logging failed',time_utc=datetime.now(timezone.utc).isoformat()),cancel);cancel.flush();os.fsync(cancel.fileno())
+            child.wait(timeout=40)
+        except (OSError,subprocess.TimeoutExpired) as exc:
+            error=(error or '')+'; cleanup: '+str(exc);forced=True
+            child.terminate()
+            try:child.wait(timeout=10)
+            except subprocess.TimeoutExpired:child.kill();child.wait(timeout=5)
+    with (destination.parent/'native.stdout.log').open('xb') as stdout, (destination.parent/'native.stderr.log').open('xb') as stderr:
+        try:
+            child = subprocess.Popen(command, shell=False, stdin=subprocess.DEVNULL,stdout=stdout,stderr=stderr)
+            record('adapter.child.json',dict(pid=child.pid,command=command))
+            code = child.wait()
+        except KeyboardInterrupt:
+            stop_owned()
+            code=130
+        except (OSError,subprocess.SubprocessError) as exc:
+            error=str(exc);stop_owned();code=2
     native = args.native_dir / "outcome.json"
-    if native.is_file():
-        # Copy actual bytes. Missing/failed measurements are never synthesized.
-        with destination.open("xb") as stream:
-            stream.write(native.read_bytes())
-        with (destination.parent / "archive-alias.json").open("x", encoding="utf-8") as stream:
-            json.dump(dict(canonical="outcome.json", archived_copy="native/outcome.json",
-                sha256=hashlib.sha256(native.read_bytes()).hexdigest()), stream)
+    try:
+        if native.is_file():
+            # Copy actual bytes. Missing/failed measurements are never synthesized.
+            with destination.open("xb") as stream:
+                stream.write(native.read_bytes());stream.flush();os.fsync(stream.fileno())
+            with (destination.parent / "archive-alias.json").open("x", encoding="utf-8") as stream:
+                json.dump(dict(canonical="outcome.json", archived_copy="native/outcome.json",
+                    sha256=hashlib.sha256(native.read_bytes()).hexdigest()), stream)
+                stream.flush();os.fsync(stream.fileno())
+    except OSError as exc:
+        error=(error or '')+'; evidence copy: '+str(exc);code=2
+    evidence=research_logcheck.check_run(args.native_dir)
+    if code==0 and not evidence['ok']:code=2
+    record('adapter.finished.json',dict(return_code=code,pid=child.pid if child else None,error=error,
+        forced_stop=forced,cleanup='unconfirmed' if forced else 'inspect native completion',evidence=evidence,
+        stdout_sha256=hashlib.sha256((destination.parent/'native.stdout.log').read_bytes()).hexdigest(),
+        stderr_sha256=hashlib.sha256((destination.parent/'native.stderr.log').read_bytes()).hexdigest(),
+        finished_utc=datetime.now(timezone.utc).isoformat()))
     return code if code else 0 if native.is_file() else 2
 
 
