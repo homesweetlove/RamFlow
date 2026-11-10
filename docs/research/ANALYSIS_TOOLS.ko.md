@@ -1,5 +1,7 @@
 # ResearchLab 결과 분석 도구
 
+현재 schema3은 `pre_intervention`의 실제 관측 경합·안정성·도달 여부와 조치 전 시간 순서를 검사해 코호트/적격성을 정한다. 조치 후 `regime`은 `observed_regime` 결과로 남으며 전환 때문에 제외하지 않는다. legacy schema2는 기존 처리와 `regime_basis`를 유지하므로 두 버전을 합치지 않는다. [프로토콜](PRE_INTERVENTION_PROTOCOL.ko.md) · [수정 후 실측](PHASE4_PRE_INTERVENTION_RESULTS.ko.md).
+
 `scripts/research_analyze.py`는 Python 3.10 이상 **표준 라이브러리만** 사용하는 읽기 전용 분석기다. ResearchLab의 재귀 `**/outcome.json`을 읽고 새 디렉터리에 CSV·JSON·SVG·Markdown을 생성한다. 실험, 실제 부하, 엔진, 관측기, 모델 학습을 실행하지 않는다. C# 학습 DTO와도 독립적이다. 의존성 설치가 필요 없다.
 
 산출물은 기술통계와 탐색적 대응 비교다. 조건 A 하나의 개선, Pareto 위치, bootstrap CI, 합성 fixture만으로 정책 성공이나 실제 앱 성능을 선언하지 않는다. 테스트에 쓰이는 숫자는 모두 `SYNTHETIC TEST DATA`로 표시한 가상 자료다.

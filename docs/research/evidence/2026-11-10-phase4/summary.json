@@ -1,0 +1,631 @@
+{
+  "scope": "Exploratory one-PC synthetic CPU pilot; not a CARP efficacy verdict",
+  "measurement_source_commit": "9b4c16376744593e5116641a5ff8bae0028091c9",
+  "observer_fix_smoke_commit": "91c2575f8c77d7287856abc5c4d5637bf3932d46",
+  "calibration": {
+    "trials": 27,
+    "fit_blocks": 6,
+    "validation_blocks": 3,
+    "restored": 27
+  },
+  "comparison": {
+    "trials": 18,
+    "eligible": 17,
+    "failed": 1,
+    "restored": 18,
+    "policies": [
+      {
+        "condition": "A",
+        "n_blocks": 3,
+        "p50": 6.667983333333334,
+        "p95": 7.078728333333333,
+        "throughput": 519.0238605954539,
+        "applies": 0,
+        "post_regimes": [
+          "cpu",
+          "cpu",
+          "cpu"
+        ],
+        "failed": 0
+      },
+      {
+        "condition": "B",
+        "n_blocks": 3,
+        "p50": 6.7035,
+        "p95": 7.051125,
+        "throughput": 531.346185660042,
+        "applies": 0,
+        "post_regimes": [
+          "cpu",
+          "cpu",
+          "cpu"
+        ],
+        "failed": 0
+      },
+      {
+        "condition": "C",
+        "n_blocks": 3,
+        "p50": 5.8552333333333335,
+        "p95": 7.5045883333333325,
+        "throughput": 221.52014714837958,
+        "applies": 3,
+        "post_regimes": [
+          "healthy",
+          "healthy",
+          "healthy"
+        ],
+        "failed": 0
+      },
+      {
+        "condition": "D",
+        "n_blocks": 2,
+        "p50": 5.9894,
+        "p95": 7.179919999999999,
+        "throughput": 364.13807138547577,
+        "applies": 8,
+        "post_regimes": [
+          "cpu",
+          "cpu",
+          "unknown"
+        ],
+        "failed": 1
+      },
+      {
+        "condition": "E",
+        "n_blocks": 3,
+        "p50": 6.731833333333333,
+        "p95": 7.077395,
+        "throughput": 530.4432084939236,
+        "applies": 0,
+        "post_regimes": [
+          "cpu",
+          "cpu",
+          "cpu"
+        ],
+        "failed": 0
+      },
+      {
+        "condition": "F",
+        "n_blocks": 3,
+        "p50": 6.7739,
+        "p95": 7.1153466666666665,
+        "throughput": 530.934434172156,
+        "applies": 0,
+        "post_regimes": [
+          "cpu",
+          "cpu",
+          "cpu"
+        ],
+        "failed": 0
+      }
+    ]
+  },
+  "model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+  "accepted_cells": 2,
+  "model_cells": [
+    {
+      "Action": "LowerCpu",
+      "Fit": [
+        {
+          "BlockId": "48e879e824f44213a315711f2205bc49",
+          "Features": {
+            "CpuPercent": 89.79936079545455,
+            "AvailableFraction": 0.4047016088168433,
+            "CommitFraction": 0.5883607617289146,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.011453699296932518,
+          "BackgroundLoss": 0.02388714887803889,
+          "ReaccessRisk": 0.07803359528580733,
+          "ControlCost": 0.008542831977941995
+        },
+        {
+          "BlockId": "e9417174b7bb45a595a7af0644f4f21b",
+          "Features": {
+            "CpuPercent": 89.79936079545455,
+            "AvailableFraction": 0.40564835064302096,
+            "CommitFraction": 0.5877477634743784,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.0019768807873450367,
+          "BackgroundLoss": 0.026202845906775685,
+          "ReaccessRisk": 0.2270915727081404,
+          "ControlCost": 0.008414828549404927
+        },
+        {
+          "BlockId": "3fb273af18254f458b2df2d38003978e",
+          "Features": {
+            "CpuPercent": 89.52710700757575,
+            "AvailableFraction": 0.4065696441519928,
+            "CommitFraction": 0.5865944385476218,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.0010184109380459994,
+          "BackgroundLoss": 0.031417614755337664,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.007051174742751671
+        },
+        {
+          "BlockId": "6eb8eaffd8b7453ab241247f1a4d079c",
+          "Features": {
+            "CpuPercent": 89.51822916666667,
+            "AvailableFraction": 0.40551329739000125,
+            "CommitFraction": 0.5874931726201931,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": 0.003133626274576029,
+          "BackgroundLoss": 0.0385616311234388,
+          "ReaccessRisk": 0.41378241606373467,
+          "ControlCost": 0.007301495128130921
+        },
+        {
+          "BlockId": "e2f42b5daeee4a3eba594011e16172eb",
+          "Features": {
+            "CpuPercent": 88.74585700757575,
+            "AvailableFraction": 0.4116223431070978,
+            "CommitFraction": 0.5871331310705044,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.000885005956770879,
+          "BackgroundLoss": 0.019808364713815974,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.008054505878898123
+        },
+        {
+          "BlockId": "0ef2143805c94e4a8b3cbdd75766ce1a",
+          "Features": {
+            "CpuPercent": 89.0625,
+            "AvailableFraction": 0.4102834878110614,
+            "CommitFraction": 0.5878195218555939,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.004507430679131508,
+          "BackgroundLoss": 0.02729979979070518,
+          "ReaccessRisk": 0.11907263144012248,
+          "ControlCost": 0.007189621779732628
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": 0.007684352838100563,
+      "BackgroundMae": 0.003762634257231569,
+      "ReaccessMae": 0.09428297528698774,
+      "OverheadMae": 0.0008181266740204188,
+      "Quality": 0.836989524822702,
+      "Accepted": true,
+      "Reason": "held-out-validation-accepted"
+    },
+    {
+      "Action": "LowerCpu, EcoQos",
+      "Fit": [
+        {
+          "BlockId": "48e879e824f44213a315711f2205bc49",
+          "Features": {
+            "CpuPercent": 87.6953125,
+            "AvailableFraction": 0.4054437977135814,
+            "CommitFraction": 0.5879754869909216,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.08439372910675957,
+          "BackgroundLoss": 0.5815538777887992,
+          "ReaccessRisk": 1,
+          "ControlCost": 0.006708098893261684
+        },
+        {
+          "BlockId": "e9417174b7bb45a595a7af0644f4f21b",
+          "Features": {
+            "CpuPercent": 87.77817234848484,
+            "AvailableFraction": 0.4047977648002098,
+            "CommitFraction": 0.5882165240182464,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.11148968792257152,
+          "BackgroundLoss": 0.5877786273639599,
+          "ReaccessRisk": 1,
+          "ControlCost": 0.006340999231219594
+        },
+        {
+          "BlockId": "3fb273af18254f458b2df2d38003978e",
+          "Features": {
+            "CpuPercent": 89.0625,
+            "AvailableFraction": 0.4065377532228361,
+            "CommitFraction": 0.5868571040220645,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.08645840139310668,
+          "BackgroundLoss": 0.5839898773766545,
+          "ReaccessRisk": 0.8254483334825291,
+          "ControlCost": 0.007920644927644648
+        },
+        {
+          "BlockId": "6eb8eaffd8b7453ab241247f1a4d079c",
+          "Features": {
+            "CpuPercent": 90.05681818181819,
+            "AvailableFraction": 0.40486935832551363,
+            "CommitFraction": 0.5877952499316061,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.08655850374626795,
+          "BackgroundLoss": 0.5846307346568878,
+          "ReaccessRisk": 1,
+          "ControlCost": 0.006591250048417858
+        },
+        {
+          "BlockId": "e2f42b5daeee4a3eba594011e16172eb",
+          "Features": {
+            "CpuPercent": 88.94708806818181,
+            "AvailableFraction": 0.4056140437343827,
+            "CommitFraction": 0.5872300745768082,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.06675270891246377,
+          "BackgroundLoss": 0.5859567109795988,
+          "ReaccessRisk": 1,
+          "ControlCost": 0.0075578760341
+        },
+        {
+          "BlockId": "0ef2143805c94e4a8b3cbdd75766ce1a",
+          "Features": {
+            "CpuPercent": 90.14547545077973,
+            "AvailableFraction": 0.41131140654781984,
+            "CommitFraction": 0.587332833732226,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.10219665204983164,
+          "BackgroundLoss": 0.586591364447544,
+          "ReaccessRisk": 1,
+          "ControlCost": 0.007442231278923059
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": 0.00951185474409666,
+      "BackgroundMae": 0.0029765103770056367,
+      "ReaccessMae": 0.03032410181401272,
+      "OverheadMae": 0.0007467945875023061,
+      "Quality": 0.9418161111608431,
+      "Accepted": true,
+      "Reason": "held-out-validation-accepted"
+    }
+  ],
+  "paired_contrasts": [
+    {
+      "baseline_condition": "A",
+      "baseline_mean": 7.078728333333333,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 12947552628911929021,
+      "candidate_condition": "E",
+      "candidate_mean": 7.077395,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": -0.0013333333333331865,
+      "difference_ci95": [
+        -0.07223499999999916,
+        0.03466000000000058
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "foreground_p95_ms",
+      "n_blocks": 3,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 3,
+      "n_unpaired_or_excluded": 0,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758",
+        "cpu-b0003-5134920441963009272"
+      ],
+      "ratio": 0.9998116422511859,
+      "ratio_ci95": [
+        0.989850515166971,
+        1.0048812776385094
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": -0.021713743887335005,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 8858,
+      "unit": "ms",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    },
+    {
+      "baseline_condition": "A",
+      "baseline_mean": 519.0238605954539,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 14201987512314379958,
+      "candidate_condition": "E",
+      "candidate_mean": 530.4432084939236,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": 11.419347898469747,
+      "difference_ci95": [
+        5.573199540835958,
+        18.613664589149835
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "background_throughput_units_per_s",
+      "n_blocks": 3,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 3,
+      "n_unpaired_or_excluded": 0,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758",
+        "cpu-b0003-5134920441963009272"
+      ],
+      "ratio": 1.0220015856021893,
+      "ratio_ci95": [
+        1.0105450725752394,
+        1.0361540916689125
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": 1.7239506048120246,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 8860,
+      "unit": "units/s",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    },
+    {
+      "baseline_condition": "C",
+      "baseline_mean": 7.5045883333333325,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 12958171809307537544,
+      "candidate_condition": "E",
+      "candidate_mean": 7.077395,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": -0.4271933333333324,
+      "difference_ci95": [
+        -0.44721499999999725,
+        -0.3877549999999994
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "foreground_p95_ms",
+      "n_blocks": 3,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 3,
+      "n_unpaired_or_excluded": 0,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758",
+        "cpu-b0003-5134920441963009272"
+      ],
+      "ratio": 0.9430757139021395,
+      "ratio_ci95": [
+        0.9404413588561156,
+        0.9478307140272018
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": -12.5071468372031,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 8951,
+      "unit": "ms",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    },
+    {
+      "baseline_condition": "C",
+      "baseline_mean": 221.52014714837958,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 5363563435334144590,
+      "candidate_condition": "E",
+      "candidate_mean": 530.4432084939236,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": 308.92306134554406,
+      "difference_ci95": [
+        302.186864022658,
+        313.24371239055813
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "background_throughput_units_per_s",
+      "n_blocks": 3,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 3,
+      "n_unpaired_or_excluded": 0,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758",
+        "cpu-b0003-5134920441963009272"
+      ],
+      "ratio": 2.3945596611518134,
+      "ratio_ci95": [
+        2.3636520667892116,
+        2.422461102359947
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": 52.262626281146346,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 8878,
+      "unit": "units/s",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    },
+    {
+      "baseline_condition": "D",
+      "baseline_mean": 7.179919999999999,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 5196359159959756977,
+      "candidate_condition": "E",
+      "candidate_mean": 7.093655,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": -0.08626499999999959,
+      "difference_ci95": [
+        -0.1894399999999994,
+        0.016910000000000203
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "foreground_p95_ms",
+      "n_blocks": 2,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 2,
+      "n_unpaired_or_excluded": 1,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758"
+      ],
+      "ratio": 0.9879852421754004,
+      "ratio_ci95": [
+        0.9741368247163708,
+        1.0024036479728904
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": -0.5912146012023974,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 5059,
+      "unit": "ms",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    },
+    {
+      "baseline_condition": "D",
+      "baseline_mean": 364.13807138547577,
+      "baseline_model_id": null,
+      "baseline_policy_variant": "None",
+      "bootstrap_iterations": 10000,
+      "bootstrap_seed": 18256038957221819196,
+      "candidate_condition": "E",
+      "candidate_mean": 528.6221113139356,
+      "candidate_model_id": "30dc959a9a0c01ba81ff54c0e31f0fbeb3aec151d73438bf34fb2a496993b943",
+      "candidate_policy_variant": "None",
+      "difference": 164.48403992845985,
+      "difference_ci95": [
+        159.6978525569998,
+        169.2702272999199
+      ],
+      "difference_defined_draws": 10000,
+      "hardware_id": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+      "metric": "background_throughput_units_per_s",
+      "n_blocks": 2,
+      "n_missing_metric_pairs": 0,
+      "n_pairable_blocks": 2,
+      "n_unpaired_or_excluded": 1,
+      "paired_block_ids": [
+        "cpu-b0001-11099982400163257324",
+        "cpu-b0002-9295631334301822758"
+      ],
+      "ratio": 1.4517078900940776,
+      "ratio_ci95": [
+        1.4386217210995071,
+        1.4647906159127164
+      ],
+      "ratio_defined_draws": 10000,
+      "regime": "cpu",
+      "regime_basis": "pre-intervention-window-v1",
+      "split": "pilot",
+      "standardized_dz": 24.30071599869118,
+      "standardized_dz_ci95": null,
+      "standardized_dz_defined_draws": 4916,
+      "unit": "units/s",
+      "workload_id": "synthetic-sha-pagewalk-v2:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1:pre5"
+    }
+  ],
+  "carp_reason": "no-net-benefit-above-margin with validated-local-neighbour-estimates; CARP performed no live interventions",
+  "failure": [
+    "System.UnauthorizedAccessException: Access to the path is denied.\r\n   at System.IO.FileSystem.MoveFile(String sourceFullPath, String destFullPath, Boolean overwrite)\r\n   at ResearchLab.ObserverProtocol.WritePhase(String path, ObserverPhase phase) in C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\scripts\\ResearchLab\\IndependentObserver.cs:line 331\r\n   at ResearchLab.IndependentObserver.SetPhase(String phase) in C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\scripts\\ResearchLab\\IndependentObserver.cs:line 90\r\n   at ResearchLab.Trial.Run(String[] args) in C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\scripts\\ResearchLab\\Trial.cs:line 72"
+  ],
+  "failed_original_retained": true,
+  "failed_trial_replaced": false,
+  "observer_fix_smoke": {
+    "scope": "Separate functional run, not a replacement paired block",
+    "status": "completed",
+    "restored": true,
+    "applies": 4,
+    "control_writes": [
+      {
+        "phase": "observe",
+        "revision": 1,
+        "retries": 0,
+        "elapsed_ms": 4.926,
+        "success": true,
+        "error": null
+      },
+      {
+        "phase": "observe",
+        "revision": 2,
+        "retries": 0,
+        "elapsed_ms": 4.6361,
+        "success": true,
+        "error": null
+      },
+      {
+        "phase": "evaluate",
+        "revision": 3,
+        "retries": 0,
+        "elapsed_ms": 9.5287,
+        "success": true,
+        "error": null
+      },
+      {
+        "phase": "intervene",
+        "revision": 4,
+        "retries": 0,
+        "elapsed_ms": 4.4188,
+        "success": true,
+        "error": null
+      },
+      {
+        "phase": "restore",
+        "revision": 5,
+        "retries": 0,
+        "elapsed_ms": 5.1351,
+        "success": true,
+        "error": null
+      },
+      {
+        "phase": "stop",
+        "revision": 6,
+        "retries": 0,
+        "elapsed_ms": 8.7822,
+        "success": true,
+        "error": null
+      }
+    ]
+  },
+  "quiet_execution": "No local tests/builds/statistical analysis during measurements; only parent progress-file counts and commentary. Normal user-machine background activity is uncontrolled.",
+  "source_and_pre_feature_checks": "44 completed records verified: pre-file SHA256, pre features, captured clean source commit, treatment/audit ordering; all45 restoration/target checks passed",
+  "limitations": [
+    "17 eligible comparison trials in 3 blocks; V1 has 2 complete paired blocks",
+    "No CARP live intervention or superiority proof",
+    "No real UI latency/Chrome/VS Code/build",
+    "No long-duration starvation, RAM/mixed or multi-PC evidence",
+    "No p99 or finite background completion-time evidence",
+    "Observer fix was made after measurement and has not been rebenchmarked as the same binary"
+  ]
+}

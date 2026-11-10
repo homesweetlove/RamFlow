@@ -1,6 +1,6 @@
 # 실제 Windows 계측 실행
 
-후속 CPU 파일럿은 [실측 기록](PHASE3_CPU_PILOT.ko.md)을 따른다. 고부하 비교 설정은 `research_lab_adapter.py config --background-threads 12 --allow-high-cpu`로 명시적으로 선택할 수 있다. 모든 비교군에 같은 스레드 수를 전달하며 네이티브 장치별 상한과 필수 안전 검사는 그대로 적용된다. 현재 조치 후 경합 필터는 정책 효과로 인한 상태 전환을 제외할 수 있으므로, 이 분석을 확증 비교로 쓰기 전에 조치 전 적격성 관측을 구현해야 한다.
+고부하 비교 설정은 `research_lab_adapter.py config --background-threads 12 --allow-high-cpu`로 명시적으로 선택할 수 있다. 모든 비교군에 같은 스레드 수를 전달하며 네이티브 장치별 상한과 필수 안전 검사는 그대로 적용된다. [Phase3 기록](PHASE3_CPU_PILOT.ko.md)의 사후 경합 필터 문제를 [조치 전 관측](PRE_INTERVENTION_PROTOCOL.ko.md)으로 수정했고 [새 실측](PHASE4_PRE_INTERVENTION_RESULTS.ko.md)을 분리 보존한다. 현재 기본5초 동안 Engine 생성 전에 경합/센서 특징을 고정하며, 조치 후 상태 변화는 제외 사유가 아니다. 이전 schema2 자료를 새 schema3과 합치지 않는다.
 
 기존 스케줄을 유지하고 `scripts/ResearchLab`·`research_lab_adapter.py`를 연결했다. 새 경로는 일회용 합성 전경/배경 프로세스만 생성한다. Chrome/VS Code·실제 빌드 어댑터는 아직 구현하지 않았으며 아래 수치를 실제 앱 입력 지연으로 해석하지 않는다.
 
