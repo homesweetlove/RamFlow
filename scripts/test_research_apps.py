@@ -1,6 +1,9 @@
 """SYNTHETIC contract fixtures only; never experimental observations."""
 import copy
 import unittest
+import json
+from pathlib import Path
+import tempfile
 import research_logcheck as gate
 import test_research_logcheck as integrity_fixtures
 
@@ -85,6 +88,16 @@ class AppVersionGate(unittest.TestCase):
         (helper.root/'pre-intervention.json').unlink();helper.index()
         result=gate.check_run(helper.root)
         self.assertIn('required_not_indexed:pre-intervention.json',result['errors'])
+
+    def test_unstarted_slots_never_become_zero_latency_successes(self):
+        import research_app_analyze as analysis
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1]/'work') as folder:
+            root=Path(folder);plan=dict(protocol='real-app-abc-v2',schedule=[dict(app=a,condition=c,session=a+'-'+c) for a in ['chrome','code'] for c in 'ABC'])
+            (root/'pilot-plan.json').write_text(json.dumps(plan))
+            result=analysis.summarize(root)
+            self.assertFalse(result['smoke_passed']);self.assertEqual([],result['metrics'])
+            self.assertTrue(all(s['status']=='unstarted' for s in result['sessions']))
+            self.assertFalse(any(result['matched_B_C_readbacks'].values()))
 
 
 if __name__ == '__main__': unittest.main()
