@@ -1,0 +1,53 @@
+{
+  "verified_code_commit": "09b9f8f4552b357ae8d8e6651f9d1bf61bc99d62",
+  "runs": [
+    {
+      "id": 42981909658,
+      "name": "Windows validation and portable build",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 56,
+      "jobs_url": "https://api.github.com/repos/homesweetlove/RamFlow/actions/runs/42981909658/jobs",
+      "logs_url": "https://api.github.com/repos/homesweetlove/RamFlow/actions/runs/42981909658/logs",
+      "workflow_id": 375937568
+    },
+    {
+      "id": 42981909820,
+      "name": "Native Windows validation",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 52,
+      "jobs_url": "https://api.github.com/repos/homesweetlove/RamFlow/actions/runs/42981909820/jobs",
+      "logs_url": "https://api.github.com/repos/homesweetlove/RamFlow/actions/runs/42981909820/logs",
+      "workflow_id": 376075866
+    }
+  ],
+  "local_native_assertions": 527,
+  "ci_native_assertions": 525,
+  "ci_contract_tests": 12,
+  "latest_local_contract_tests": 13,
+  "log_excerpt": [
+    "2026-11-11T07:46:50.4777473Z Ran 28 tests in 3.544s\r",
+    "2026-11-11T07:46:51.5003264Z Ran 25 tests in 0.752s\r",
+    "2026-11-11T07:46:51.6443349Z Ran 10 tests in 0.071s\r",
+    "2026-11-11T07:46:51.7308812Z Ran 12 tests in 0.014s\r",
+    "2026-11-11T07:46:51.8532481Z Ran 5 tests in 0.019s\r",
+    "2026-11-11T07:47:01.6166245Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T07:47:01.6549315Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T07:47:01.7253295Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T07:47:01.7379194Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T07:47:01.7456623Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T07:47:01.7472530Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T07:47:40.6301149Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T07:47:40.6774335Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T07:47:40.7437723Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T07:47:40.7568061Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T07:47:40.7644569Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T07:47:40.7665405Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T07:47:45.5199528Z Native Windows verification: 515 assertions passed.\r",
+    "2026-11-11T07:47:45.7002448Z Native IPC verification: 525 assertions passed.\r",
+    "2026-11-11T07:47:50.8343093Z   ResearchLab -> D:\\a\\RamFlow\\RamFlow\\scripts\\ResearchLab\\bin\\Release\\net10.0-windows\\ResearchLab.dll\r",
+    "2026-11-11T07:49:25.0602591Z ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.\r",
+    "2026-11-11T07:50:14.6285952Z Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at D:\\a\\RamFlow\\RamFlow\\work\\logging-integration-5026953a72b64337a40f26bd695bd27e\r"
+  ]
+}
