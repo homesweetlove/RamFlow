@@ -89,7 +89,9 @@ static class AppStudy
                     if(File.Exists(Path.Combine(root,"cancel.request")))throw new OperationCanceledException("Owner cancellation; restore and seal as failure.");
                     if(watch.Elapsed.TotalSeconds>seconds+45)throw new TimeoutException("Bounded phase timeout.");
                     if(watch.Elapsed.TotalSeconds>=nextTick) {
-                        engine?.Tick();var sample=provider.Sample();var readback=provider.ReadValues(background.Process.Id);
+                        // Reuse the exact decision snapshot: a second immediate sensor
+                        // read would reset CPU deltas and log a different interval.
+                        var sample=engine is null?provider.Sample():engine.Tick().Snapshot;var readback=provider.ReadValues(background.Process.Id);
                         evidence.Write("system-sample",new {phase,sample,readback,per_process_hard_faults=(double?)null,pages_input_scope="system-wide only"});
                         if(sample.Available<512UL*1048576||(double)sample.Commit/Math.Max(1,sample.CommitLimit)>.9)throw new IOException("Safety headroom exhausted.");
                         nextTick=watch.Elapsed.TotalSeconds+.5;
