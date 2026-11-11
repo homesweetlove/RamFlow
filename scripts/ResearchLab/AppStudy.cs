@@ -69,7 +69,9 @@ static class AppStudy
                 var start=new ProcessStartInfo(exe) {UseShellExecute=false,CreateNoWindow=true};
                 foreach(string arg in new[]{"--ipc-namespace",EnginePipe.VerificationNamespace!,"--data-root",Path.Combine(root,"engine-data"),"--ready-event",readyName})start.ArgumentList.Add(arg);
                 tray=Process.Start(start)??throw new IOException("Isolated tray launch failed.");
-                evidence.Write("process-owned",new {role="tray",pid=tray.Id,creation_filetime=tray.StartTime.ToFileTimeUtc(),executable=exe,sha256=FileResearchAuditSink.FileHash(exe),arguments=start.ArgumentList.ToArray()},true);
+                evidence.Write("process-owned",new {role="tray",pid=tray.Id,creation_filetime=tray.StartTime.ToFileTimeUtc(),executable=exe,sha256=FileResearchAuditSink.FileHash(exe),
+                    managed_dll_sha256=FileResearchAuditSink.FileHash(Path.ChangeExtension(exe,".dll")),core_dll_sha256=FileResearchAuditSink.FileHash(Path.Combine(Path.GetDirectoryName(exe)!,"RamFlow.Core.dll")),
+                    managed_version=FileVersionInfo.GetVersionInfo(Path.ChangeExtension(exe,".dll")).ProductVersion,arguments=start.ArgumentList.ToArray()},true);
                 if(!ready.WaitOne(8000)||tray.HasExited)throw new IOException("Isolated tray readiness failed.");
             }
             var targets=new Dictionary<string,(int,long)> {
