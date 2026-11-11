@@ -1,0 +1,48 @@
+{
+  "verified_commit": "a7b9e19bc91d1a0967075998bd3bad2027285226",
+  "native_run": {
+    "id": 43041560788,
+    "url": "https://github.com/homesweetlove/RamFlow/actions/runs/43041560788",
+    "conclusion": "success"
+  },
+  "product_run": {
+    "id": 43041561276,
+    "url": "https://github.com/homesweetlove/RamFlow/actions/runs/43041561276",
+    "conclusion": "success"
+  },
+  "ci_native_assertions": 525,
+  "contract_tests": 13,
+  "checksum_worker_test": "Two independent golden vectors passed in one Windows test",
+  "latest_local_sustained_gate_tests": 5,
+  "latest_local_other_tests": {
+    "app_contract": 13,
+    "integrity": 10,
+    "analysis": 25,
+    "adapter": 5
+  },
+  "log_excerpt": [
+    "2026-11-11T14:46:10.2075345Z Ran 38 tests in 0.137s\r",
+    "2026-11-11T14:46:14.8035389Z Ran 28 tests in 4.092s\r",
+    "2026-11-11T14:46:15.8294699Z Ran 25 tests in 0.739s\r",
+    "2026-11-11T14:46:15.9750303Z Ran 10 tests in 0.073s\r",
+    "2026-11-11T14:46:16.0713799Z Ran 13 tests in 0.021s\r",
+    "2026-11-11T14:46:16.1981128Z Ran 5 tests in 0.024s\r",
+    "2026-11-11T14:46:27.0510434Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T14:46:27.0920362Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T14:46:27.1553585Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T14:46:27.1673923Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T14:46:27.1749037Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T14:46:27.1764312Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T14:47:07.0191777Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T14:47:07.0988730Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T14:47:07.1612712Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T14:47:07.1731225Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T14:47:07.1804943Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T14:47:07.1819959Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T14:47:11.9606964Z Native Windows verification: 515 assertions passed.\r",
+    "2026-11-11T14:47:12.1265936Z Native IPC verification: 525 assertions passed.\r",
+    "2026-11-11T14:47:17.1907732Z   ResearchLab -> D:\\a\\RamFlow\\RamFlow\\scripts\\ResearchLab\\bin\\Release\\net10.0-windows\\ResearchLab.dll\r",
+    "2026-11-11T14:48:51.4266708Z ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.\r",
+    "2026-11-11T14:49:40.8482571Z Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at D:\\a\\RamFlow\\RamFlow\\work\\logging-integration-e14dc011eb4a4adfb800d04ca15e1986\r"
+  ]
+}
