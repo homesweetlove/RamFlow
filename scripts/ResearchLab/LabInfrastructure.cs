@@ -28,9 +28,14 @@ static class Options
             string name = Path.GetRelativePath(root.FullName, path), target = Path.Combine(directory, "source", name); System.IO.Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             File.Copy(path, target); files[name] = FileResearchAuditSink.FileHash(target);
         }
-        foreach(string relative in new[] { "native/Directory.Build.props","scripts/research_lab_adapter.py","scripts/research_matrix.py","scripts/research_analyze.py","scripts/research_logcheck.py" }) {
+        foreach(string relative in new[] { "native/Directory.Build.props","scripts/research_lab_adapter.py","scripts/research_matrix.py","scripts/research_analyze.py","scripts/research_logcheck.py","scripts/research_app_pilot.py","scripts/research_app_analyze.py","scripts/test_research_apps.py" }) {
             string path=Path.Combine(root.FullName,relative);if(!File.Exists(path))continue;
             string target=Path.Combine(directory,"source",relative);Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);
+        }
+        string appAssets=Path.Combine(root.FullName,"scripts","real_apps");
+        if(Directory.Exists(appAssets))foreach(string path in Directory.GetFiles(appAssets,"*",SearchOption.AllDirectories).Where(p=>!p.Contains("__pycache__") && !p.EndsWith(".pyc"))) {
+            string relative=Path.GetRelativePath(root.FullName,path),target=Path.Combine(directory,"source",relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);
         }
         return new { Status = "recorded", Commit = Query("rev-parse", "HEAD"), Dirty = Query("status", "--porcelain") != "", SourceFilesSha256 = FileResearchAuditSink.Hash(files), Files = files };
     }

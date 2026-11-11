@@ -4,9 +4,64 @@ import csv
 from datetime import datetime
 import hashlib
 import json
+import math
 from pathlib import Path, PurePosixPath
 
 COMPLETED_REQUIRED=('started.json','pre-intervention.json','effective-settings.json','resource-original.json','resource-final.json','cost-observation.json')
+
+def app_profile_errors(records,outcome):
+    """Semantic gate in addition to the fd17548 byte/index/lifecycle gate."""
+    errors=[]
+    def payload(kind):return [r.get('data',{}) for r in records if r.get('kind')==kind]
+    phases=['Normal','Contention','Recovery'];starts=payload('phase-start');ends=payload('phase-end')
+    if [r.get('phase') for r in starts]!=phases or [r.get('phase') for r in ends]!=phases:
+        errors.append('app_phases_missing_or_out_of_order');return errors
+    boundaries=[(r['kind'],r['data']['phase']) for r in records if r.get('kind') in ('phase-start','phase-end')]
+    if boundaries!=[(k,p) for p in phases for k in ('phase-start','phase-end')]:errors.append('app_phase_boundaries_overlap')
+    observed=payload('app-observation');summaries=outcome.get('phases',[])
+    if [r.get('phase') for r in summaries]!=phases:errors.append('app_summary_phases_mismatch');return errors
+    if len(observed)!=outcome.get('observations'):errors.append('app_observation_count_mismatch')
+    def near(a,b):return isinstance(a,(int,float)) and not isinstance(a,bool) and math.isfinite(a) and math.isclose(a,b,rel_tol=1e-10,abs_tol=1e-9)
+    def quantile(values,p):
+        values=sorted(values);x=(len(values)-1)*p;lo=int(x);hi=math.ceil(x)
+        return values[lo]+(values[hi]-values[lo])*(x-lo)
+    ready=payload('app-ready');features=ready[0].get('features',[]) if len(ready)==1 else []
+    expected=['search','sort'] if outcome.get('application')=='chrome' else ['completion','save']
+    if features!=expected:errors.append('app_features_missing_or_wrong')
+    active=None;positions={p:[] for p in phases}
+    for row in records:
+        if row.get('kind')=='phase-start':active=row['data']['phase']
+        if row.get('kind')=='app-observation':
+            item=row['data'];p=item.get('phase')
+            if p!=active or p not in phases:errors.append('app_observation_outside_phase')
+            elif item.get('feature') not in features:errors.append('app_unknown_feature')
+            else:positions[p].append(item)
+            if item.get('correct') is not True:errors.append('app_incorrect_result')
+            for boundary in ('foreground_before','foreground_after'):
+                fg=item.get('reply',{}).get(boundary,{})
+                if fg.get('owned') is not True or not isinstance(fg.get('pid'),int) or fg['pid']<=0 or not isinstance(fg.get('creation_filetime'),int):errors.append('app_foreground_unconfirmed')
+        if row.get('kind')=='phase-end':active=None
+    for start,end,summary in zip(starts,ends,summaries):
+        p=start['phase'];duration=end['seconds']-start['seconds'];units=end['units']-start['units']
+        if duration<=0 or units<0 or not near(summary.get('background_seconds'),duration) or summary.get('background_units')!=units or not near(summary.get('background_units_per_second'),units/duration):errors.append('app_throughput_summary_mismatch:'+p)
+        metrics=summary.get('metrics',[])
+        if [m.get('feature') for m in metrics]!=features:errors.append('app_metric_features_mismatch:'+p)
+        for m in metrics:
+            rows=[r for r in positions[p] if r['feature']==m['feature']];values=[r.get('latency_ms') for r in rows]
+            if len(rows)<12 or not all(isinstance(v,(int,float)) and math.isfinite(v) and v>=0 for v in values):errors.append('app_invalid_or_insufficient_requests:'+p);continue
+            if m.get('latencies_ms')!=values or m.get('count')!=len(rows) or m.get('roundtrip_ms')!=[r.get('roundtrip_ms') for r in rows] or not near(m.get('p50_ms'),quantile(values,.5)) or not near(m.get('p95_ms'),quantile(values,.95)):errors.append('app_latency_summary_mismatch:'+p)
+    writes=payload('resource-write-readback')
+    def equivalent(a,b):return isinstance(a,dict) and isinstance(b,dict) and all(a.get(k)==b.get(k) and k in a for k in ('MemoryPriority','CpuPriority','PowerControl','PowerState','CpuSets'))
+    for item in writes:
+        if item.get('phase') not in phases+['cleanup'] or item.get('api_result') is not True or item.get('matched') is not True or not equivalent(item.get('requested'),item.get('observed')):errors.append('app_readback_mismatch')
+    if outcome.get('condition')=='A' and writes:errors.append('app_A_was_modified')
+    if outcome.get('condition') in ('B','C'):
+        active_writes=[r for r in writes if (r.get('requested') or {}).get('CpuPriority')==0x4000 and (r.get('requested') or {}).get('PowerState',0)&1]
+        if not active_writes or any(r['requested'].get('MemoryPriority')!=3 or not r['requested'].get('PowerControl',0)&1 for r in active_writes):errors.append('app_v1_matched_bundle_not_demonstrated')
+    if outcome.get('readback_failures')!=0 or outcome.get('protected_misinterventions')!=0 or payload('out-of-scope-write'):errors.append('app_safety_or_readback_failure')
+    cleanup=payload('app-cleanup')
+    if len(cleanup)!=1 or cleanup[0].get('cleanup',{}).get('completed') is not True or cleanup[0].get('cleanup',{}).get('remaining_pids')!=[]:errors.append('app_cleanup_unconfirmed')
+    return errors
 
 def check_run(directory):
     root=Path(directory).resolve();errors=[];warnings=[];status='unfinalized';kind='trial';records=[]
@@ -18,6 +73,9 @@ def check_run(directory):
         if errors:return dict(ok=False,status=status,performance_ready=False,errors=errors,warnings=warnings,root=str(root))
         start,done,index=read('run-manifest.json'),read('completion.json'),read('artifact-index.json')
         run_id=start['run_id'];status=done['status'];kind='calibration-batch' if start.get('args',[None])[0:1]==['calibrate'] else 'trial'
+        profile=start.get('evidence_profile','synthetic-trial-v1')
+        if profile=='real-app-abc-v1':kind='real-app-smoke'
+        elif profile!='synthetic-trial-v1':fail('unknown_evidence_profile')
         if done.get('run_id')!=run_id or index.get('run_id')!=run_id:fail('run_identity_mismatch')
         if any(x.get('evidence_schema_version')!=1 for x in (start,done,index)):fail('unsupported_evidence_schema')
         if done.get('logging_fault') is not False:fail('logging_fault_or_missing_flag')
@@ -36,9 +94,10 @@ def check_run(directory):
                 continue
             if path.stat().st_size!=item['bytes'] or hashlib.sha256(path.read_bytes()).hexdigest()!=item['sha256']:fail('hash_or_length_mismatch:'+name)
         required=['run-manifest.json','completion.json','trial-events.jsonl']
-        if kind=='trial':required.append('outcome.json')
+        if kind in ('trial','real-app-smoke'):required.append('outcome.json')
         else:required.extend(('manifest.json','run.result.json'))
         if status=='completed' and kind=='trial':required.extend(COMPLETED_REQUIRED)
+        if status=='completed' and kind=='real-app-smoke':required.extend(('started.json','effective-settings.json','resource-original.json','resource-final.json','source-manifest.json','overhead-summary.json','app-driver.jsonl','app-driver.stderr.jsonl'))
         for name in required:
             if name not in indexed or not (root/name).is_file():fail('required_not_indexed:'+name)
         # Unindexed additions are not silently counted as part of the sealed run.
@@ -70,7 +129,7 @@ def check_run(directory):
         elif records[-1].get('data',{}).get('status')!=status:fail('terminal_status_mismatch')
         if done.get('records')!=len(records):fail('event_count_mismatch')
         if status=='completed' and pending:fail('unfinished_requests')
-        if kind=='trial':
+        if kind in ('trial','real-app-smoke'):
             outcome=read('outcome.json')
             if outcome.get('status')!=status:fail('outcome_completion_mismatch')
             if status=='completed' and (outcome.get('restored') is not True):fail('restoration_not_confirmed')
@@ -80,6 +139,19 @@ def check_run(directory):
                 if [r.get('index') for r in observed]!=list(range(1,len(observed)+1)) or [r.get('latency_ms') for r in observed]!=outcome['foreground_latency_ms'] or [r.get('roundtrip_ms') for r in observed]!=outcome['foreground_wall_ms']:
                     fail('raw_foreground_summary_mismatch')
                 if not any(r.get('kind')=='measurement-end' for r in records):fail('missing_measurement_end')
+            if status=='completed' and kind=='real-app-smoke':
+                errors.extend(app_profile_errors(records,outcome))
+                original,final=read('resource-original.json'),read('resource-final.json')
+                if final.get('values')!=original.get('values') or final.get('restored') is not True or final.get('cleanup_completed') is not True:fail('app_original_final_readback_mismatch')
+                for item in (r['data'] for r in records if r['kind']=='resource-write-readback'):
+                    if item.get('pid')!=original.get('pid') or item.get('creation_filetime')!=original.get('creation_filetime'):fail('app_write_target_identity_mismatch')
+                driver_rows=[json.loads(line) for line in (root/'app-driver.jsonl').read_text(encoding='utf-8-sig').splitlines()]
+                replies={r['id']:r for r in driver_rows if r.get('kind')=='observation'}
+                for item in (r['data'] for r in records if r['kind']=='app-observation'):
+                    if replies.get(item.get('id'))!=item.get('reply'):fail('app_driver_raw_observation_mismatch')
+                bg_rows=[json.loads(line) for line in (root/'background-raw.jsonl').read_text(encoding='utf-8-sig').splitlines()]
+                for boundary in (r['data'] for r in records if r['kind'] in ('phase-start','phase-end')):
+                    if not any(r.get('Id',0)>0 and r.get('Units')==boundary.get('units') and r.get('Seconds')==boundary.get('seconds') and r.get('Phase')==boundary.get('phase') for r in bg_rows):fail('app_background_raw_boundary_mismatch')
         audit=root/'audit/events.jsonl'
         if audit.is_file():
             events=[json.loads(line) for line in audit.read_text(encoding='utf-8-sig').splitlines()]

@@ -1,0 +1,1 @@
+{"name":"ramflow-isolated-research","displayName":"RAM Flow Research Fixture","publisher":"ramflow-research","version":"0.1.0","engines":{"vscode":"^1.90.0"},"main":"./extension.js","activationEvents":["onStartupFinished"]}

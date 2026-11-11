@@ -17,6 +17,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Research analysis regression failed' }
         python scripts/test_research_logcheck.py
         if ($LASTEXITCODE -ne 0) { throw 'Research evidence-integrity regression failed' }
+        python scripts/test_research_apps.py
+        if ($LASTEXITCODE -ne 0) { throw 'Real-app evidence-contract regression failed' }
         python scripts/test_research_lab_adapter.py
         if ($LASTEXITCODE -ne 0) { throw 'Research lab binding regression failed' }
         & $ramDotnet run --project native/RamFlow.Tests/RamFlow.Tests.csproj -c Release

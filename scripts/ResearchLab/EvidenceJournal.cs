@@ -21,10 +21,10 @@ sealed class EvidenceJournal : IDisposable
     public bool Faulted { get; private set; }
     public double WriteMilliseconds { get; private set; }
     public long Records => sequence;
-    public EvidenceJournal(string directory,string[] args) {
+    public EvidenceJournal(string directory,string[] args,string evidenceProfile="synthetic-trial-v1") {
         root=Path.GetFullPath(directory);
         using(var self=Process.GetCurrentProcess()) AtomicNew(Path.Combine(root,"run-manifest.json"),new {
-            evidence_schema_version=1,run_id=RunId,created_utc=DateTimeOffset.UtcNow,args,
+            evidence_schema_version=1,evidence_profile=evidenceProfile,run_id=RunId,created_utc=DateTimeOffset.UtcNow,args,
             host_pid=self.Id,host_creation_filetime=self.StartTime.ToFileTimeUtc(),
             runtime=Environment.Version.ToString(),os=Environment.OSVersion.ToString(),logical_processors=Environment.ProcessorCount,
             controller_binary=Assembly.GetEntryAssembly()?.Location,
