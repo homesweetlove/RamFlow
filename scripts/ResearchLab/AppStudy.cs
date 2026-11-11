@@ -4,7 +4,7 @@ using RamFlow.Core;
 
 namespace ResearchLab;
 
-// These A/B/C labels belong ONLY to real-app-abc-v1, not the CARP A--F matrix.
+// These A/B/C labels belong ONLY to real-app-abc-v2, not the CARP A--F matrix.
 static class AppStudy
 {
     internal static readonly ResourceAction MatchedBundle=ResourceAction.LowerCpu|ResourceAction.EcoQos|ResourceAction.LowerMemory;
@@ -16,7 +16,7 @@ static class AppStudy
     }
     public static async Task<int> Run(string[] args) {
         string root=Path.GetFullPath(Options.Get(args,"--output",""));Options.NewDirectory(root);
-        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v1");
+        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v2");
         var failures=new List<string>();var summaries=new List<object>();var observations=new List<JsonElement>();
         FixtureChild? background=null;AppDriver? app=null;AppProvider? provider=null;Engine? engine=null;AppAudit? audit=null;
         IndependentObserver? observer=null;Process? tray=null;Task? pipe=null;CancellationTokenSource? lifetime=null;
@@ -25,11 +25,12 @@ static class AppStudy
         using var self=Process.GetCurrentProcess();
         try {
             if(condition is not ("A" or "B" or "C") || application is not ("chrome" or "code"))throw new ArgumentException("Use --app chrome|code --condition A|B|C.");
+            if(Options.Get(args,"--protocol","real-app-abc-v2")!="real-app-abc-v2")throw new ArgumentException("Old v1 plan is closed; preserve it and make a new v2 smoke plan.");
             int seconds=Options.Int(args,"--phase-seconds",10,5,120);
             int threads=Options.Int(args,"--contention-threads",Math.Min(12,Environment.ProcessorCount),1,Math.Min(16,Environment.ProcessorCount));
             string driver=Path.GetFullPath(Options.Get(args,"--driver","scripts/real_apps/driver.py"));
             string runtime=Path.Combine(Path.GetDirectoryName(root)!,"runtime-"+evidence.RunId);
-            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v1",started_utc=DateTimeOffset.UtcNow,
+            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v2",started_utc=DateTimeOffset.UtcNow,
                 planned_phases=new[]{"Normal","Contention","Recovery"},seconds,threads,scope="One smoke session, synthetic CPU background, real generated app tasks; not efficacy evidence",runtime });
             Options.WriteNew(Path.Combine(root,"source-manifest.json"),Options.CaptureSources(root));
             string binary=Path.Combine(root,"fixture-bin");Directory.CreateDirectory(binary);
@@ -58,6 +59,20 @@ static class AppStudy
                 evidence.Write("app-warmup",new {phase="warmup",reply=warmup});
                 if(!warmup.GetProperty("correct").GetBoolean())throw new IOException("App warmup correctness failed.");
             }
+            // v1 smoke exposed pre-existing Moderate RAM pressure. Freeze the
+            // real app's baseline BEFORE any engine or high background load.
+            var preSamples=new List<Snapshot>();
+            await background.Request("load",1,"Normal");
+            var preClock=Stopwatch.StartNew();
+            while(preClock.Elapsed.TotalSeconds<5 || preSamples.Count<10) {
+                var sample=provider.Sample();preSamples.Add(sample);evidence.Write("system-sample",new {phase="pre-intervention",sample});
+                if(sample.Available<2UL*1073741824 || sample.CommitLimit==0 || (double)sample.Commit/sample.CommitLimit>.85)throw new IOException("Pre-intervention headroom lost; no treatment started.");
+                await Task.Delay(500);
+            }
+            var baseline=PreInterventionWindow.Freeze(preSamples,"healthy");
+            Options.WriteNew(Path.Combine(root,"pre-intervention.json"),baseline);
+            evidence.Write("baseline-frozen",new {baseline.Eligible,baseline.Stable,baseline.Attained,baseline.Regime,sha256=FileResearchAuditSink.FileHash(Path.Combine(root,"pre-intervention.json"))},true);
+            if(!baseline.Eligible)throw new IOException("Normal baseline not attained: no engine or contention treatment started. Do not force restoration against existing RAM pressure.");
             if(condition!="A") {
                 audit=new(root,evidence,()=>phase);
                 engine=new(provider,Path.Combine(root,"engine-data"),persist:true,allowRemote:false,audit:audit,
@@ -144,16 +159,17 @@ static class AppStudy
             if(background is not null)try {await background.DisposeAsync();}catch(Exception e){failures.Add(e.ToString());cleanup=false;}
             try {engine?.Dispose();provider?.Dispose();audit?.Dispose();tray?.Dispose();}catch(Exception e){failures.Add(e.ToString());cleanup=false;}
         }
-        Options.WriteNew(Path.Combine(root,"resource-final.json"),new {values=final,restored,cleanup_completed=cleanup,protected_misinterventions=provider?.OutOfScopeRequests??0});
-        if(!restored)failures.Add("Original background settings were not confirmed restored.");
+        string restorationStatus=background is null?"not-required-no-background-launched":restored?"confirmed-original-readback":"not-confirmed";
+        Options.WriteNew(Path.Combine(root,"resource-final.json"),new {values=final,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,protected_misinterventions=provider?.OutOfScopeRequests??0});
+        if(background is not null&&!restored)failures.Add("Original background settings were not confirmed restored.");
         if((provider?.ReadbackFailures??0)>0)failures.Add("One or more OS readbacks differed from requested settings.");
         if((provider?.OutOfScopeRequests??0)>0)failures.Add("Out-of-scope resource write attempt.");
-        if(condition is "B" or "C" && (audit?.Applies??0)==0)failures.Add("No active application: matched B/C readback not demonstrated.");
+        if(condition is "B" or "C" && summaries.Count>0 && (audit?.Applies??0)==0)failures.Add("No active application: matched B/C readback not demonstrated.");
         string status=failures.Count==0&&cleanup?"completed":"failed";
-        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v1",restored,cleanup_completed=cleanup,
+        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v2",restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
             phases=summaries,observations=observations.Count,applies=audit?.Applies??0,readback_failures=provider?.ReadbackFailures??0,protected_misinterventions=provider?.OutOfScopeRequests??0,failures,
             inference="Smoke functionality only. One session per app/condition is not an independent efficacy replication; no superiority inference."});
-        evidence.Seal(status,cleanup);Console.WriteLine(JsonSerializer.Serialize(new {root,status,restored,cleanup,failures}));return status=="completed"?0:1;
+        evidence.Seal(status,cleanup);Console.WriteLine(JsonSerializer.Serialize(new {root,status,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup,failures}));return status=="completed"?0:1;
     }
 }
 
@@ -201,7 +217,13 @@ sealed class AppAudit : IResearchAuditSink,IDisposable
 {
     readonly FileResearchAuditSink sink;readonly EvidenceJournal evidence;readonly Func<string> phase;
     public List<double> DecisionMs {get;}=[];public List<double> WriteMs {get;}=[];public int Applies {get;private set;}
-    public AppAudit(string root,EvidenceJournal evidence,Func<string> phase) {this.evidence=evidence;this.phase=phase;sink=new(Path.Combine(root,"audit"),"see-source-manifest");}
+    public AppAudit(string root,EvidenceJournal evidence,Func<string> phase) {
+        this.evidence=evidence;this.phase=phase;
+        using var source=JsonDocument.Parse(File.ReadAllText(Path.Combine(root,"source-manifest.json")));
+        string commit=source.RootElement.TryGetProperty("Commit",out var id)?id.GetString()??"unknown":"unknown";
+        string? tree=source.RootElement.TryGetProperty("SourceFilesSha256",out var hash)?hash.GetString():null;
+        sink=new(Path.Combine(root,"audit"),commit,tree);
+    }
     public void Write(ResearchAuditEvent entry) {
         var tagged=entry with {Detail=new {phase=phase(),original_detail=entry.Detail}};
         var clock=Stopwatch.StartNew();sink.Write(tagged);WriteMs.Add(clock.Elapsed.TotalMilliseconds);

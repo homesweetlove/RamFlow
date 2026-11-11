@@ -74,7 +74,7 @@ def check_run(directory):
         start,done,index=read('run-manifest.json'),read('completion.json'),read('artifact-index.json')
         run_id=start['run_id'];status=done['status'];kind='calibration-batch' if start.get('args',[None])[0:1]==['calibrate'] else 'trial'
         profile=start.get('evidence_profile','synthetic-trial-v1')
-        if profile=='real-app-abc-v1':kind='real-app-smoke'
+        if profile in ('real-app-abc-v1','real-app-abc-v2'):kind='real-app-smoke'
         elif profile!='synthetic-trial-v1':fail('unknown_evidence_profile')
         if done.get('run_id')!=run_id or index.get('run_id')!=run_id:fail('run_identity_mismatch')
         if any(x.get('evidence_schema_version')!=1 for x in (start,done,index)):fail('unsupported_evidence_schema')
@@ -98,6 +98,7 @@ def check_run(directory):
         else:required.extend(('manifest.json','run.result.json'))
         if status=='completed' and kind=='trial':required.extend(COMPLETED_REQUIRED)
         if status=='completed' and kind=='real-app-smoke':required.extend(('started.json','effective-settings.json','resource-original.json','resource-final.json','source-manifest.json','overhead-summary.json','app-driver.jsonl','app-driver.stderr.jsonl'))
+        if status=='completed' and profile=='real-app-abc-v2':required.append('pre-intervention.json')
         for name in required:
             if name not in indexed or not (root/name).is_file():fail('required_not_indexed:'+name)
         # Unindexed additions are not silently counted as part of the sealed run.
@@ -141,6 +142,9 @@ def check_run(directory):
                 if not any(r.get('kind')=='measurement-end' for r in records):fail('missing_measurement_end')
             if status=='completed' and kind=='real-app-smoke':
                 errors.extend(app_profile_errors(records,outcome))
+                if profile=='real-app-abc-v2':
+                    baseline=read('pre-intervention.json')
+                    if baseline.get('Eligible') is not True or baseline.get('Stable') is not True or baseline.get('Attained') is not True or baseline.get('Regime')!=1:fail('app_normal_baseline_not_confirmed')
                 original,final=read('resource-original.json'),read('resource-final.json')
                 if final.get('values')!=original.get('values') or final.get('restored') is not True or final.get('cleanup_completed') is not True:fail('app_original_final_readback_mismatch')
                 for item in (r['data'] for r in records if r['kind']=='resource-write-readback'):

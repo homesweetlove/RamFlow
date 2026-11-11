@@ -23,6 +23,10 @@ def summarize(root):
             applies=outcome.get('applies'),protected_misinterventions=outcome.get('protected_misinterventions'),readback_failures=outcome.get('readback_failures'),
             version=ready.get('version'),binary_sha256=ready.get('binary_sha256'),failures=outcome.get('failures',[]))
         sessions.append(session)
+        if (directory/'completion.json').exists():session['journal_write_wall_ms']=read(directory/'completion.json').get('log_write_ms')
+        if (directory/'overhead-summary.json').exists():
+            timings=read(directory/'overhead-summary.json')
+            session['decision_ms']=timings.get('policy_timing_ms');session['audit_write_ms']=timings.get('audit_write_ms')
         writes=[r['data'] for r in records if r['kind']=='resource-write-readback']
         active={tuple(r['observed'][k] for k in ('CpuPriority','MemoryPriority','PowerControl','PowerState'))+(tuple(r['observed']['CpuSets']),)
             for r in writes if r.get('matched') and r['requested']['CpuPriority']==0x4000 and r['requested']['PowerState']&1}
@@ -30,11 +34,12 @@ def summarize(root):
         session['active_readbacks']=sorted(active)
         session['app_cleanup']=[r['data']['cleanup'] for r in records if r['kind']=='app-cleanup']
         session['interventions_and_restores']=[dict(time_utc=r['time_utc'],phase=r['data']['phase'],kind=r['data']['entry']['Kind'],result=r['data']['entry']['Result']) for r in records if r['kind']=='engine-event' and r['data']['entry']['Kind'] in ('apply','restore')]
-        if not integrity['ok'] or outcome.get('status')!='completed':continue
-        for phase in outcome['phases']:
-            for metric in phase['metrics']:
-                metrics.append(dict(**slot,phase=phase['phase'],feature=metric['feature'],requests=metric['count'],p50_ms=metric['p50_ms'],p95_ms=metric['p95_ms'],
-                    background_units_per_second=phase['background_units_per_second'],background_units=phase['background_units'],background_seconds=phase['background_seconds']))
+        if not integrity['ok']:continue
+        if outcome.get('status')=='completed':
+            for phase in outcome['phases']:
+                for metric in phase['metrics']:
+                    metrics.append(dict(**slot,phase=phase['phase'],feature=metric['feature'],requests=metric['count'],p50_ms=metric['p50_ms'],p95_ms=metric['p95_ms'],
+                        background_units_per_second=phase['background_units_per_second'],background_units=phase['background_units'],background_seconds=phase['background_seconds']))
         boundaries=[]
         for start in [r for r in records if r['kind']=='phase-start']:
             end=next(r for r in records if r['kind']=='phase-end' and r['data']['phase']==start['data']['phase'])
@@ -42,20 +47,20 @@ def summarize(root):
         raw=[json.loads(line) for file in sorted((directory/'independent').glob('*.raw.jsonl')) for line in file.read_text().splitlines()]
         grouped={}
         for sample in raw:
-            phase=next((p for begin,end,p in boundaries if begin<=utc(sample['time_utc'])<=end),'outside-measured-phase')
+            phase=next((p for begin,end,p in boundaries if begin<=utc(sample['time_utc'])<=end),'cleanup' if sample.get('phase')=='restore' else 'outside-measured-phase')
             grouped.setdefault((phase,sample['role']),[]).append(sample)
         for (phase,role),rows in grouped.items():
             cpu=[r['cpu_percent'] for r in rows if r.get('status')=='ok' and r.get('cpu_percent') is not None]
             private=[r['private_bytes'] for r in rows if r.get('status')=='ok' and r.get('private_bytes') is not None]
             working=[r['working_set_bytes'] for r in rows if r.get('status')=='ok' and r.get('working_set_bytes') is not None]
-            overheads.append(dict(**slot,phase=phase,role=role,samples=len(rows),available_cpu_samples=len(cpu),cpu_percent_mean=statistics.mean(cpu) if cpu else None,
+            overheads.append(dict(**slot,session_status=outcome.get('status'),diagnostic_only=True,phase=phase,role=role,samples=len(rows),available_cpu_samples=len(cpu),cpu_percent_mean=statistics.mean(cpu) if cpu else None,
                 private_bytes_max=max(private) if private else None,working_set_bytes_max=max(working) if working else None,unavailable_samples=sum(r.get('status')!='ok' for r in rows)))
         for role in ['tray','optional-service']:
             if role=='tray' and slot['condition']!='A':continue
-            overheads.append(dict(**slot,phase='all',role=role,samples=0,status='not-started',cpu_percent_mean=None,private_bytes_max=None,working_set_bytes_max=None))
+            overheads.append(dict(**slot,session_status=outcome.get('status'),diagnostic_only=True,phase='all',role=role,samples=0,status='not-started',cpu_percent_mean=None,private_bytes_max=None,working_set_bytes_max=None))
     matched={app:bool(parity.get(app+'-B')) and parity.get(app+'-B')==parity.get(app+'-C') for app in ['chrome','code']}
     passed=len(sessions)==6 and all(s.get('status')=='completed' and s.get('integrity',{}).get('ok') for s in sessions) and all(matched.values())
-    return dict(protocol='real-app-abc-v1',smoke_passed=passed,sessions=sessions,matched_B_C_readbacks=matched,metrics=metrics,overheads=overheads,
+    return dict(protocol=plan['protocol'],smoke_passed=passed,sessions=sessions,matched_B_C_readbacks=matched,metrics=metrics,overheads=overheads,
         inference='n=1 per app/condition smoke only. Do not use requests as independent blocks. No superiority, CI, main-study sample size, or old-version comparison claimed.',
         costs='CPU normalized to all logical processors. Engine shares process with controller; tray, app driver and independent observer are separate. Absent service/tray is null, not zero.')
 

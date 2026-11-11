@@ -2,6 +2,7 @@
 import copy
 import unittest
 import research_logcheck as gate
+import test_research_logcheck as integrity_fixtures
 
 
 class AppContract(unittest.TestCase):
@@ -74,6 +75,16 @@ class AppContract(unittest.TestCase):
         rows,outcome=self.fixture();outcome['protected_misinterventions']=1;rows.pop()
         errors=gate.app_profile_errors(rows,outcome)
         self.assertIn('app_safety_or_readback_failure',errors);self.assertIn('app_cleanup_unconfirmed',errors)
+
+
+class AppVersionGate(unittest.TestCase):
+    def test_v2_cannot_be_completed_without_frozen_healthy_baseline(self):
+        helper=integrity_fixtures.EvidenceChecks('runTest');helper.setUp();self.addCleanup(helper.doCleanups);helper.fixture('completed')
+        manifest=__import__('json').loads((helper.root/'run-manifest.json').read_text())
+        manifest['evidence_profile']='real-app-abc-v2';helper.save('run-manifest.json',manifest)
+        (helper.root/'pre-intervention.json').unlink();helper.index()
+        result=gate.check_run(helper.root)
+        self.assertIn('required_not_indexed:pre-intervention.json',result['errors'])
 
 
 if __name__ == '__main__': unittest.main()
