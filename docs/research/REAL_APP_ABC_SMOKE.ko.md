@@ -2,6 +2,8 @@
 
 현재 실행 버전은 `real-app-abc-v3`다. v2의 32 MiB SHA256/12스레드 부하에서는 실제 CPU가 V1의 80% 임계값에 닿지 않아 두 C가 무개입으로 끝났다. 이 자료를 변경하거나 성공으로 재분류하지 않는다. v3는 CPU 계산 경로를 분리한 `xorshift64-1000000-v1` 작업 단위와 14스레드(16논리CPU 장비에서 2개 여유)를 사용한다. 각 단위/단계 경계의 체크섬을 독립 golden vector로 검사한다. 처리율 단위가 달라 v1/v2의 SHA 처리율과 합치지 않는다. 새 실행 전 `python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14`로 실제 CPU가 임계값에 도달하는지 확인한다. 부하 스레드 수 자체를 실제 압박으로 간주하지 않는다. 별도 원시 결과와 사전 기준선을 유지하며 본실험 효과를 주장하지 않는다.
 
+2026-11-11~12 실앱 실행에서 v3도 앱 워밍업 이후 80%를 지속하지 못했다. 초기 부하 점검의 3개 상승 표본만으로 통과시키던 규칙은 불충분했다. 이후 사전 검사만 `cpu-preflight-v2-sustained`로 보강했다: 정상 워밍업 5초, 부하 점검 6초, 유효 표본 6개 이상·80% 이상 표본에서 CPU≥80%·마지막 3개도 CPU≥80%를 요구한다. 새 계획은 이 결과와 동일 관리 바이너리 해시·스레드 수·작업 단위가 맞는 `--preflight` 증거가 없으면 생성/실행하지 않는다. 기존 자료는 초기 규칙/소스 그대로 보존하고 스모크 성공으로 재분류하지 않았다. 지속 압박이 확인되기 전 추가 정책 비교를 진행하지 않는다.
+
 보존한 v2 프로토콜 `real-app-abc-v2`는 기존 CARP A–F 조건명과 다르다. A는 엔진·트레이 미실행, B는 고정 V1 조합(CPU BelowNormal, EcoQoS execution-speed 비트, 메모리 우선순위 3), C는 기존 V1 적응 제어다. CPU Sets·Working Set 강제 축소는 끈다. 동일한 엔진 적용/저널/복원 경로를 사용하고 매 API 쓰기 직후 PID 생성 시각과 OS readback을 검증한다. B는 Recovery에도 고정 제한을 유지하고 세션 종료 시 복원한다. C는 Recovery 안에서 복원을 확인해야 통과한다.
 
 최초 v1 스모크에서는 Normal/Recovery라는 부하 명칭과 실제 압박 해제가 일치하지 않았다. C에서 기존 메모리 압박이 Moderate로 유지됐고 종료 때만 정상 복원됐다. 이를 성공으로 바꾸지 않았다. v2는 실제 앱 준비 후 엔진 생성 및 경쟁 부하 시작 전에 5초/10개 이상 센서 스냅샷으로 `PreInterventionWindow`의 Healthy·안정성·도달 여부를 고정한다. 부적합하면 개입 전에 실패로 봉인한다. 기존 v1 계획은 닫고 새 v2 디렉터리를 요구한다. 파일럿 결과·바이너리·소스 버전은 합치지 않는다.
@@ -26,7 +28,9 @@ dotnet build native/RamFlow.Tray -c Release
 python scripts/test_research_apps.py
 python scripts/test_research_logcheck.py
 python scripts/test_real_app_adapters_windows.py --run
-python scripts/research_app_pilot.py --plan --output work/NEW-pilot
+python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14
+if ($LASTEXITCODE -ne 0) { throw '지속 CPU 압박 미확인: 추가 정책 비교 중단' }
+python scripts/research_app_pilot.py --plan --output work/NEW-pilot --preflight work/NEW-cpu-check --contention-threads 14
 # pilot-plan.json 순서대로 각 슬롯을 딱 한 번씩 실행:
 python scripts/research_app_pilot.py --output work/NEW-pilot --app chrome --condition A
 # C, B 및 code의 예정 순서도 동일하게 실행한다. 실패 슬롯을 덮어쓰지 않는다.
