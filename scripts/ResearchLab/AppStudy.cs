@@ -4,7 +4,7 @@ using RamFlow.Core;
 
 namespace ResearchLab;
 
-// These A/B/C labels belong ONLY to real-app-abc-v2, not the CARP A--F matrix.
+// These A/B/C labels belong ONLY to real-app-abc-v3, not the CARP A--F matrix.
 static class AppStudy
 {
     internal static readonly ResourceAction MatchedBundle=ResourceAction.LowerCpu|ResourceAction.EcoQos|ResourceAction.LowerMemory;
@@ -16,7 +16,7 @@ static class AppStudy
     }
     public static async Task<int> Run(string[] args) {
         string root=Path.GetFullPath(Options.Get(args,"--output",""));Options.NewDirectory(root);
-        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v2");
+        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v3");
         var failures=new List<string>();var summaries=new List<object>();var observations=new List<JsonElement>();
         FixtureChild? background=null;AppDriver? app=null;AppProvider? provider=null;Engine? engine=null;AppAudit? audit=null;
         IndependentObserver? observer=null;Process? tray=null;Task? pipe=null;CancellationTokenSource? lifetime=null;
@@ -25,12 +25,14 @@ static class AppStudy
         using var self=Process.GetCurrentProcess();
         try {
             if(condition is not ("A" or "B" or "C") || application is not ("chrome" or "code"))throw new ArgumentException("Use --app chrome|code --condition A|B|C.");
-            if(Options.Get(args,"--protocol","real-app-abc-v2")!="real-app-abc-v2")throw new ArgumentException("Old v1 plan is closed; preserve it and make a new v2 smoke plan.");
+            if(Options.Get(args,"--protocol","real-app-abc-v3")!="real-app-abc-v3")throw new ArgumentException("Old v1/v2 plans are closed; preserve them and make a new v3 smoke plan.");
             int seconds=Options.Int(args,"--phase-seconds",10,5,120);
-            int threads=Options.Int(args,"--contention-threads",Math.Min(12,Environment.ProcessorCount),1,Math.Min(16,Environment.ProcessorCount));
+            int threads=Options.Int(args,"--contention-threads",Math.Min(14,Math.Max(1,Environment.ProcessorCount-2)),1,Math.Min(16,Environment.ProcessorCount));
+            string expectedBackgroundChecksum=CpuWork.Complete(20261111);
             string driver=Path.GetFullPath(Options.Get(args,"--driver","scripts/real_apps/driver.py"));
             string runtime=Path.Combine(Path.GetDirectoryName(root)!,"runtime-"+evidence.RunId);
-            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v2",started_utc=DateTimeOffset.UtcNow,
+            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v3",started_utc=DateTimeOffset.UtcNow,
+                background_workload=CpuWork.WorkloadId,background_mode="cpu-arithmetic",expected_background_checksum=expectedBackgroundChecksum,
                 planned_phases=new[]{"Normal","Contention","Recovery"},seconds,threads,scope="One smoke session, synthetic CPU background, real generated app tasks; not efficacy evidence",runtime });
             Options.WriteNew(Path.Combine(root,"source-manifest.json"),Options.CaptureSources(root));
             string binary=Path.Combine(root,"fixture-bin");Directory.CreateDirectory(binary);
@@ -44,7 +46,7 @@ static class AppStudy
                 if(initial.Available<2UL*1073741824||initial.CommitLimit==0||(double)initial.Commit/initial.CommitLimit>.85)throw new IOException("Insufficient safe headroom.");
             }
             app=await AppDriver.Start(Options.Get(args,"--python","python"),driver,application,runtime,root,evidence);
-            background=new(backgroundExe,"background","cpu",32,threads,20261111,0,Path.Combine(root,"background-raw.jsonl"),evidence,initialThreads:0);
+            background=new(backgroundExe,"background","cpu-arithmetic",4,threads,20261111,0,Path.Combine(root,"background-raw.jsonl"),evidence,initialThreads:0);
             await background.Ready();provider=new(background,evidence,()=>phase);
             original=provider.ReadValues(background.Process.Id)??throw new IOException("Missing original readback.");
             provider.Processes(); // Prime CPU/IO activity before policy eligibility; unknown activity remains protected.
@@ -100,7 +102,8 @@ static class AppStudy
                 phase=nextPhase;observer.SetPhase(phase=="Contention"?"intervene":"observe");
                 int active=phase=="Contention"?threads:1;
                 var first=await background.Request("load",active,phase);
-                evidence.Write("phase-start",new {phase,active_threads=active,units=first.Units,seconds=first.Seconds,observed_utc=first.ObservedUtc},true);
+                if(first.Units<=0 || first.Checksum!=expectedBackgroundChecksum)throw new IOException("Background completed work checksum missing or incorrect.");
+                evidence.Write("phase-start",new {phase,active_threads=active,units=first.Units,seconds=first.Seconds,observed_utc=first.ObservedUtc,work_checksum=first.Checksum},true);
                 var phaseRows=new List<JsonElement>();var watch=Stopwatch.StartNew();double nextTick=0;int rounds=0;
                 while(watch.Elapsed.TotalSeconds<seconds || rounds<12) {
                     if(File.Exists(Path.Combine(root,"cancel.request")))throw new OperationCanceledException("Owner cancellation; restore and seal as failure.");
@@ -121,6 +124,7 @@ static class AppStudy
                     rounds++;await Task.Delay(100);
                 }
                 var last=await background.Request("progress");
+                if(last.Units<=first.Units || last.Checksum!=expectedBackgroundChecksum)throw new IOException("Background made no valid completed progress.");
                 double duration=last.Seconds-first.Seconds;long units=last.Units-first.Units;
                 var metrics=app.Features.Select(feature=> {
                     var rows=phaseRows.Where(r=>r.GetProperty("feature").GetString()==feature).ToArray();
@@ -129,7 +133,7 @@ static class AppStudy
                         p99_ms=(double?)null,roundtrip_ms=rows.Select(r=>r.GetProperty("roundtrip_ms").GetDouble()).ToArray()};
                 }).ToArray();
                 var summary=new {phase,metrics,background_units=units,background_seconds=duration,background_units_per_second=units/duration};summaries.Add(summary);
-                evidence.Write("phase-end",new {phase,units=last.Units,seconds=last.Seconds,observed_utc=last.ObservedUtc},true);
+                evidence.Write("phase-end",new {phase,units=last.Units,seconds=last.Seconds,observed_utc=last.ObservedUtc,work_checksum=last.Checksum},true);
                 if(phase=="Recovery" && condition=="C" && !Same(provider.ReadValues(background.Process.Id),original))
                     throw new IOException("V1 did not restore during Recovery; cleanup will retry. Phase transition smoke is not successful.");
             }
@@ -166,7 +170,7 @@ static class AppStudy
         if((provider?.OutOfScopeRequests??0)>0)failures.Add("Out-of-scope resource write attempt.");
         if(condition is "B" or "C" && summaries.Count>0 && (audit?.Applies??0)==0)failures.Add("No active application: matched B/C readback not demonstrated.");
         string status=failures.Count==0&&cleanup?"completed":"failed";
-        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v2",restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
+        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v3",background_workload=CpuWork.WorkloadId,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
             phases=summaries,observations=observations.Count,applies=audit?.Applies??0,readback_failures=provider?.ReadbackFailures??0,protected_misinterventions=provider?.OutOfScopeRequests??0,failures,
             inference="Smoke functionality only. One session per app/condition is not an independent efficacy replication; no superiority inference."});
         evidence.Seal(status,cleanup);Console.WriteLine(JsonSerializer.Serialize(new {root,status,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup,failures}));return status=="completed"?0:1;

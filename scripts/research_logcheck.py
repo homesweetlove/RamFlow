@@ -74,7 +74,7 @@ def check_run(directory):
         start,done,index=read('run-manifest.json'),read('completion.json'),read('artifact-index.json')
         run_id=start['run_id'];status=done['status'];kind='calibration-batch' if start.get('args',[None])[0:1]==['calibrate'] else 'trial'
         profile=start.get('evidence_profile','synthetic-trial-v1')
-        if profile in ('real-app-abc-v1','real-app-abc-v2'):kind='real-app-smoke'
+        if profile in ('real-app-abc-v1','real-app-abc-v2','real-app-abc-v3'):kind='real-app-smoke'
         elif profile!='synthetic-trial-v1':fail('unknown_evidence_profile')
         if done.get('run_id')!=run_id or index.get('run_id')!=run_id:fail('run_identity_mismatch')
         if any(x.get('evidence_schema_version')!=1 for x in (start,done,index)):fail('unsupported_evidence_schema')
@@ -98,7 +98,7 @@ def check_run(directory):
         else:required.extend(('manifest.json','run.result.json'))
         if status=='completed' and kind=='trial':required.extend(COMPLETED_REQUIRED)
         if status=='completed' and kind=='real-app-smoke':required.extend(('started.json','effective-settings.json','resource-original.json','resource-final.json','source-manifest.json','overhead-summary.json','app-driver.jsonl','app-driver.stderr.jsonl'))
-        if status=='completed' and profile=='real-app-abc-v2':required.append('pre-intervention.json')
+        if status=='completed' and profile in ('real-app-abc-v2','real-app-abc-v3'):required.append('pre-intervention.json')
         for name in required:
             if name not in indexed or not (root/name).is_file():fail('required_not_indexed:'+name)
         # Unindexed additions are not silently counted as part of the sealed run.
@@ -142,7 +142,7 @@ def check_run(directory):
                 if not any(r.get('kind')=='measurement-end' for r in records):fail('missing_measurement_end')
             if status=='completed' and kind=='real-app-smoke':
                 errors.extend(app_profile_errors(records,outcome))
-                if profile=='real-app-abc-v2':
+                if profile in ('real-app-abc-v2','real-app-abc-v3'):
                     baseline=read('pre-intervention.json')
                     if baseline.get('Eligible') is not True or baseline.get('Stable') is not True or baseline.get('Attained') is not True or baseline.get('Regime')!=1:fail('app_normal_baseline_not_confirmed')
                 original,final=read('resource-original.json'),read('resource-final.json')
@@ -156,6 +156,9 @@ def check_run(directory):
                 bg_rows=[json.loads(line) for line in (root/'background-raw.jsonl').read_text(encoding='utf-8-sig').splitlines()]
                 for boundary in (r['data'] for r in records if r['kind'] in ('phase-start','phase-end')):
                     if not any(r.get('Id',0)>0 and r.get('Units')==boundary.get('units') and r.get('Seconds')==boundary.get('seconds') and r.get('Phase')==boundary.get('phase') for r in bg_rows):fail('app_background_raw_boundary_mismatch')
+                    if profile=='real-app-abc-v3':
+                        expected=read('started.json').get('expected_background_checksum')
+                        if not expected or boundary.get('work_checksum')!=expected or not any(r.get('Id',0)>0 and r.get('Units')==boundary.get('units') and r.get('Seconds')==boundary.get('seconds') and r.get('Checksum')==expected for r in bg_rows):fail('app_background_work_checksum_mismatch')
         audit=root/'audit/events.jsonl'
         if audit.is_file():
             events=[json.loads(line) for line in audit.read_text(encoding='utf-8-sig').splitlines()]

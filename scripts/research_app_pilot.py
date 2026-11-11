@@ -17,19 +17,19 @@ def save_new(path,value):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--plan',action='store_true')
     p.add_argument('--app',choices=['chrome','code']);p.add_argument('--condition',choices=list('ABC'));p.add_argument('--lab',type=Path,default=Path('scripts/ResearchLab/bin/Release/net10.0-windows/ResearchLab.exe'))
-    p.add_argument('--seed',type=int,default=20261111);p.add_argument('--phase-seconds',type=int,default=10);p.add_argument('--contention-threads',type=int,default=12)
+    p.add_argument('--seed',type=int,default=20261111);p.add_argument('--phase-seconds',type=int,default=10);p.add_argument('--contention-threads',type=int,default=14)
     args=p.parse_args();root=args.output.resolve()
     if args.plan:
         root.mkdir(parents=True,exist_ok=False);rng=random.Random(args.seed);schedule=[]
         for app in ['chrome','code']:
             conditions=list('ABC');rng.shuffle(conditions)
             schedule.extend(dict(app=app,condition=c,session=f'{app}-{c}') for c in conditions)
-        save_new(root/'pilot-plan.json',dict(protocol='real-app-abc-v2',seed=args.seed,created_utc=datetime.now(timezone.utc).isoformat(),schedule=schedule,
+        save_new(root/'pilot-plan.json',dict(protocol='real-app-abc-v3',background_workload='xorshift64-1000000-v1',seed=args.seed,created_utc=datetime.now(timezone.utc).isoformat(),schedule=schedule,
             phase_seconds=args.phase_seconds,contention_threads=args.contention_threads,scope='Six smoke sessions only; no main-study N or efficacy inference'))
         print(json.dumps(schedule));return 0
     if not args.app or not args.condition:p.error('Select --app and --condition for one planned slot')
     plan=json.loads((root/'pilot-plan.json').read_text());slot=next(x for x in plan['schedule'] if x['app']==args.app and x['condition']==args.condition)
-    if plan['protocol']!='real-app-abc-v2':p.error('v1 plan is closed; create a NEW v2 plan, never replace failed slots')
+    if plan['protocol']!='real-app-abc-v3':p.error('v1/v2 plans are closed; create a NEW v3 plan, never replace failed slots')
     save_new(root/(slot['session']+'.attempt.json'),dict(slot=slot,started_utc=datetime.now(timezone.utc).isoformat(),lab_sha256=hashlib.sha256(args.lab.read_bytes()).hexdigest()))
     command=[str(args.lab.resolve()),'app-session','--protocol',plan['protocol'],'--app',args.app,'--condition',args.condition,'--output',str(root/slot['session']),
         '--phase-seconds',str(plan['phase_seconds']),'--contention-threads',str(plan['contention_threads'])]

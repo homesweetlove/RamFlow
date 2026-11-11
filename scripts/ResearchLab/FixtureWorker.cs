@@ -14,12 +14,14 @@ static class FixtureWorker
         int mib = Options.Int(args, "--mib", 16, 4, 256), threads = Options.Int(args, "--threads", 1, 1, 32);
         long target = Options.Int(args, "--units", 0, 0, 10000000);
         byte[] data = new byte[mib * 1048576];
-        new Random(Options.Int(args, "--seed", 1, 0, int.MaxValue)).NextBytes(data);
+        int seed=Options.Int(args,"--seed",1,0,int.MaxValue);
+        new Random(seed).NextBytes(data);
         var clock = Stopwatch.StartNew(); using var cancellation = new CancellationTokenSource();
         object output = new(); long units = 0; double? completion = null;
-        string? outputPhase=null;
+        string? outputPhase=null,lastChecksum=null;
         void Write(WorkerReply value) { lock (output) Console.WriteLine(JsonSerializer.Serialize(value with { ObservedUtc = DateTimeOffset.UtcNow,Phase=Volatile.Read(ref outputPhase) })); }
         string Work() {
+            if(mode=="cpu-arithmetic")return CpuWork.Complete(seed);
             if (mode is "ram" or "mixed") {
                 long sum = 0; for (int i = 0; i < data.Length; i += 4096) sum += data[i];
                 if (mode == "ram") return sum.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -34,14 +36,14 @@ static class FixtureWorker
                 tasks.Add(Task.Factory.StartNew(() => {
                     while (!cancellation.IsCancellationRequested && (target == 0 || Interlocked.Read(ref units) < target)) {
                         if(workerIndex>=Volatile.Read(ref activeThreads)) { Thread.Sleep(10);continue; }
-                        Work(); Interlocked.Increment(ref units);
+                        string checksum=Work();Volatile.Write(ref lastChecksum,checksum);Interlocked.Increment(ref units);
                     }
                 }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default));
             }
             _ = Task.Run(async () => {
                 while (!cancellation.IsCancellationRequested) {
                     if (target > 0 && tasks.All(x => x.IsCompleted) && completion is null) completion = clock.Elapsed.TotalSeconds;
-                    Write(new(0, "progress", Interlocked.Read(ref units), clock.Elapsed.TotalSeconds, CompletionSeconds: completion));
+                    Write(new(0, "progress", Interlocked.Read(ref units), clock.Elapsed.TotalSeconds, Checksum:Volatile.Read(ref lastChecksum),CompletionSeconds: completion));
                     try { await Task.Delay(100, cancellation.Token); } catch (OperationCanceledException) { break; }
                 }
             });
@@ -59,9 +61,9 @@ static class FixtureWorker
                     Volatile.Write(ref outputPhase,selected);
                 }
                 Volatile.Write(ref activeThreads,count);
-                Write(new(id,"load",Interlocked.Read(ref units),clock.Elapsed.TotalSeconds));continue;
+                Write(new(id,"load",Interlocked.Read(ref units),clock.Elapsed.TotalSeconds,Checksum:Volatile.Read(ref lastChecksum)));continue;
             }
-            if (verb == "progress") { Write(new(id, "progress", Interlocked.Read(ref units), clock.Elapsed.TotalSeconds, CompletionSeconds: completion)); continue; }
+            if (verb == "progress") { Write(new(id, "progress", Interlocked.Read(ref units), clock.Elapsed.TotalSeconds, Checksum:Volatile.Read(ref lastChecksum),CompletionSeconds: completion)); continue; }
             if (verb is not ("work" or "probe")) throw new ArgumentException("Unknown fixture command.");
             var request = Stopwatch.StartNew(); string hash = Work(); double elapsed = request.Elapsed.TotalMilliseconds;
             Write(new(id, verb, Interlocked.Read(ref units), clock.Elapsed.TotalSeconds, elapsed, hash, completion));
