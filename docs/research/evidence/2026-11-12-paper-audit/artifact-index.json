@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "actions.csv",
+      "bytes": 43869,
+      "sha256": "69bbb9799c4aac15b457c52d3a992b9304644a64fb66fad10b888eee65c54943"
+    },
+    {
+      "path": "audit.json",
+      "bytes": 262804,
+      "sha256": "e3d011fc07f064e7f7940dbe5a0b7e10f65e68f4d6657cba33b36435a3d2fb38"
+    },
+    {
+      "path": "metrics.csv",
+      "bytes": 20641,
+      "sha256": "154fe3b03fbec987e39eb299fe8627af1ce22f852d172fa28e54fe0650ca39e8"
+    },
+    {
+      "path": "phases.csv",
+      "bytes": 9973,
+      "sha256": "424f7fdda21d9d76731746776137f30e79afb3244b3d04011c6573274c5096c3"
+    },
+    {
+      "path": "roundtrip_comparisons.csv",
+      "bytes": 3327,
+      "sha256": "775484565ea573e50423b0647415b7860e475e55a7a14618aff740335a6b565f"
+    },
+    {
+      "path": "runs.csv",
+      "bytes": 6025,
+      "sha256": "df6b7abd6ff8aa41e37a5e445fc57997df46fd77bd3d11e889ad5a3d1a5a0f2d"
+    }
+  ]
+}

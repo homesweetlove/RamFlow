@@ -1,5 +1,7 @@
 # RAM Flow KCI 연구 작업 안내
 
+원고 검토(2026-11-12): [CPU 중심 논문 초안](PAPER_DRAFT_CPU_TRADEOFF.ko.md) · [기여/투고 준비 상태 판단](PAPER_ASSESSMENT.ko.md) · [집중 선행연구 대조](PAPER_RELATED_WORK_CPU.ko.md). 추가 성능 실험 없이 36슬롯을 사후 분석했다. C의 경쟁 구간 제한 상태 시간은 Chrome47.84%/Code46.22%로 B100%와 달랐고, 적용90/복원83회는 CPU 압박 게이트와 일치했다. 원고는 이 관측과 지연–배경 진행의 절충을 기술하며 새 알고리즘 우위를 주장하지 않는다. 현재 기여를 단일 PC 실증 평가로 정리했으나, 바로 정규 연구논문을 투고하기에는 독창성과 비교 분리의 근거가 부족하다는 검토 의견을 함께 남겼다. [재현 가능한 사후 분석 자료](evidence/2026-11-12-paper-audit/audit.json).
+
 최신 일괄 비교(2026-11-12): [36슬롯 실행·대응 블록 분석·해석](evidence/2026-11-12-abc-batch/REPORT.ko.md) · [실패 포함 원시 ZIP](evidence/2026-11-12-abc-batch/raw-evidence.zip). 6블록×2앱×A/B/C를 한 명령으로 실행해 35완료·1개입 전 기준선 실패, 10,900요청을 기록했다. Chrome6/Code5 완전 대응 블록으로 탐색 분석했다. Chrome 지연은 비슷하고 미실행 A가 배경 처리율을 가장 많이 보존했으며, Code에서는 고정 B의 낮은 지연과 V1 C의 더 많은 배경 처리율이 상충했다. V1/CARP의 일반적 우위나 지연 동등성을 입증하지 않았다. 추가 시험을 자동으로 늘리지 않고 이 결과에 맞춰 원고의 주장 범위를 정한다. 아래 이전 구현·스모크 기록과 버전/앱 바이너리를 합치지 않는다.
 
 최신 실앱 연결 검증(2026-11-12): [QoS 진단·v4 A/B/C 6세션 보고서](evidence/2026-11-12-qos-v4/REPORT.ko.md) · [원시 증거 ZIP](evidence/2026-11-12-qos-v4/raw-evidence.zip) · [실행 명령](REAL_APP_ABC_SMOKE.ko.md). 새 격리 Chrome/VS Code 어댑터에서 실제 개입·회복·B/C OS readback 일치·두 단계 원복·무결성 검사를 통과했다. 모든 조건의 배경 워크로드가 정상 QoS를 명시하는 별도 입력층이며, 기본 QoS의 [v2/v3 실패 기록](evidence/2026-11-12-real-app-v2-v3/REPORT.ko.md)과 합치지 않는다. C의 반복 적용/복원, 효과 없는 Chrome 조건, VS Code 지연/배경 처리율 상충도 보존했다. n=1 연결 검증으로 CARP 우위·같은 응답성에서의 처리율 우위를 입증하지 않는다.
@@ -17,7 +19,7 @@
 3. [선행연구 비교와 검증 범위](RELATED_WORK.ko.md)
 4. [실험·소거·통계 프로토콜](PROTOCOL.ko.md)
 5. [학술지 공식 규정·AI 공개·비용·미확인 항목](JOURNALS.ko.md)
-6. [논문 개요와 빈 표·그림 양식](PAPER_OUTLINE.ko.md)
+6. [현재 CPU 실증 논문 초안](PAPER_DRAFT_CPU_TRADEOFF.ko.md), [기존 CARP 개요와 빈 표·그림 양식](PAPER_OUTLINE.ko.md)
 7. [구현 계획](IMPLEMENTATION_PLAN.ko.md), [검증 결과](VALIDATION.ko.md)
 
 ## 실제로 구현한 경계

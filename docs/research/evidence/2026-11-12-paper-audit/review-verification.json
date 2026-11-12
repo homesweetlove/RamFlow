@@ -1,0 +1,13 @@
+{
+  "analysis_commit": "cdc46ac",
+  "measurement_commit": "6e9b1624ba0e3ada219ec6dbf8f06801acdd7ac3",
+  "new_performance_experiments": 0,
+  "tests_passed": 44,
+  "immutable_source_files_verified": 3143,
+  "raw_runs": 36,
+  "complete_runs": 35,
+  "failed_runs": 1,
+  "analysis_phase_rows": 105,
+  "analysis_action_rows": 210,
+  "scope": "Post-hoc read-only analysis and manuscript preparation. Not new efficacy replication or powered inference."
+}
