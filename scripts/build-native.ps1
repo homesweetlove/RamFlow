@@ -21,6 +21,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Real-app evidence-contract regression failed' }
         python scripts/test_research_app_batch.py
         if ($LASTEXITCODE -ne 0) { throw 'Real-app batch/order/pairing/safety-stop regression failed' }
+        python scripts/test_research_paper_audit.py
+        if ($LASTEXITCODE -ne 0) { throw 'Paper audit readback-state interval regression failed' }
         python scripts/test_research_cpu_preflight.py
         if ($LASTEXITCODE -ne 0) { throw 'CPU preflight sustained-pressure regression failed' }
         python scripts/test_research_lab_adapter.py
