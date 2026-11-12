@@ -6,9 +6,9 @@ namespace ResearchLab;
 // Research-only placement experiment: identical 9-of-20 requested ON epochs.
 // Tail allocation deliberately spends the common quota, even at low observed
 // risk. This tests placement, not optimal abstention, SLOs, or full CARP.
-sealed class BudgetPolicy(string mode,int rotation,int pid,long identity) : IResourcePolicy
+sealed class BudgetPolicy(string mode,int rotation,int pid,long identity,Func<double>? clock=null) : IResourcePolicy
 {
-    public const string Protocol="real-app-budget-v1";
+    public const string Protocol="real-app-budget-v2-readback-clock";
     public const int Epochs=20,Quota=9;
     public const double EpochSeconds=.5,MaxAge=1.5;
     readonly object gate=new();
@@ -19,10 +19,11 @@ sealed class BudgetPolicy(string mode,int rotation,int pid,long identity) : IRes
     int epoch=-1,used,runLength;
     bool selected,latched;
     public string Name=>"budget-"+mode;
-    public string Version=>"1.0-research";
+    public string Version=>"2.0-research";
     public int Used {get {lock(gate)return used;}}
     public bool Selected {get {lock(gate)return selected;}}
     public bool QuotaComplete=>Used==Quota;
+    public bool CanApplyAt(double now) {lock(gate)return phase=="Contention"&&selected&&baseline.Count==2&&seen.All(x=>now>=x.Value&&now-x.Value<=MaxAge);}
     public void Baseline(IReadOnlyDictionary<string,double> values,IReadOnlyDictionary<string,int> counts,double now) {
         if(mode is not ("fixed" or "feedback") || rotation is <0 or >=Epochs || pid<=0 || identity<=0 ||
             values.Count!=2 || values.Any(x=>!double.IsFinite(x.Value)||x.Value<=0||counts.GetValueOrDefault(x.Key)<20))
@@ -66,24 +67,25 @@ sealed class BudgetPolicy(string mode,int rotation,int pid,long identity) : IRes
             string? guard=PolicySafety.Protection(input,explicitOnly:true);
             if(input.Process.Pid!=pid||input.Process.Identity!=identity)guard??="owned-identity-mismatch";
             if(input.MemoryPressure>=PressureLevel.Moderate)guard??="outside-cpu-study-scope";
-            bool on=guard is null&&phase=="Contention"&&selected;
+            bool on=guard is null&&CanApplyAt(clock?.Invoke()??BudgetControl.Now);
             return new(on?AppStudy.MatchedBundle:ResourceAction.None,guard??reason,PolicySafety.Classify(input),[]);
         }
     }
     public static int Replay(string[] args) {
         using var doc=JsonDocument.Parse(File.ReadAllText(Options.Get(args,"--input","")));var r=doc.RootElement;
-        var policy=new BudgetPolicy(r.GetProperty("mode").GetString()!,0,987650,12);
+        double replayNow=0;var policy=new BudgetPolicy(r.GetProperty("mode").GetString()!,0,987650,12,()=>replayNow);
         var values=r.GetProperty("baseline").EnumerateObject().ToDictionary(x=>x.Name,x=>x.Value.GetDouble());
         policy.Baseline(values,values.Keys.ToDictionary(k=>k,k=>r.GetProperty("baseline_count").GetInt32()),0);
         policy.Begin("Contention");var result=new List<object>();int sequence=0;
         foreach(var row in r.GetProperty("epochs").EnumerateArray()) {
-            double now=row.GetProperty("time").GetDouble();sequence++;
+            double now=row.GetProperty("time").GetDouble();replayNow=now;sequence++;
             if(row.GetProperty("observations").ValueKind==JsonValueKind.Object)foreach(var o in row.GetProperty("observations").EnumerateObject())policy.Observe(o.Name,o.Value.GetDouble(),now,sequence);
             var step=policy.Advance(row.GetProperty("epoch").GetInt32(),now);
             var system=new Snapshot {Time=DateTimeOffset.UtcNow,RamTotal=16UL<<30,Available=10UL<<30,Commit=8UL<<30,CommitLimit=32UL<<30,CpuPercent=90};
             var process=new ProcessSample(987650,12,"fixture.exe",@"D:\Fixtures\fixture.exe",1,32UL<<20,32UL<<20,20,0,true);
             var input=new PolicyInput(system,process,new Settings(),r.GetProperty("protected").GetBoolean()?987650:987651,"foreground.exe",false,"background",PressureLevel.Normal,true,0,true,false);
-            result.Add(new {selected=policy.Selected,step,action=(int)policy.Decide(input).Action,applied=false});
+            result.Add(new {selected=policy.Selected,step,action=(int)policy.Decide(input).Action,
+                write_allowed=policy.CanApplyAt(now+(r.TryGetProperty("write_delay",out var delay)?delay.GetDouble():0)),applied=false});
         }
         Options.WriteNew(Options.Get(args,"--output",""),new {scope="Pure SYNTHETIC replay; no OS setters",epochs=result,quota_complete=policy.QuotaComplete});return 0;
     }

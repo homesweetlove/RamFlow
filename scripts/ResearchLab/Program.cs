@@ -10,6 +10,7 @@ try {
     if (args[0] == "worker") return await FixtureWorker.Run(args);
     if (args[0] == "app-session") return await AppStudy.Run(args);
     if (args[0] == "budget-replay") return BudgetPolicy.Replay(args);
+    if (args[0] == "budget-clock-replay") return BudgetClock.Replay(args);
     if (args[0] == "train") {
         string root = Path.GetFullPath(Options.Get(args, "--input", "")), output = Options.Get(args, "--model", "");
         var rows = Directory.GetFiles(root, "cost-observation.json", SearchOption.AllDirectories)

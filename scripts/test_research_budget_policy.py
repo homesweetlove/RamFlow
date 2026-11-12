@@ -8,10 +8,10 @@ import unittest
 LAB=Path(__file__).resolve().parent/'ResearchLab/bin/Release/net10.0-windows/ResearchLab.exe'
 
 class BudgetPolicyTests(unittest.TestCase):
-    def replay(self,mode='feedback',ratio=2,stale=False,protected=False,count=20):
+    def replay(self,mode='feedback',ratio=2,stale=False,protected=False,count=20,write_delay=0):
         with tempfile.TemporaryDirectory() as t:
             root=Path(t);source=root/'input.json';output=root/'output.json'
-            source.write_text(json.dumps(dict(label='SYNTHETIC UNIT DATA',mode=mode,baseline={'completion':50,'save':20},baseline_count=count,protected=protected,
+            source.write_text(json.dumps(dict(label='SYNTHETIC UNIT DATA',mode=mode,baseline={'completion':50,'save':20},baseline_count=count,protected=protected,write_delay=write_delay,
                 epochs=[dict(epoch=i,time=i*.5,observations=None if stale and i>0 else {'completion':50*ratio,'save':20*ratio}) for i in range(20)])))
             r=subprocess.run([str(LAB),'budget-replay','--input',str(source),'--output',str(output)],capture_output=True,text=True,timeout=10)
             return r,json.loads(output.read_text()) if output.exists() else None
@@ -39,5 +39,10 @@ class BudgetPolicyTests(unittest.TestCase):
     def test_insufficient_calibration_is_rejected(self):
         r,v=self.replay(count=19);self.assertNotEqual(r.returncode,0)
         self.assertIsNone(v)
+
+    def test_journal_or_setter_delay_cannot_reuse_stale_response(self):
+        r,v=self.replay(write_delay=1.6);self.assertEqual(r.returncode,0,r.stderr)
+        self.assertTrue(any(x['selected'] for x in v['epochs']))
+        self.assertTrue(all(x['write_allowed'] is False for x in v['epochs']))
 
 if __name__=='__main__':unittest.main()

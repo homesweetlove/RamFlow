@@ -31,7 +31,7 @@ static class AppStudy
             if(protocol!="real-app-abc-v4-normal-qos"&&!budget)throw new ArgumentException("Unknown real-app protocol; historical plans cannot be silently changed.");
             if(budget&&condition=="A")throw new ArgumentException("Budget placement study uses B fixed periodic / C response feedback only.");
             int seconds=Options.Int(args,"--phase-seconds",10,5,120);
-            if(budget&&seconds!=10)throw new ArgumentException("Budget v1 freezes 20 half-second epochs.");
+            if(budget&&seconds!=12)throw new ArgumentException("Budget v2 requires a fixed 12-second phase.");
             int threads=Options.Int(args,"--contention-threads",Math.Min(14,Math.Max(1,Environment.ProcessorCount-2)),1,Math.Min(16,Environment.ProcessorCount));
             string expectedBackgroundChecksum=CpuWork.Complete(20261111);
             string driver=Path.GetFullPath(Options.Get(args,"--driver","scripts/real_apps/driver.py"));
@@ -64,9 +64,12 @@ static class AppStudy
             phase="setup";
             provider.Processes(); // Prime CPU/IO activity before policy eligibility; unknown activity remains protected.
             Options.WriteNew(Path.Combine(root,"resource-original.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=original});
-            if(budget)budgetPolicy=new(condition=="B"?"fixed":"feedback",Options.Int(args,"--budget-rotation",0,0,19),background.Process.Id,background.Identity);
+            if(budget) {
+                budgetPolicy=new(condition=="B"?"fixed":"feedback",Options.Int(args,"--budget-rotation",0,0,19),background.Process.Id,background.Identity);
+                provider.RestrictionAllowed=()=>budgetPolicy.CanApplyAt(BudgetControl.Now);
+            }
             var config=new Settings {DryRun=false,PolicyName=budget||condition=="B"?"fixed":"v1",CpuManagement=true,EcoQos=true,CpuSets=false,WorkingSetTrim=false,Learning=false,BackgroundApps=[backgroundExe]};
-            Options.WriteNew(Path.Combine(root,"effective-settings.json"),new {condition,protocol,labels=budget?new {A="not-in-study",B="budget-fixed-periodic",C="budget-response-feedback"}:new {A="no-engine-or-tray",B="fixed-v1-matched-bundle",C="adaptive-v1"},
+            Options.WriteNew(Path.Combine(root,"effective-settings.json"),new {condition,protocol,labels=budget?new {A="not-in-study",B="budget-fixed-sequence",C="budget-response-feedback"}:new {A="no-engine-or-tray",B="fixed-v1-matched-bundle",C="adaptive-v1"},
                 settings=config,settings_sha256=FileResearchAuditSink.Hash(config),matched_action=(int)MatchedBundle,
                 target=new {CpuPriority=0x4000,MemoryPriority=3,EcoControlBit=1,EcoStateBit=1},
                 readback_rule="Compare requested and observed after EVERY write. B and C active writes must equal the same V1 transformation of each original; restored/no-action values are separate."});
@@ -151,7 +154,7 @@ static class AppStudy
                 if(budget&&phase=="Contention") {
                     await controlTask!;controlTask=null;
                     var result=budgetControl!.Result(original);Options.WriteNew(Path.Combine(root,"budget-result.json"),result);
-                    if(!JsonSerializer.SerializeToElement(result).GetProperty("matched_session").GetBoolean())throw new IOException("Budget dose/deadline mismatch; retain failed run, no matched-exposure inference.");
+                    if(!JsonSerializer.SerializeToElement(result).GetProperty("matched_session").GetBoolean())failures.Add("Budget dose/deadline mismatch; retain failed run with Recovery, no matched-exposure inference.");
                 }
                 var last=await background.Request("progress");
                 if(last.Units<=first.Units || last.Checksum!=expectedBackgroundChecksum)throw new IOException("Background made no valid completed progress.");
@@ -229,6 +232,7 @@ static class AppStudy
 sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<string> phase) : IResourceProvider
 {
     public List<(double Time,ResourceValues Values)> PolicyReadbacks {get;}=[];
+    public Func<bool>? RestrictionAllowed {get;set;}
     readonly WindowsResourceProvider real=new();
     (double Cpu,ulong Io,long Stamp)? previous;
     public int OutOfScopeRequests {get;private set;}
@@ -253,7 +257,7 @@ sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<s
     public long? Identity(int pid)=>real.Identity(pid);
     public bool Exited(int pid)=>real.Exited(pid);
     bool Owns(int pid,long identity)=>pid==background.Process.Id && identity==background.Identity;
-    public bool Validate(ProcessSample p,bool restoring=false)=>Owns(p.Pid,p.Identity)&&real.Validate(p,restoring);
+    public bool Validate(ProcessSample p,bool restoring=false)=>Owns(p.Pid,p.Identity)&&real.Validate(p,restoring)&&(restoring||RestrictionAllowed?.Invoke()!=false);
     public ResourceValues? ReadValues(int pid)=>real.ReadValues(pid);
     public bool WriteValues(int pid,ResourceValues values,long identity)=>WriteOwned(pid,values,identity,"resource-write-readback");
     public bool WriteWorkloadValues(ResourceValues values,bool restoring) {
@@ -263,6 +267,9 @@ sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<s
     }
     bool WriteOwned(int pid,ResourceValues values,long identity,string kind) {
         if(!Owns(pid,identity)) {OutOfScopeRequests++;evidence.Write("out-of-scope-write",new {phase=phase(),pid,creation_filetime=identity});return false;}
+        if(kind=="resource-write-readback"&&(values.PowerState&1U)!=0&&RestrictionAllowed?.Invoke()==false) {
+            evidence.Write("resource-write-blocked",new {phase=phase(),pid,creation_filetime=identity,reason="response-expired-or-budget-off-before-os-write"},true);return false;
+        }
         bool result=real.WriteValues(pid,values,identity);var observed=real.ReadValues(pid);
         double readbackSeconds=BudgetControl.Now;
         bool matched=result&&AppStudy.Same(values,observed)&&real.Identity(pid)==identity;

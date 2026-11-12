@@ -35,6 +35,7 @@ K.CreateProcessW.argtypes=[w.LPCWSTR,w.LPWSTR,c.c_void_p,c.c_void_p,w.BOOL,w.DWO
 K.AssignProcessToJobObject.argtypes=[w.HANDLE,w.HANDLE]
 K.ResumeThread.argtypes=[w.HANDLE];K.ResumeThread.restype=w.DWORD
 K.CloseHandle.argtypes=[w.HANDLE];K.OpenProcess.argtypes=[w.DWORD,w.BOOL,w.DWORD];K.OpenProcess.restype=w.HANDLE
+K.WaitForSingleObject.argtypes=[w.HANDLE,w.DWORD];K.WaitForSingleObject.restype=w.DWORD
 K.IsProcessInJob.argtypes=[w.HANDLE,w.HANDLE,c.POINTER(w.BOOL)]
 K.GetProcessTimes.argtypes=[w.HANDLE,c.POINTER(w.FILETIME),c.POINTER(w.FILETIME),c.POINTER(w.FILETIME),c.POINTER(w.FILETIME)]
 K.TerminateJobObject.argtypes=[w.HANDLE,w.UINT];K.TerminateProcess.argtypes=[w.HANDLE,w.UINT]
@@ -77,10 +78,14 @@ class OwnedApp:
             if self.process:K.CloseHandle(self.process)
             K.CloseHandle(self.job);raise
     def owns(self,pid):
-        handle=K.OpenProcess(0x1000,False,pid)
+        handle=K.OpenProcess(0x1000|0x100000,False,pid) # query + SYNCHRONIZE
         if not handle:return False
         try:
-            answer=w.BOOL();return bool(K.IsProcessInJob(handle,self.job,c.byref(answer)) and answer.value)
+            answer=w.BOOL()
+            if not (K.IsProcessInJob(handle,self.job,c.byref(answer)) and answer.value):return False
+            wait=K.WaitForSingleObject(handle,0)
+            if wait not in (0,0x102):raise OSError(f'Unknown owned process wait result: {wait}')
+            return wait==0x102 # An exited/signaled process can retain a PID/job association.
         finally:K.CloseHandle(handle)
     def members(self):return [p for p in psutil.process_iter() if self.owns(p.pid)]
     def windows(self):
@@ -119,7 +124,8 @@ class OwnedApp:
         while self.members() and time.monotonic()<deadline:time.sleep(.05)
         remaining=[p.pid for p in self.members()]
         K.CloseHandle(self.process);K.CloseHandle(self.job);self.job=None
-        return {'completed':not remaining,'forced_job_cleanup':forced,'members_before_close':before,'remaining_pids':remaining}
+        return {'completed':not remaining,'forced_job_cleanup':forced,'members_before_close':before,'remaining_pids':remaining,
+                'liveness_rule':'Job membership plus nonsignaled process handle; an exited/signaled PID is not a running job member'}
 
 def read_url(url,data=None,token=None):
     req=urllib.request.Request(url,data=None if data is None else json.dumps(data).encode(),headers={'Content-Type':'application/json',**({'Authorization':'Bearer '+token} if token else {})})

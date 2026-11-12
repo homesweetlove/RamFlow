@@ -37,6 +37,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/test_research_budget_check.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/test_research_budget_clock.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/test_research_cpu_worker_windows.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/test_owned_process_qos_windows.py

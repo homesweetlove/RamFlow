@@ -38,14 +38,14 @@ def analyze(root,plan):
         if o and (o.get('condition')!=r['condition'] or o.get('application')!=r['app'] or o.get('protocol')!=PROTOCOL):r.update(eligible=False,slot_mismatch=True)
     pairs=pair_blocks(data['ledger'])
     matched=[r for r in data['metrics'] if (r['app'],r['block']) in pairs]
-    comparisons=[r for r in compare(matched,plan['bootstrap_iterations'],plan['seed']) if r['baseline']=='B' and r['candidate']=='C']
+    comparisons=[] if plan.get('stage')=='actuator-smoke' else [r for r in compare(matched,plan['bootstrap_iterations'],plan['seed']) if r['baseline']=='B' and r['candidate']=='C']
     data.update(protocol=PROTOCOL,comparisons=comparisons,matched_blocks=[dict(app=a,block=b) for a,b in sorted(pairs)],
         analysis_unit='Paired session block; requests are subsamples',planned_sessions=len(plan['schedule']),eligible_sessions=sum(r['eligible'] for r in data['ledger']),
         inference='Exploratory marginal unadjusted 95% block-bootstrap intervals. No equivalence/SLO claim, full CARP validation or acceptance guarantee. Equal wall-time exposure does not imply equal throughput loss.')
     save_new(output/'summary.json',data)
     for k in ('ledger','metrics','comparisons','overheads','timings'):_write_csv(output/(k+'.csv'),data[k])
     lines=['# 동일 개입 시간 예산 배치 비교','',f"예정 {len(plan['schedule'])}세션 / 세션 적격 {data['eligible_sessions']} / 시간 예산 대응 블록 {len(pairs)}개(앱별 합계).",'',
-        'B=고정 주기, C=응답 피드백. 둘 다 9/20개의 0.5초 epoch를 요청한다. 실제 readback 상태 시간 차이 ≤0.15초인 대응 블록만 비교한다. 동일 배경 손실·동등 응답성을 보장하지 않는다. 95% CI는 탐색적·다중성 미보정. 이전 V1 A/B/C 자료와 합산하지 않는다.','',
+        'B=고정 순서, C=응답 피드백. 둘 다 9/20개의 0.5초 ON credit을 요청하며 readback 시계로 차감한다. 공통 측정 구간은 12초다. 실제 readback 상태 시간 차이 ≤0.15초인 대응 블록만 비교한다. 동일 배경 손실·동등 응답성을 보장하지 않는다. 95% CI는 탐색적·다중성 미보정. 이전 V1 A/B/C 자료와 합산하지 않는다.','',
         '| 앱·기능 (Contention) | B p95 ms | C p95 ms | B 배경 단위/초 | C 배경 단위/초 | 대응 블록 |','|---|---:|---:|---:|---:|---:|']
     bars=[]
     for app,feature in sorted({(r['app'],r['feature']) for r in matched}):
@@ -65,15 +65,17 @@ def analyze(root,plan):
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',required=True,type=Path);p.add_argument('--seed',type=int,default=20261113);p.add_argument('--plan-only',action='store_true')
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',required=True,type=Path);p.add_argument('--seed',type=int,default=20261113);p.add_argument('--plan-only',action='store_true');p.add_argument('--smoke',action='store_true')
     args=p.parse_args();lab=REPO/'scripts/ResearchLab/bin/Release/net10.0-windows/ResearchLab.exe';root=args.output.resolve()
+    slots=schedule(args.seed)
+    if args.smoke:slots=[r for r in slots if r['block']==1]
     source=provenance(lab)
     for name in ('research_budget_batch.py','research_budget_check.py'):source['files']['scripts/'+name]=file_hash(REPO/'scripts'/name)
     root.mkdir(parents=True,exist_ok=False)
-    plan=dict(protocol=PROTOCOL,created_utc=datetime.now(timezone.utc).isoformat(),schedule=schedule(args.seed),seed=args.seed,phase_seconds=10,contention_threads=14,
-        bootstrap_iterations=10000,provenance=source,blocks_per_app=6,primary_contrast='C minus B, Contention: p95 and background throughput jointly',
+    plan=dict(protocol=PROTOCOL,created_utc=datetime.now(timezone.utc).isoformat(),schedule=slots,stage='actuator-smoke' if args.smoke else 'exploratory-comparison',seed=args.seed,phase_seconds=12,contention_threads=14,
+        bootstrap_iterations=10000,provenance=source,blocks_per_app=1 if args.smoke else 6,primary_contrast='C minus B, Contention: p95 and background throughput jointly',
         response_baseline='Own Normal p95, >=20 per feature',ema_alpha=.3,entry_ratio=1.25,exit_ratio=1.10,min_hold_epochs=2,max_response_age_seconds=1.5,
-        epochs=20,epoch_seconds=.5,quota=9,fixed_mask=[0,1,2,5,6,10,11,15,16],max_deadline_lag_seconds=.1,dose_tolerance_seconds=.1,pair_dose_difference_seconds=.15,
+        epochs=20,epoch_seconds=.5,quota=9,clock='readback-paced ON credit; fixed 12s measurement phase',fixed_mask=[0,1,2,5,6,10,11,15,16],max_deadline_lag_seconds=.1,dose_tolerance_seconds=.1,pair_dose_difference_seconds=.15,
         foreground_tolerance_ms=None,scope='Single-PC CPU-only placement feasibility; not full CARP or powered confirmation',stop_rule='No retries; stop on unsafe/unverifiable run or two consecutive failures')
     save_new(root/'batch-plan.json',plan);save_new(root/'batch-plan-sha256.json',dict(sha256=file_hash(root/'batch-plan.json')))
     if args.plan_only:print('Plan only; no live sessions');return 0
@@ -85,7 +87,7 @@ def main():
         verify_frozen(plan)
         if read(root/'batch-plan-sha256.json')['sha256']!=file_hash(root/'batch-plan.json'):raise ValueError('Plan changed')
         d=root/slot['session']
-        argv=[str(lab),'app-session','--protocol',PROTOCOL,'--app',slot['app'],'--condition',slot['condition'],'--output',str(d),'--phase-seconds','10','--contention-threads','14','--budget-rotation',str(slot['rotation'])]
+        argv=[str(lab),'app-session','--protocol',PROTOCOL,'--app',slot['app'],'--condition',slot['condition'],'--output',str(d),'--phase-seconds','12','--contention-threads','14','--budget-rotation',str(slot['rotation'])]
         with (root/(slot['session']+'.stdout.txt')).open('x') as out,(root/(slot['session']+'.stderr.txt')).open('x') as err:
             child=subprocess.Popen(argv,cwd=REPO,stdout=out,stderr=err)
             try:return child.wait(timeout=270)
@@ -93,9 +95,10 @@ def main():
                 if d.exists():save_new(d/'cancel.request',dict(reason='Restore and seal; no retry'))
                 child.wait(timeout=90);raise RuntimeError('Batch cancelled; no next session')
     results=run_schedule(root,plan,execute);save_new(root/'execution-ledger.json',results);data=analyze(root,plan)
-    save_new(root/'batch-result.json',dict(status='completed' if data['eligible_sessions']==24 else 'completed_with_failures',eligible_sessions=data['eligible_sessions'],planned_sessions=24,matched_blocks=len(data['matched_blocks'])))
+    success=data['eligible_sessions']==len(slots) and len(data['matched_blocks'])==len(slots)//2
+    save_new(root/'batch-result.json',dict(status='completed' if success else 'completed_with_failures',eligible_sessions=data['eligible_sessions'],planned_sessions=len(slots),matched_blocks=len(data['matched_blocks'])))
     save_new(root/'batch-artifact-index.json',dict(files=[dict(path=f.relative_to(root).as_posix(),bytes=f.stat().st_size,sha256=file_hash(f)) for f in sorted(root.rglob('*')) if f.is_file() and not any(p.startswith('runtime-') for p in f.relative_to(root).parts)]))
-    print(json.dumps(dict(event='batch-finished',eligible=data['eligible_sessions'],planned=24,matched_blocks=len(data['matched_blocks']))),flush=True)
-    return 0 if data['eligible_sessions']==24 else 1
+    print(json.dumps(dict(event='batch-finished',eligible=data['eligible_sessions'],planned=len(slots),matched_blocks=len(data['matched_blocks']))),flush=True)
+    return 0 if success else 1
 
 if __name__=='__main__':raise SystemExit(main())

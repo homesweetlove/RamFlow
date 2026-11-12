@@ -32,6 +32,21 @@ class BudgetGateTests(unittest.TestCase):
     def test_semantic_replay_accepts_synthetic_exact_schedule(self):
         self.assertEqual(budget_errors(*self.sample()),[])
 
+    def v2_sample(self):
+        args=self.sample();records,outcome,baseline,result,original=args
+        outcome['protocol']=result['protocol']='real-app-budget-v2-readback-clock'
+        writes=[r['data'] for r in records if r['kind']=='resource-write-readback']
+        for i in range(20):
+            on,_=exposure(0,i*.5,writes,original['values'])
+            records.append(dict(kind='budget-after-tick',data=dict(phase='Contention',epoch=i,tick_end_seconds=i*.5,on_seconds=on,next_due_seconds=(i+1)*.5)))
+        return args
+
+    def test_readback_clock_semantic_replay(self):self.assertEqual(budget_errors(*self.v2_sample()),[])
+
+    def test_readback_clock_deadline_tampering_rejected(self):
+        args=self.v2_sample();next(r['data'] for r in args[0] if r['kind']=='budget-after-tick')['next_due_seconds']+=.2
+        self.assertIn('budget_readback_clock_replay_mismatch',budget_errors(*args))
+
     def test_replay_rejects_response_policy_and_dose_tampering(self):
         for kind in ('raw','decision','dose'):
             args=copy.deepcopy(self.sample());records,outcome,baseline,result,original=args

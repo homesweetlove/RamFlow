@@ -1,7 +1,7 @@
 """Read-only semantic checks for the separate budget-placement protocol."""
 import math
 
-PROTOCOL='real-app-budget-v1'
+PROTOCOL='real-app-budget-v2-readback-clock'
 MASK={0,1,2,5,6,10,11,15,16}
 
 
@@ -30,9 +30,13 @@ def budget_errors(records,outcome,baseline,result,original):
     starts,ends,epochs,stops=rows('budget-start'),rows('budget-end'),rows('budget-epoch'),rows('budget-stop-deadline')
     if len(starts)!=1 or len(ends)!=1 or len(epochs)!=20 or len(stops)!=1:return ['budget_lifecycle_missing']
     start,end=starts[0],ends[0]
+    v2=outcome.get('protocol')==PROTOCOL
+    if v2:
+        after=rows('budget-after-tick')
+        if len(after)!=20 or [r.get('epoch') for r in after]!=list(range(20)):return ['budget_after_tick_lifecycle']
     if (start.get('epochs'),start.get('quota'),start.get('epoch_seconds'))!=(20,9,.5):errors.append('budget_parameters_changed')
     if [r.get('decision',{}).get('epoch') for r in epochs]!=list(range(20)):errors.append('budget_epoch_sequence')
-    if result.get('protocol')!=PROTOCOL or outcome.get('protocol')!=PROTOCOL:errors.append('budget_protocol_mismatch')
+    if outcome.get('protocol') not in (PROTOCOL,'real-app-budget-v1') or result.get('protocol')!=outcome.get('protocol'):errors.append('budget_protocol_mismatch')
     if rows('budget-baseline-frozen')!=[baseline]:errors.append('budget_baseline_sidecar_mismatch')
     if baseline.get('phase')!='Normal' or len(baseline.get('p95_ms',{}))!=2:errors.append('budget_baseline_features')
     normal=next((p for p in outcome['phases'] if p['phase']=='Normal'),{})
@@ -47,7 +51,7 @@ def budget_errors(records,outcome,baseline,result,original):
     mode='fixed' if outcome['condition']=='B' else 'feedback'
     used=0;latched=False;prior=False;run_length=0;rotation=None;lag=0.
     for i,r in enumerate(epochs):
-        d=r['decision'];actual=r['actual_seconds'];due=start['clock_seconds']+i*.5
+        d=r['decision'];actual=r['actual_seconds'];due=(start['clock_seconds'] if i==0 else after[i-1]['next_due_seconds']) if v2 else start['clock_seconds']+i*.5
         if not near(r['due_seconds'],due) or actual<due:errors.append('budget_deadline_clock')
         lag=max(lag,actual-due)
         if d.get('mode')!=mode or type(d.get('rotation')) is not int or not 0<=d['rotation']<20:errors.append('budget_mode_rotation')
@@ -77,8 +81,12 @@ def budget_errors(records,outcome,baseline,result,original):
             used+=int(selected)
         if d.get('selected')!=selected or d.get('reason')!=reason or d.get('used')!=used or d.get('quota')!=9:errors.append('budget_selection_replay_mismatch')
         run_length=(run_length+1 if prior else 1) if selected else 0;prior=selected
+        if v2:
+            a=after[i];on,_=exposure(start['clock_seconds'],a['tick_end_seconds'],rows('resource-write-readback'),original['values'])
+            next_due=a['tick_end_seconds']+max(0,used*.5-on) if selected else max(a['tick_end_seconds'],actual+.5)
+            if a['tick_end_seconds']<actual or not near(a.get('on_seconds'),on) or not near(a.get('next_due_seconds'),next_due):errors.append('budget_readback_clock_replay_mismatch')
     stop=stops[0]
-    if not near(stop.get('due_seconds'),start['clock_seconds']+10) or stop['actual_seconds']<stop['due_seconds']:errors.append('budget_stop_deadline_clock')
+    if not near(stop.get('due_seconds'),after[-1]['next_due_seconds'] if v2 else start['clock_seconds']+10) or stop['actual_seconds']<stop['due_seconds']:errors.append('budget_stop_deadline_clock')
     lag=max(lag,stop['actual_seconds']-stop['due_seconds'])
     on,active=exposure(start['clock_seconds'],end['clock_seconds'],rows('resource-write-readback'),original['values'])
     if not near(result.get('actual_readback_on_seconds'),on) or not near(result.get('max_deadline_lag_seconds'),lag) or not near(end.get('max_deadline_lag_seconds'),lag) or not near(result.get('start_seconds'),start['clock_seconds']) or not near(result.get('end_seconds'),end['clock_seconds']) or not near(result.get('requested_on_seconds'),4.5):errors.append('budget_actual_dose_summary_mismatch')
@@ -86,4 +94,5 @@ def budget_errors(records,outcome,baseline,result,original):
     if any(r.get('phase')!='Contention' and r['observed']!=original['values'] for r in rows('resource-write-readback')):errors.append('budget_intervention_outside_contention')
     if result.get('used')!=used or end.get('used')!=used or used!=9 or result.get('quota_complete') is not True or end.get('quota_complete') is not True:errors.append('budget_quota_incomplete')
     if result.get('matched_session') is not True or abs(on-4.5)>.1 or result.get('max_deadline_lag_seconds',1)>.1 or active:errors.append('budget_exposure_or_deadline_invalid')
+    if v2 and end['clock_seconds']-start['clock_seconds']>12:errors.append('budget_fixed_phase_overrun')
     return sorted(set(errors))
