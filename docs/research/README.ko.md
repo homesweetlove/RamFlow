@@ -1,6 +1,8 @@
 # RAM Flow KCI 연구 작업 안내
 
-검사 전 기록 점검: [로그 계약·누락 보완·무결성 검증](LOGGING_CONTRACT.ko.md). 새 실행은 evidence-v1 원시 기록과 정리 후 완료/해시 목록을 생성하며, 미완료·변경된 새 기록은 학습/분석에서 거부한다. 실제 앱의 새 실행기에도 이 계약을 연결해야 한다.
+최신 실앱 연결 검증(2026-11-12): [QoS 진단·v4 A/B/C 6세션 보고서](evidence/2026-11-12-qos-v4/REPORT.ko.md) · [원시 증거 ZIP](evidence/2026-11-12-qos-v4/raw-evidence.zip) · [실행 명령](REAL_APP_ABC_SMOKE.ko.md). 새 격리 Chrome/VS Code 어댑터에서 실제 개입·회복·B/C OS readback 일치·두 단계 원복·무결성 검사를 통과했다. 모든 조건의 배경 워크로드가 정상 QoS를 명시하는 별도 입력층이며, 기본 QoS의 [v2/v3 실패 기록](evidence/2026-11-12-real-app-v2-v3/REPORT.ko.md)과 합치지 않는다. C의 반복 적용/복원, 효과 없는 Chrome 조건, VS Code 지연/배경 처리율 상충도 보존했다. n=1 연결 검증으로 CARP 우위·같은 응답성에서의 처리율 우위를 입증하지 않는다.
+
+검사 전 기록 점검: [로그 계약·누락 보완·무결성 검증](LOGGING_CONTRACT.ko.md). 새 실행은 evidence-v1 원시 기록과 정리 후 완료/해시 목록을 생성하며, 미완료·변경된 새 기록은 학습/분석에서 거부한다. 실제 앱 실행기 연결과 재추출 검증은 위 v4 증거를 참조한다. 아래 최초 구현 경계/미완료 목록은 후속 실측 문서와 함께 읽는다.
 
 추가 개발: [실측 비용 모델](MEASURED_MODEL.ko.md) · [실행 가능한 Windows 경로](RESEARCHLAB.ko.md) · [starvation/소거](STARVATION_ABLATIONS.ko.md) · [추가 실측·실패·검증](PHASE2_RESULTS.ko.md). 아래 기존 단계 기록과 새 파일럿 결과를 구분한다.
 

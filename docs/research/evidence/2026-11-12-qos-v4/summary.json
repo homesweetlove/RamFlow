@@ -1,0 +1,5592 @@
+{
+  "protocol": "real-app-abc-v4-normal-qos",
+  "input_stratum": "All A/B/C use explicitly normal execution-speed QoS workload; A has no engine/tray. Not OS-default workload QoS.",
+  "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+  "sessions": [
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "requests": 354,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:29:21.318266+09:00",
+      "applies": 0,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 14968,
+        "creation_filetime": 134389277827753491,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 14968,
+        "creation_filetime": 134389277827753491,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 14968,
+        "creation_filetime": 134389277827753491,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 14968,
+          "creation_filetime": 134389277827753491,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 14968,
+          "creation_filetime": 134389277827753491,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [],
+      "decision_count": 0,
+      "decision_p50_ms": null,
+      "decision_p95_ms": null,
+      "decision_max_ms": null,
+      "audit_count": 0,
+      "audit_p50_ms": null,
+      "audit_p95_ms": null,
+      "journal_wall_ms": 149.8269000000002,
+      "last_recovery_restore_delay_seconds": null
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "requests": 344,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:30:28.551488+09:00",
+      "applies": 9,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 12736,
+        "creation_filetime": 134389278489373304,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 12736,
+        "creation_filetime": 134389278489373304,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 12736,
+        "creation_filetime": 134389278489373304,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Recovery",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 12736,
+          "creation_filetime": 134389278489373304,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [
+        {
+          "time_utc": "2026-11-12T03:31:05.9466393+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:05.8898162+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:06.4960443+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:06.4930592+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 577.0379
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:07.2101126+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:07.1700607+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:07.7494266+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:07.7493101+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 560.077
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:08.3221957+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:08.2582605+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:08.8667247+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:08.8666052+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 582.4397
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:09.4285098+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:09.3799093+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:09.9756637+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:09.9755805+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 577.1989
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:10.5621839+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:10.5136033+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:11.0975713+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:11.0974809+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 561.8915
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:11.6625737+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:11.6132119+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:12.2312378+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:12.2311465+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 598.3505
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:12.7964919+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:12.7486808+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:13.4950025+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:13.4949136+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 725.8324
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:14.0664589+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:14.0250174+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:14.6138398+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:14.6137375+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 573.0639
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:15.1702673+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:31:15.1273541+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:31:15.5583111+00:00",
+          "phase": "Recovery",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:31:15.5582339+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "b27e3b207111549083b2cf1fa23a6ca82dba10c260ecb38b5becfa172ce258ec",
+            "Pid": 12736,
+            "Identity": 134389278489373304,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 414.2387
+            }
+          }
+        }
+      ],
+      "decision_count": 112,
+      "decision_p50_ms": 0.0030499999999999998,
+      "decision_p95_ms": 0.008859999999999991,
+      "decision_max_ms": 0.9636,
+      "audit_count": 251,
+      "audit_p50_ms": 0.1086,
+      "audit_p95_ms": 0.28105,
+      "journal_wall_ms": 269.45699999999977,
+      "last_recovery_restore_delay_seconds": 0.032129
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "requests": 348,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:31:36.209647+09:00",
+      "applies": 1,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 10732,
+        "creation_filetime": 134389279159740938,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 10732,
+        "creation_filetime": 134389279159740938,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 10732,
+        "creation_filetime": 134389279159740938,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [
+        {
+          "phase": "Normal",
+          "pid": 10732,
+          "creation_filetime": 134389279159740938,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "cleanup",
+          "pid": 10732,
+          "creation_filetime": 134389279159740938,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 10732,
+          "creation_filetime": 134389279159740938,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 10732,
+          "creation_filetime": 134389279159740938,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [
+        {
+          "time_utc": "2026-11-12T03:32:02.2969049+00:00",
+          "phase": "Normal",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:32:02.1724558+00:00",
+            "Policy": "measured-candidate",
+            "Version": "1.0",
+            "SettingsSha256": "02b3f192c496973679f89e21da03721c66b9a2b5cdfc88506f5db9e9e1b80d1b",
+            "Pid": 10732,
+            "Identity": 134389279159740938,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:32:32.4164098+00:00",
+          "phase": "cleanup",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:32:32.4141861+00:00",
+            "Policy": "measured-candidate",
+            "Version": "1.0",
+            "SettingsSha256": "02b3f192c496973679f89e21da03721c66b9a2b5cdfc88506f5db9e9e1b80d1b",
+            "Pid": 10732,
+            "Identity": 134389279159740938,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 30140.8834
+            }
+          }
+        }
+      ],
+      "decision_count": 112,
+      "decision_p50_ms": 0.0020499999999999997,
+      "decision_p95_ms": 0.006844999999999999,
+      "decision_max_ms": 0.9525,
+      "audit_count": 227,
+      "audit_p50_ms": 0.1067,
+      "audit_p95_ms": 0.24455999999999997,
+      "journal_wall_ms": 179.27869999999976,
+      "last_recovery_restore_delay_seconds": null
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "requests": 272,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:32:42.142713+09:00",
+      "applies": 8,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 31356,
+        "creation_filetime": 134389279830560747,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 31356,
+        "creation_filetime": 134389279830560747,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 31356,
+        "creation_filetime": 134389279830560747,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Contention",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Recovery",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "Recovery",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 31356,
+          "creation_filetime": 134389279830560747,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [
+        {
+          "time_utc": "2026-11-12T03:33:20.4784765+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:20.4141087+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:21.1033362+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:21.0998646+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 661.8309
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:21.8616371+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:21.8201321+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:22.5264163+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:22.5262684+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 687.4863
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:23.3171559+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:23.2511217+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:23.92433+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:23.923908+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 648.0642
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:24.7394369+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:24.6892205+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:25.3444614+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:25.3443763+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 631.1648
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:26.1438472+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:26.0928843+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:26.7684949+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:26.7684165+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 656.4397
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:27.3529187+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:27.2939788+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:27.9642161+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:27.9641345+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 650.7223
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:28.5765217+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:28.5053986+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:29.2165435+00:00",
+          "phase": "Contention",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:29.216464+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 687.8045
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:29.811496+00:00",
+          "phase": "Recovery",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:33:29.7452019+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:33:30.4446124+00:00",
+          "phase": "Recovery",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:33:30.4445227+00:00",
+            "Policy": "v1",
+            "Version": "1.0-baseline-53cd18a",
+            "SettingsSha256": "6cfbd9077997a038610a6f8416d951f3e94489e50ef91dd387ee223cc5fb1a09",
+            "Pid": 31356,
+            "Identity": 134389279830560747,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 653.9739
+            }
+          }
+        }
+      ],
+      "decision_count": 94,
+      "decision_p50_ms": 0.0032,
+      "decision_p95_ms": 0.017609999999999987,
+      "decision_max_ms": 0.9494,
+      "audit_count": 212,
+      "audit_p50_ms": 0.10915,
+      "audit_p95_ms": 0.3352899999999995,
+      "journal_wall_ms": 218.33990000000006,
+      "last_recovery_restore_delay_seconds": 0.702919
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "requests": 274,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:33:50.982509+09:00",
+      "applies": 0,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 3428,
+        "creation_filetime": 134389280505629495,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 3428,
+        "creation_filetime": 134389280505629495,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 3428,
+        "creation_filetime": 134389280505629495,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 3428,
+          "creation_filetime": 134389280505629495,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 3428,
+          "creation_filetime": 134389280505629495,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [],
+      "decision_count": 0,
+      "decision_p50_ms": null,
+      "decision_p95_ms": null,
+      "decision_max_ms": null,
+      "audit_count": 0,
+      "audit_p50_ms": null,
+      "audit_p95_ms": null,
+      "journal_wall_ms": 126.43699999999983,
+      "last_recovery_restore_delay_seconds": null
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "requests": 282,
+      "status": "completed",
+      "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+      "source_dirty": false,
+      "controller_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+      "core_sha256": "218b4d0de67eb21e58e133be650c805082fe860ef175412bc3072e0d5c4ba10c",
+      "started_kst": "2026-11-12T12:34:54.665476+09:00",
+      "applies": 1,
+      "restored": true,
+      "workload_restored": true,
+      "cleanup_completed": true,
+      "protected_misinterventions": 0,
+      "readback_failures": 0,
+      "workload_initial": {
+        "pid": 28312,
+        "creation_filetime": 134389281158933457,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        }
+      },
+      "workload_effective": {
+        "pid": 28312,
+        "creation_filetime": 134389281158933457,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Explicit normal QoS is part of the input, identical in A/B/C"
+      },
+      "workload_final": {
+        "pid": 28312,
+        "creation_filetime": 134389281158933457,
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 0,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "restored": true
+      },
+      "policy_final": {
+        "values": {
+          "MemoryPriority": 5,
+          "CpuPriority": 32,
+          "PowerControl": 1,
+          "PowerState": 0,
+          "CpuSets": []
+        },
+        "scope": "Policy baseline readback BEFORE separate common-workload reset",
+        "restored": true,
+        "restoration_status": "confirmed-original-readback",
+        "cleanup_completed": true,
+        "protected_misinterventions": 0
+      },
+      "policy_writes": [
+        {
+          "phase": "Normal",
+          "pid": 28312,
+          "creation_filetime": 134389281158933457,
+          "requested": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 3,
+            "CpuPriority": 16384,
+            "PowerControl": 1,
+            "PowerState": 1,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "cleanup",
+          "pid": 28312,
+          "creation_filetime": 134389281158933457,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "workload_writes": [
+        {
+          "phase": "workload-setup",
+          "pid": 28312,
+          "creation_filetime": 134389281158933457,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 1,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        },
+        {
+          "phase": "workload-reset",
+          "pid": 28312,
+          "creation_filetime": 134389281158933457,
+          "requested": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "observed": {
+            "MemoryPriority": 5,
+            "CpuPriority": 32,
+            "PowerControl": 0,
+            "PowerState": 0,
+            "CpuSets": []
+          },
+          "api_result": true,
+          "matched": true
+        }
+      ],
+      "interventions_and_restores": [
+        {
+          "time_utc": "2026-11-12T03:35:22.4896219+00:00",
+          "phase": "Normal",
+          "entry": {
+            "Kind": "apply",
+            "Time": "2026-11-12T03:35:22.3639558+00:00",
+            "Policy": "measured-candidate",
+            "Version": "1.0",
+            "SettingsSha256": "590a85af4c15667d3e03bc33860a1a959f8aac5a06e96f057894817f67e6f5c0",
+            "Pid": 28312,
+            "Identity": 134389281158933457,
+            "Result": "applied",
+            "Detail": {
+              "Requested": {
+                "MemoryPriority": 3,
+                "CpuPriority": 16384,
+                "PowerControl": 1,
+                "PowerState": 1,
+                "CpuSets": []
+              },
+              "Action": 7
+            }
+          }
+        },
+        {
+          "time_utc": "2026-11-12T03:35:52.5698541+00:00",
+          "phase": "cleanup",
+          "entry": {
+            "Kind": "restore",
+            "Time": "2026-11-12T03:35:52.5680797+00:00",
+            "Policy": "measured-candidate",
+            "Version": "1.0",
+            "SettingsSha256": "590a85af4c15667d3e03bc33860a1a959f8aac5a06e96f057894817f67e6f5c0",
+            "Pid": 28312,
+            "Identity": 134389281158933457,
+            "Result": "restored",
+            "Detail": {
+              "Original": {
+                "MemoryPriority": 5,
+                "CpuPriority": 32,
+                "PowerControl": 1,
+                "PowerState": 0,
+                "CpuSets": []
+              },
+              "RestrictedDurationMs": 30102.9615
+            }
+          }
+        }
+      ],
+      "decision_count": 96,
+      "decision_p50_ms": 0.0027,
+      "decision_p95_ms": 0.007775000000000001,
+      "decision_max_ms": 0.8326,
+      "audit_count": 195,
+      "audit_p50_ms": 0.1084,
+      "audit_p95_ms": 0.26956999999999964,
+      "journal_wall_ms": 158.50050000000005,
+      "last_recovery_restore_delay_seconds": null
+    }
+  ],
+  "total_foreground_requests": 1874,
+  "smoke_passed": true,
+  "matched_B_C_readbacks": {
+    "chrome": true,
+    "code": true
+  },
+  "diagnostics": [
+    {
+      "directory": "cpu-readonly-diagnostic-20261112",
+      "result": {
+        "status": "completed",
+        "cleanup_completed": true,
+        "control_writes": 0,
+        "headroom_ok": true,
+        "errors": [],
+        "samples": 32,
+        "sustained_time_cpu": false,
+        "inference": "Read-only diagnostic completed is not successful pressure admission or an efficacy result"
+      },
+      "phases": {
+        "Normal": {
+          "samples": 10,
+          "system_time_cpu_min": 17.0,
+          "system_time_cpu_max": 22.4,
+          "system_time_cpu_mean": 19.03,
+          "last_sampled_processors": [
+            3,
+            4,
+            6,
+            8,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "Contention": {
+          "samples": 16,
+          "system_time_cpu_min": 29.2,
+          "system_time_cpu_max": 35.8,
+          "system_time_cpu_mean": 32.2625,
+          "last_sampled_processors": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "Recovery": {
+          "samples": 6,
+          "system_time_cpu_min": 18.1,
+          "system_time_cpu_max": 25.1,
+          "system_time_cpu_mean": 21.650000000000002,
+          "last_sampled_processors": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "index_verified": true,
+      "profile": "owned-cpu-diagnostic-v1"
+    },
+    {
+      "directory": "cpu-qos-owned-probe-20261112",
+      "result": {
+        "status": "completed",
+        "cleanup_completed": true,
+        "restored": true,
+        "control_writes": 2,
+        "headroom_ok": true,
+        "errors": [],
+        "samples": 52,
+        "sustained_time_cpu": false,
+        "inference": "Read-only diagnostic completed is not successful pressure admission or an efficacy result"
+      },
+      "phases": {
+        "Normal": {
+          "samples": 10,
+          "system_time_cpu_min": 15.5,
+          "system_time_cpu_max": 20.3,
+          "system_time_cpu_mean": 17.75,
+          "last_sampled_processors": [
+            5,
+            7,
+            8,
+            9,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "default-qos": {
+          "samples": 12,
+          "system_time_cpu_min": 28.8,
+          "system_time_cpu_max": 35.9,
+          "system_time_cpu_mean": 32.43333333333334,
+          "last_sampled_processors": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "normal-qos": {
+          "samples": 12,
+          "system_time_cpu_min": 94.9,
+          "system_time_cpu_max": 99.8,
+          "system_time_cpu_mean": 96.41666666666667,
+          "last_sampled_processors": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "default-restored": {
+          "samples": 12,
+          "system_time_cpu_min": 30.1,
+          "system_time_cpu_max": 37.9,
+          "system_time_cpu_mean": 33.6,
+          "last_sampled_processors": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "Recovery": {
+          "samples": 6,
+          "system_time_cpu_min": 17.8,
+          "system_time_cpu_max": 22.8,
+          "system_time_cpu_mean": 20.383333333333333,
+          "last_sampled_processors": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "explicit_qos": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "index_verified": true,
+      "profile": "owned-cpu-qos-probe-v1"
+    }
+  ],
+  "admission_result": {
+    "scope": "Fixture connectivity only; not app performance",
+    "passed": true,
+    "attained": true,
+    "cleanup": true,
+    "restored": true,
+    "control_writes": 2,
+    "errors": [],
+    "samples": [
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:51.311865+00:00",
+        "cpu_percent": 21.6,
+        "worker_cpu_percent_normalized": 6.23125,
+        "available_bytes": 9740103680,
+        "commit_fraction": 0.6662968352176849
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:51.813108+00:00",
+        "cpu_percent": 22.6,
+        "worker_cpu_percent_normalized": 6.2375,
+        "available_bytes": 9740763136,
+        "commit_fraction": 0.6663641830002928
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:52.313903+00:00",
+        "cpu_percent": 21.7,
+        "worker_cpu_percent_normalized": 6.24375,
+        "available_bytes": 9739100160,
+        "commit_fraction": 0.6664461541062158
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:52.820638+00:00",
+        "cpu_percent": 21.5,
+        "worker_cpu_percent_normalized": 6.74375,
+        "available_bytes": 9740443648,
+        "commit_fraction": 0.6664548744366331
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:53.321669+00:00",
+        "cpu_percent": 22.3,
+        "worker_cpu_percent_normalized": 6.2375,
+        "available_bytes": 9739436032,
+        "commit_fraction": 0.666461582383108
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:53.822512+00:00",
+        "cpu_percent": 23.1,
+        "worker_cpu_percent_normalized": 6.2375,
+        "available_bytes": 9740812288,
+        "commit_fraction": 0.6666047299608819
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:54.328362+00:00",
+        "cpu_percent": 24.7,
+        "worker_cpu_percent_normalized": 6.36875,
+        "available_bytes": 9738592256,
+        "commit_fraction": 0.6665797763999954
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:54.831950+00:00",
+        "cpu_percent": 22.3,
+        "worker_cpu_percent_normalized": 7.36875,
+        "available_bytes": 9738997760,
+        "commit_fraction": 0.666630085998557
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:55.332875+00:00",
+        "cpu_percent": 27.1,
+        "worker_cpu_percent_normalized": 6.04375,
+        "available_bytes": 9738395648,
+        "commit_fraction": 0.6666166701056072
+      },
+      {
+        "phase": "Normal",
+        "time_utc": "2026-11-12T03:28:55.834005+00:00",
+        "cpu_percent": 23.2,
+        "worker_cpu_percent_normalized": 6.81875,
+        "available_bytes": 9740365824,
+        "commit_fraction": 0.6665911799090026
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:56.335465+00:00",
+        "cpu_percent": 99.0,
+        "worker_cpu_percent_normalized": 85.30625,
+        "available_bytes": 9744408576,
+        "commit_fraction": 0.6664963295458479
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:56.862598+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 84.3,
+        "available_bytes": 9741344768,
+        "commit_fraction": 0.6664725834153268
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:57.366482+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 87.025,
+        "available_bytes": 9739321344,
+        "commit_fraction": 0.6664725834153268
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:57.869178+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 86.45625,
+        "available_bytes": 9735483392,
+        "commit_fraction": 0.6665607258320068
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:58.428836+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 86.20625,
+        "available_bytes": 9735598080,
+        "commit_fraction": 0.6665952046768876
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:58.990496+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 85.725,
+        "available_bytes": 9735962624,
+        "commit_fraction": 0.6666629549362839
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:28:59.500964+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 83.8,
+        "available_bytes": 9736466432,
+        "commit_fraction": 0.6666574544201745
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:29:00.002922+00:00",
+        "cpu_percent": 100.0,
+        "worker_cpu_percent_normalized": 84.825,
+        "available_bytes": 9737392128,
+        "commit_fraction": 0.6666750292399387
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:29:00.511574+00:00",
+        "cpu_percent": 97.7,
+        "worker_cpu_percent_normalized": 86.40625,
+        "available_bytes": 9732087808,
+        "commit_fraction": 0.6668798899252816
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:29:01.012924+00:00",
+        "cpu_percent": 94.7,
+        "worker_cpu_percent_normalized": 86.88125,
+        "available_bytes": 9724260352,
+        "commit_fraction": 0.6667674647423625
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:29:01.520394+00:00",
+        "cpu_percent": 95.8,
+        "worker_cpu_percent_normalized": 88.14375,
+        "available_bytes": 9728180224,
+        "commit_fraction": 0.6666689920881113
+      },
+      {
+        "phase": "Contention",
+        "time_utc": "2026-11-12T03:29:02.025255+00:00",
+        "cpu_percent": 96.1,
+        "worker_cpu_percent_normalized": 85.89375,
+        "available_bytes": 9732714496,
+        "commit_fraction": 0.6667946990050505
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:02.526329+00:00",
+        "cpu_percent": 19.3,
+        "worker_cpu_percent_normalized": 6.2375,
+        "available_bytes": 9729482752,
+        "commit_fraction": 0.6667151427598584
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:03.026979+00:00",
+        "cpu_percent": 17.5,
+        "worker_cpu_percent_normalized": 6.24375,
+        "available_bytes": 9725657088,
+        "commit_fraction": 0.6667049466812166
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:03.527748+00:00",
+        "cpu_percent": 15.9,
+        "worker_cpu_percent_normalized": 6.24375,
+        "available_bytes": 9730682880,
+        "commit_fraction": 0.6666206948734922
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:04.028632+00:00",
+        "cpu_percent": 20.3,
+        "worker_cpu_percent_normalized": 6.2375,
+        "available_bytes": 9738919936,
+        "commit_fraction": 0.6666897867221834
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:04.529187+00:00",
+        "cpu_percent": 16.8,
+        "worker_cpu_percent_normalized": 6.24375,
+        "available_bytes": 9740046336,
+        "commit_fraction": 0.6666975679400943
+      },
+      {
+        "phase": "Recovery",
+        "time_utc": "2026-11-12T03:29:05.029915+00:00",
+        "cpu_percent": 17.2,
+        "worker_cpu_percent_normalized": 6.24375,
+        "available_bytes": 9738469376,
+        "commit_fraction": 0.6666221706217166
+      }
+    ]
+  },
+  "admission_started": {
+    "scope": "Disposable load-connectivity diagnostic. No app/policy effectiveness result.\n--qos-mode normal explicitly configures ONLY the owned workload and restores it.\nNo priorities, affinity, system settings or other processes are modified.\n",
+    "admission_version": "cpu-preflight-v2-sustained",
+    "normal_warmup_seconds": 5,
+    "load_seconds": 6,
+    "admission_rule": ">=6 valid samples; >=80% samples at CPU>=80%; final 3 samples >=80%",
+    "threads": 14,
+    "qos_mode": "normal",
+    "workload": "xorshift64-1000000-v1:normal-qos",
+    "controller_binary_sha256": "40f171faa326510fa31d2a83efeeba4d0e468fe403880c9d024d708da35032f2",
+    "created_utc": "2026-11-12T03:28:50.538008+00:00"
+  },
+  "metrics": [
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Normal",
+      "feature": "search",
+      "requests": 59,
+      "p50_ms": 26.30000001192093,
+      "p95_ms": 32.02000000029802,
+      "background_units_per_second": 697.191852551266,
+      "background_units": 7064,
+      "background_seconds": 10.132074800000002
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Normal",
+      "feature": "sort",
+      "requests": 59,
+      "p50_ms": 29.400000005960464,
+      "p95_ms": 30,
+      "background_units_per_second": 697.191852551266,
+      "background_units": 7064,
+      "background_seconds": 10.132074800000002
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Contention",
+      "feature": "search",
+      "requests": 59,
+      "p50_ms": 24.899999991059303,
+      "p95_ms": 32.460000005364414,
+      "background_units_per_second": 8275.96307544548,
+      "background_units": 83811,
+      "background_seconds": 10.1270389
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Contention",
+      "feature": "sort",
+      "requests": 59,
+      "p50_ms": 29.900000005960464,
+      "p95_ms": 30.5,
+      "background_units_per_second": 8275.96307544548,
+      "background_units": 83811,
+      "background_seconds": 10.1270389
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Recovery",
+      "feature": "search",
+      "requests": 59,
+      "p50_ms": 25,
+      "p95_ms": 32.42999999076128,
+      "background_units_per_second": 716.806608378715,
+      "background_units": 7215,
+      "background_seconds": 10.065476400000001
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "phase": "Recovery",
+      "feature": "sort",
+      "requests": 59,
+      "p50_ms": 29.600000008940697,
+      "p95_ms": 30.210000003874303,
+      "background_units_per_second": 716.806608378715,
+      "background_units": 7215,
+      "background_seconds": 10.065476400000001
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Normal",
+      "feature": "search",
+      "requests": 58,
+      "p50_ms": 23.44999999552965,
+      "p95_ms": 32.84499999657273,
+      "background_units_per_second": 705.2772062181189,
+      "background_units": 7058,
+      "background_seconds": 10.007412599999999
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Normal",
+      "feature": "sort",
+      "requests": 58,
+      "p50_ms": 29.80000001192093,
+      "p95_ms": 30.599999994039536,
+      "background_units_per_second": 705.2772062181189,
+      "background_units": 7058,
+      "background_seconds": 10.007412599999999
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Contention",
+      "feature": "search",
+      "requests": 55,
+      "p50_ms": 24.299999997019768,
+      "p95_ms": 32.85999999791384,
+      "background_units_per_second": 5157.501764663346,
+      "background_units": 52458,
+      "background_seconds": 10.1712035
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Contention",
+      "feature": "sort",
+      "requests": 55,
+      "p50_ms": 30,
+      "p95_ms": 30.700000002980232,
+      "background_units_per_second": 5157.501764663346,
+      "background_units": 52458,
+      "background_seconds": 10.1712035
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Recovery",
+      "feature": "search",
+      "requests": 59,
+      "p50_ms": 24,
+      "p95_ms": 32.160000008344646,
+      "background_units_per_second": 712.4414958716313,
+      "background_units": 7205,
+      "background_seconds": 10.113111100000001
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "phase": "Recovery",
+      "feature": "sort",
+      "requests": 59,
+      "p50_ms": 29.900000005960464,
+      "p95_ms": 30.410000005364417,
+      "background_units_per_second": 712.4414958716313,
+      "background_units": 7205,
+      "background_seconds": 10.113111100000001
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Normal",
+      "feature": "search",
+      "requests": 57,
+      "p50_ms": 27.099999994039536,
+      "p95_ms": 32.82000001072883,
+      "background_units_per_second": 493.6175244147226,
+      "background_units": 4963,
+      "background_seconds": 10.0543432
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Normal",
+      "feature": "sort",
+      "requests": 57,
+      "p50_ms": 29.099999994039536,
+      "p95_ms": 30.119999995827673,
+      "background_units_per_second": 493.6175244147226,
+      "background_units": 4963,
+      "background_seconds": 10.0543432
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Contention",
+      "feature": "search",
+      "requests": 59,
+      "p50_ms": 23.700000002980232,
+      "p95_ms": 31.699999995529645,
+      "background_units_per_second": 1814.8787179135186,
+      "background_units": 18383,
+      "background_seconds": 10.1290515
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Contention",
+      "feature": "sort",
+      "requests": 59,
+      "p50_ms": 29.5,
+      "p95_ms": 30.210000003874303,
+      "background_units_per_second": 1814.8787179135186,
+      "background_units": 18383,
+      "background_seconds": 10.1290515
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Recovery",
+      "feature": "search",
+      "requests": 58,
+      "p50_ms": 26.5,
+      "p95_ms": 32.419999996572734,
+      "background_units_per_second": 517.5986127317583,
+      "background_units": 5178,
+      "background_seconds": 10.0038908
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "phase": "Recovery",
+      "feature": "sort",
+      "requests": 58,
+      "p50_ms": 29.400000005960464,
+      "p95_ms": 30.115000005811453,
+      "background_units_per_second": 517.5986127317583,
+      "background_units": 5178,
+      "background_seconds": 10.0038908
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Normal",
+      "feature": "completion",
+      "requests": 46,
+      "p50_ms": 49.653949999998076,
+      "p95_ms": 72.57859999999891,
+      "background_units_per_second": 688.4375791501797,
+      "background_units": 6964,
+      "background_seconds": 10.115659299999999
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Normal",
+      "feature": "save",
+      "requests": 46,
+      "p50_ms": 15.781450000002224,
+      "p95_ms": 19.43170000000009,
+      "background_units_per_second": 688.4375791501797,
+      "background_units": 6964,
+      "background_seconds": 10.115659299999999
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Contention",
+      "feature": "completion",
+      "requests": 42,
+      "p50_ms": 63.757299999997485,
+      "p95_ms": 97.35003999999861,
+      "background_units_per_second": 5093.504130979757,
+      "background_units": 51174,
+      "background_seconds": 10.046914399999999
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Contention",
+      "feature": "save",
+      "requests": 42,
+      "p50_ms": 15.912449999999808,
+      "p95_ms": 21.323705000000697,
+      "background_units_per_second": 5093.504130979757,
+      "background_units": 51174,
+      "background_seconds": 10.046914399999999
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Recovery",
+      "feature": "completion",
+      "requests": 48,
+      "p50_ms": 49.045249999999214,
+      "p95_ms": 68.63764499999998,
+      "background_units_per_second": 684.2847834399212,
+      "background_units": 6926,
+      "background_seconds": 10.121516899999996
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "phase": "Recovery",
+      "feature": "save",
+      "requests": 48,
+      "p50_ms": 14.618849999998929,
+      "p95_ms": 20.816210000001593,
+      "background_units_per_second": 684.2847834399212,
+      "background_units": 6926,
+      "background_seconds": 10.121516899999996
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Normal",
+      "feature": "completion",
+      "requests": 47,
+      "p50_ms": 51.384500000000116,
+      "p95_ms": 70.9841800000009,
+      "background_units_per_second": 688.8957413545381,
+      "background_units": 6901,
+      "background_seconds": 10.017481
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Normal",
+      "feature": "save",
+      "requests": 47,
+      "p50_ms": 15.19260000000213,
+      "p95_ms": 20.642799999999987,
+      "background_units_per_second": 688.8957413545381,
+      "background_units": 6901,
+      "background_seconds": 10.017481
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Contention",
+      "feature": "completion",
+      "requests": 41,
+      "p50_ms": 89.7210999999952,
+      "p95_ms": 111.63849999999366,
+      "background_units_per_second": 7712.689775265036,
+      "background_units": 77831,
+      "background_seconds": 10.091291400000001
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Contention",
+      "feature": "save",
+      "requests": 41,
+      "p50_ms": 18.046199999997043,
+      "p95_ms": 22.665000000000873,
+      "background_units_per_second": 7712.689775265036,
+      "background_units": 77831,
+      "background_seconds": 10.091291400000001
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Recovery",
+      "feature": "completion",
+      "requests": 49,
+      "p50_ms": 46.603299999995215,
+      "p95_ms": 69.33219999999709,
+      "background_units_per_second": 687.0343453936458,
+      "background_units": 6899,
+      "background_seconds": 10.0417105
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "phase": "Recovery",
+      "feature": "save",
+      "requests": 49,
+      "p50_ms": 13.951300000000629,
+      "p95_ms": 20.18093999999837,
+      "background_units_per_second": 687.0343453936458,
+      "background_units": 6899,
+      "background_seconds": 10.0417105
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Normal",
+      "feature": "completion",
+      "requests": 46,
+      "p50_ms": 55.316750000001775,
+      "p95_ms": 79.14007500000207,
+      "background_units_per_second": 505.313616609476,
+      "background_units": 5096,
+      "background_seconds": 10.084826200000002
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Normal",
+      "feature": "save",
+      "requests": 46,
+      "p50_ms": 16.00420000000122,
+      "p95_ms": 26.024075000000266,
+      "background_units_per_second": 505.313616609476,
+      "background_units": 5096,
+      "background_seconds": 10.084826200000002
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Contention",
+      "feature": "completion",
+      "requests": 47,
+      "p50_ms": 58.749500000005355,
+      "p95_ms": 78.39552999999796,
+      "background_units_per_second": 1781.2910389583271,
+      "background_units": 17941,
+      "background_seconds": 10.0719083
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Contention",
+      "feature": "save",
+      "requests": 47,
+      "p50_ms": 15.029900000001362,
+      "p95_ms": 21.197110000002418,
+      "background_units_per_second": 1781.2910389583271,
+      "background_units": 17941,
+      "background_seconds": 10.0719083
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Recovery",
+      "feature": "completion",
+      "requests": 48,
+      "p50_ms": 51.54305000000022,
+      "p95_ms": 70.76448000000055,
+      "background_units_per_second": 512.0690127465392,
+      "background_units": 5122,
+      "background_seconds": 10.002558000000004
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "phase": "Recovery",
+      "feature": "save",
+      "requests": 48,
+      "p50_ms": 15.090799999998126,
+      "p95_ms": 19.121024999998554,
+      "background_units_per_second": 512.0690127465392,
+      "background_units": 5122,
+      "background_seconds": 10.002558000000004
+    }
+  ],
+  "overheads": [
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "controller-no-engine",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 24956928,
+      "working_set_bytes_max": 61673472,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 23793664,
+      "working_set_bytes_max": 38584320,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 15314944,
+      "working_set_bytes_max": 40337408,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 7946240,
+      "working_set_bytes_max": 28266496,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "controller-no-engine",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.5250514603419029,
+      "private_bytes_max": 33517568,
+      "working_set_bytes_max": 70754304,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.1619817936353158,
+      "private_bytes_max": 23867392,
+      "working_set_bytes_max": 38637568,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.2380133432184905,
+      "private_bytes_max": 17887232,
+      "working_set_bytes_max": 43065344,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.3765477462923159,
+      "private_bytes_max": 18681856,
+      "working_set_bytes_max": 44384256,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "controller-no-engine",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.13177443685869947,
+      "private_bytes_max": 27308032,
+      "working_set_bytes_max": 63295488,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.1140073371717652,
+      "private_bytes_max": 23867392,
+      "working_set_bytes_max": 38637568,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 82.07163947941243,
+      "private_bytes_max": 19214336,
+      "working_set_bytes_max": 44257280,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.3256724810109008,
+      "private_bytes_max": 18944000,
+      "working_set_bytes_max": 44691456,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "controller-no-engine",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.14818670595831876,
+      "private_bytes_max": 32468992,
+      "working_set_bytes_max": 68931584,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.12714317767403133,
+      "private_bytes_max": 23867392,
+      "working_set_bytes_max": 38637568,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.200579767956367,
+      "private_bytes_max": 19734528,
+      "working_set_bytes_max": 44859392,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.06858447098519824,
+      "private_bytes_max": 13144064,
+      "working_set_bytes_max": 38658048,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "controller-no-engine",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0.44867368326262524,
+      "private_bytes_max": 32612352,
+      "working_set_bytes_max": 69742592,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23867392,
+      "working_set_bytes_max": 38637568,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 6.218416846562768,
+      "private_bytes_max": 20058112,
+      "working_set_bytes_max": 45199360,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 12836864,
+      "working_set_bytes_max": 38555648,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "tray",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "chrome",
+      "condition": "A",
+      "session": "chrome-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "engine-and-controller",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 25890816,
+      "working_set_bytes_max": 63238144,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 23638016,
+      "working_set_bytes_max": 38518784,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 15671296,
+      "working_set_bytes_max": 40595456,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "tray",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 10489856,
+      "working_set_bytes_max": 45416448,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 7888896,
+      "working_set_bytes_max": 28221440,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 1.0033948068986038,
+      "private_bytes_max": 37511168,
+      "working_set_bytes_max": 77963264,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.0954215728904744,
+      "private_bytes_max": 23711744,
+      "working_set_bytes_max": 38567936,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 6.24034532457201,
+      "private_bytes_max": 17825792,
+      "working_set_bytes_max": 42889216,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.14110511771056805,
+      "private_bytes_max": 13459456,
+      "working_set_bytes_max": 54272000,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.4681268654765794,
+      "private_bytes_max": 18518016,
+      "working_set_bytes_max": 44310528,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "engine-and-controller",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.5817017958528374,
+      "private_bytes_max": 35409920,
+      "working_set_bytes_max": 76812288,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.08284992494952316,
+      "private_bytes_max": 23711744,
+      "working_set_bytes_max": 38567936,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 51.72852458631195,
+      "private_bytes_max": 18841600,
+      "working_set_bytes_max": 42975232,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "tray",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.04909349804918441,
+      "private_bytes_max": 13529088,
+      "working_set_bytes_max": 54448128,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.10678518954279471,
+      "private_bytes_max": 18845696,
+      "working_set_bytes_max": 44630016,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "engine-and-controller",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.13474986251416787,
+      "private_bytes_max": 39968768,
+      "working_set_bytes_max": 79839232,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.11407199778997351,
+      "private_bytes_max": 23711744,
+      "working_set_bytes_max": 38567936,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.263786007314225,
+      "private_bytes_max": 19251200,
+      "working_set_bytes_max": 43466752,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "tray",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.07312950946282235,
+      "private_bytes_max": 14295040,
+      "working_set_bytes_max": 55332864,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.07484797233205848,
+      "private_bytes_max": 13414400,
+      "working_set_bytes_max": 38813696,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "engine-and-controller",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0.05576159410053255,
+      "private_bytes_max": 40013824,
+      "working_set_bytes_max": 80711680,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23711744,
+      "working_set_bytes_max": 38567936,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 6.098701535203116,
+      "private_bytes_max": 19783680,
+      "working_set_bytes_max": 43925504,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "tray",
+      "samples": 20,
+      "available_cpu_samples": 16,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 14024704,
+      "working_set_bytes_max": 55058432,
+      "unavailable_samples": 3
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0.10339795519213038,
+      "private_bytes_max": 13950976,
+      "working_set_bytes_max": 39407616,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "C",
+      "session": "chrome-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "engine-and-controller",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 25759744,
+      "working_set_bytes_max": 63512576,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 23990272,
+      "working_set_bytes_max": 38719488,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 15527936,
+      "working_set_bytes_max": 40448000,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "tray",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 10432512,
+      "working_set_bytes_max": 45359104,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 8007680,
+      "working_set_bytes_max": 28332032,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 1.0120779085420384,
+      "private_bytes_max": 37638144,
+      "working_set_bytes_max": 78123008,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.10953373252824825,
+      "private_bytes_max": 24064000,
+      "working_set_bytes_max": 38768640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 5.644756966248211,
+      "private_bytes_max": 18030592,
+      "working_set_bytes_max": 43094016,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.1629940787451695,
+      "private_bytes_max": 13426688,
+      "working_set_bytes_max": 54231040,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.5519962284531617,
+      "private_bytes_max": 18731008,
+      "working_set_bytes_max": 44527616,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "engine-and-controller",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.2702743382181738,
+      "private_bytes_max": 33886208,
+      "working_set_bytes_max": 75407360,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.12396944987977485,
+      "private_bytes_max": 24064000,
+      "working_set_bytes_max": 38768640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 20.700828367936644,
+      "private_bytes_max": 16556032,
+      "working_set_bytes_max": 40943616,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "tray",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.02904733469251063,
+      "private_bytes_max": 13426688,
+      "working_set_bytes_max": 54255616,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.17746656147895473,
+      "private_bytes_max": 19058688,
+      "working_set_bytes_max": 44859392,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.16572737946794536,
+      "private_bytes_max": 38596608,
+      "working_set_bytes_max": 79540224,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.10910588254242343,
+      "private_bytes_max": 24064000,
+      "working_set_bytes_max": 38768640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 6.019454423897963,
+      "private_bytes_max": 17203200,
+      "working_set_bytes_max": 41373696,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.04528047491808996,
+      "private_bytes_max": 14327808,
+      "working_set_bytes_max": 55283712,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.13640541101936554,
+      "private_bytes_max": 13209600,
+      "working_set_bytes_max": 38944768,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "engine-and-controller",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0.055003035252295426,
+      "private_bytes_max": 39505920,
+      "working_set_bytes_max": 80470016,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 24064000,
+      "working_set_bytes_max": 38768640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 6.117277358901373,
+      "private_bytes_max": 17788928,
+      "working_set_bytes_max": 41754624,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "tray",
+      "samples": 20,
+      "available_cpu_samples": 16,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 12992512,
+      "working_set_bytes_max": 53932032,
+      "unavailable_samples": 3
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 13844480,
+      "working_set_bytes_max": 39591936,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "chrome",
+      "condition": "B",
+      "session": "chrome-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "engine-and-controller",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 26198016,
+      "working_set_bytes_max": 63270912,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 23388160,
+      "working_set_bytes_max": 37535744,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 15568896,
+      "working_set_bytes_max": 40464384,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "tray",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 10477568,
+      "working_set_bytes_max": 45367296,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 7880704,
+      "working_set_bytes_max": 28205056,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "engine-and-controller",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 1.0674130273123785,
+      "private_bytes_max": 37101568,
+      "working_set_bytes_max": 77152256,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.1795244538821727,
+      "private_bytes_max": 23461888,
+      "working_set_bytes_max": 37584896,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.3379252515705415,
+      "private_bytes_max": 17645568,
+      "working_set_bytes_max": 42721280,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "tray",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.18473273372378052,
+      "private_bytes_max": 13369344,
+      "working_set_bytes_max": 54128640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.6667343369380013,
+      "private_bytes_max": 18694144,
+      "working_set_bytes_max": 44470272,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.6098832323265709,
+      "private_bytes_max": 31461376,
+      "working_set_bytes_max": 72073216,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.07096642915430217,
+      "private_bytes_max": 23461888,
+      "working_set_bytes_max": 37584896,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 52.83772476843717,
+      "private_bytes_max": 18358272,
+      "working_set_bytes_max": 42717184,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.054367712997457796,
+      "private_bytes_max": 13504512,
+      "working_set_bytes_max": 54403072,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.0682603603274889,
+      "private_bytes_max": 19021824,
+      "working_set_bytes_max": 44789760,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "engine-and-controller",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.22852495721298796,
+      "private_bytes_max": 34635776,
+      "working_set_bytes_max": 76038144,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.09915916650580753,
+      "private_bytes_max": 23461888,
+      "working_set_bytes_max": 37584896,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 6.23500345105271,
+      "private_bytes_max": 18890752,
+      "working_set_bytes_max": 43327488,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "tray",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.035430694267131704,
+      "private_bytes_max": 14270464,
+      "working_set_bytes_max": 55304192,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 102,
+      "available_cpu_samples": 101,
+      "cpu_percent_mean": 0.05944590949026314,
+      "private_bytes_max": 14524416,
+      "working_set_bytes_max": 38907904,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "engine-and-controller",
+      "samples": 19,
+      "available_cpu_samples": 18,
+      "cpu_percent_mean": 0.17225457552634407,
+      "private_bytes_max": 32899072,
+      "working_set_bytes_max": 74412032,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 19,
+      "available_cpu_samples": 18,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23461888,
+      "working_set_bytes_max": 37584896,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 19,
+      "available_cpu_samples": 18,
+      "cpu_percent_mean": 6.240255162130494,
+      "private_bytes_max": 19222528,
+      "working_set_bytes_max": 43683840,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "tray",
+      "samples": 19,
+      "available_cpu_samples": 15,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 13840384,
+      "working_set_bytes_max": 54939648,
+      "unavailable_samples": 3
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 19,
+      "available_cpu_samples": 18,
+      "cpu_percent_mean": 0.2140721134217881,
+      "private_bytes_max": 15036416,
+      "working_set_bytes_max": 39444480,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "C",
+      "session": "code-C",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "controller-no-engine",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 25632768,
+      "working_set_bytes_max": 61833216,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 23511040,
+      "working_set_bytes_max": 37634048,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 15093760,
+      "working_set_bytes_max": 40169472,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 1,
+      "available_cpu_samples": 0,
+      "cpu_percent_mean": null,
+      "private_bytes_max": 7917568,
+      "working_set_bytes_max": 28229632,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "controller-no-engine",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.45505261383822165,
+      "private_bytes_max": 33783808,
+      "working_set_bytes_max": 70873088,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.06738200352176713,
+      "private_bytes_max": 23584768,
+      "working_set_bytes_max": 37683200,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 6.295469128313176,
+      "private_bytes_max": 17235968,
+      "working_set_bytes_max": 42455040,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.42532668153581943,
+      "private_bytes_max": 18436096,
+      "working_set_bytes_max": 44154880,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "controller-no-engine",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.07864646872195172,
+      "private_bytes_max": 26144768,
+      "working_set_bytes_max": 62779392,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.04629099596279237,
+      "private_bytes_max": 23584768,
+      "working_set_bytes_max": 37683200,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 78.95005411159178,
+      "private_bytes_max": 19685376,
+      "working_set_bytes_max": 43900928,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.05765537421554167,
+      "private_bytes_max": 18763776,
+      "working_set_bytes_max": 44498944,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "controller-no-engine",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.12094773208079315,
+      "private_bytes_max": 26439680,
+      "working_set_bytes_max": 63455232,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.21527936072706078,
+      "private_bytes_max": 23584768,
+      "working_set_bytes_max": 37683200,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.2292800927502805,
+      "private_bytes_max": 20250624,
+      "working_set_bytes_max": 44511232,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.09664296602808745,
+      "private_bytes_max": 13221888,
+      "working_set_bytes_max": 38563840,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "controller-no-engine",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0.4429702646039287,
+      "private_bytes_max": 25391104,
+      "working_set_bytes_max": 62803968,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23584768,
+      "working_set_bytes_max": 37683200,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 6.148244553454305,
+      "private_bytes_max": 20660224,
+      "working_set_bytes_max": 44871680,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 3,
+      "available_cpu_samples": 2,
+      "cpu_percent_mean": 0.4428601812322743,
+      "private_bytes_max": 13217792,
+      "working_set_bytes_max": 38584320,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "tray",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "code",
+      "condition": "A",
+      "session": "code-A",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "engine-and-controller",
+      "samples": 2,
+      "available_cpu_samples": 1,
+      "cpu_percent_mean": 0.8948378536628276,
+      "private_bytes_max": 29085696,
+      "working_set_bytes_max": 68464640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "app-driver",
+      "samples": 2,
+      "available_cpu_samples": 1,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23429120,
+      "working_set_bytes_max": 37580800,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "background",
+      "samples": 2,
+      "available_cpu_samples": 1,
+      "cpu_percent_mean": 6.263629658136104,
+      "private_bytes_max": 15507456,
+      "working_set_bytes_max": 40386560,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "tray",
+      "samples": 2,
+      "available_cpu_samples": 1,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 13316096,
+      "working_set_bytes_max": 54079488,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "outside-measured-phase",
+      "role": "observer",
+      "samples": 2,
+      "available_cpu_samples": 1,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 19042304,
+      "working_set_bytes_max": 44609536,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 1.042699999445281,
+      "private_bytes_max": 36974592,
+      "working_set_bytes_max": 77406208,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.1468424422262111,
+      "private_bytes_max": 23429120,
+      "working_set_bytes_max": 37580800,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 5.964143392202248,
+      "private_bytes_max": 17428480,
+      "working_set_bytes_max": 42577920,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.15696062469701957,
+      "private_bytes_max": 13316096,
+      "working_set_bytes_max": 54079488,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Normal",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.5613929674866323,
+      "private_bytes_max": 19042304,
+      "working_set_bytes_max": 44593152,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "engine-and-controller",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.21484573271229698,
+      "private_bytes_max": 32546816,
+      "working_set_bytes_max": 72130560,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "app-driver",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.10950022740791003,
+      "private_bytes_max": 23429120,
+      "working_set_bytes_max": 37580800,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "background",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 21.76208130727333,
+      "private_bytes_max": 15904768,
+      "working_set_bytes_max": 40816640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "tray",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0.029102732630853757,
+      "private_bytes_max": 13324288,
+      "working_set_bytes_max": 54194176,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Contention",
+      "role": "observer",
+      "samples": 100,
+      "available_cpu_samples": 99,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 19369984,
+      "working_set_bytes_max": 44941312,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "engine-and-controller",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.056316807948897527,
+      "private_bytes_max": 33710080,
+      "working_set_bytes_max": 75104256,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "app-driver",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.09715183872268908,
+      "private_bytes_max": 23429120,
+      "working_set_bytes_max": 37580800,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "background",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 6.073879325908797,
+      "private_bytes_max": 15716352,
+      "working_set_bytes_max": 40968192,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "tray",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.04901584109068145,
+      "private_bytes_max": 14217216,
+      "working_set_bytes_max": 55230464,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "Recovery",
+      "role": "observer",
+      "samples": 101,
+      "available_cpu_samples": 100,
+      "cpu_percent_mean": 0.04763117095660612,
+      "private_bytes_max": 14143488,
+      "working_set_bytes_max": 39223296,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "engine-and-controller",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0.09370660559542802,
+      "private_bytes_max": 33992704,
+      "working_set_bytes_max": 75632640,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "app-driver",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 23429120,
+      "working_set_bytes_max": 37580800,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "background",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 6.2499234834827035,
+      "private_bytes_max": 16117760,
+      "working_set_bytes_max": 41345024,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "tray",
+      "samples": 20,
+      "available_cpu_samples": 16,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 12779520,
+      "working_set_bytes_max": 53788672,
+      "unavailable_samples": 3
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "cleanup",
+      "role": "observer",
+      "samples": 20,
+      "available_cpu_samples": 19,
+      "cpu_percent_mean": 0,
+      "private_bytes_max": 14467072,
+      "working_set_bytes_max": 39649280,
+      "unavailable_samples": 0
+    },
+    {
+      "app": "code",
+      "condition": "B",
+      "session": "code-B",
+      "session_status": "completed",
+      "diagnostic_only": true,
+      "phase": "all",
+      "role": "optional-service",
+      "samples": 0,
+      "status": "not-started",
+      "cpu_percent_mean": null,
+      "private_bytes_max": null,
+      "working_set_bytes_max": null
+    }
+  ],
+  "inference": "One session per app/condition, single PC. No CI, superiority, equivalence, main-study N or journal acceptance inference. Default-QoS historical protocols remain separate."
+}

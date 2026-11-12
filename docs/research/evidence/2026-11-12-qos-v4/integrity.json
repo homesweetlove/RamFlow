@@ -1,0 +1,65 @@
+{
+  "runs": [
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\chrome-A",
+      "records": 1180
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\chrome-C",
+      "records": 1421
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\chrome-B",
+      "records": 1393
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\code-C",
+      "records": 1155
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\code-A",
+      "records": 933
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\real-app-abc-smoke-v4-20261112\\code-B",
+      "records": 1155
+    }
+  ],
+  "diagnostic_indices_verified": true
+}
