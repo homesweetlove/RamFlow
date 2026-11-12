@@ -33,6 +33,10 @@ static class Options
             string target=Path.Combine(directory,"source",relative);Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);
         }
         string appAssets=Path.Combine(root.FullName,"scripts","real_apps");
+        foreach(string relative in new[]{"scripts/owned_process_qos.py","scripts/research_cpu_diagnose.py","scripts/cpu_native_counters.py"}) {
+            string path=Path.Combine(root.FullName,relative),target=Path.Combine(directory,"source",relative);
+            if(File.Exists(path)){Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);}
+        }
         if(Directory.Exists(appAssets))foreach(string path in Directory.GetFiles(appAssets,"*",SearchOption.AllDirectories).Where(p=>!p.Contains("__pycache__") && !p.EndsWith(".pyc"))) {
             string relative=Path.GetRelativePath(root.FullName,path),target=Path.Combine(directory,"source",relative);
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(path,target);files[relative]=FileResearchAuditSink.FileHash(target);

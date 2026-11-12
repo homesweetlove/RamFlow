@@ -4,7 +4,8 @@ using RamFlow.Core;
 
 namespace ResearchLab;
 
-// These A/B/C labels belong ONLY to real-app-abc-v3, not the CARP A--F matrix.
+// V4 is a NEW input stratum: the owned workload explicitly requests normal QoS.
+// It must never be pooled with the OS-managed/default-QoS v2/v3 trials.
 static class AppStudy
 {
     internal static readonly ResourceAction MatchedBundle=ResourceAction.LowerCpu|ResourceAction.EcoQos|ResourceAction.LowerMemory;
@@ -16,23 +17,23 @@ static class AppStudy
     }
     public static async Task<int> Run(string[] args) {
         string root=Path.GetFullPath(Options.Get(args,"--output",""));Options.NewDirectory(root);
-        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v3");
+        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v4-normal-qos");
         var failures=new List<string>();var summaries=new List<object>();var observations=new List<JsonElement>();
         FixtureChild? background=null;AppDriver? app=null;AppProvider? provider=null;Engine? engine=null;AppAudit? audit=null;
         IndependentObserver? observer=null;Process? tray=null;Task? pipe=null;CancellationTokenSource? lifetime=null;
-        ResourceValues? original=null,final=null;bool cleanup=true,restored=false;string phase="setup";
+        ResourceValues? original=null,final=null,workloadOriginal=null,workloadFinal=null;bool cleanup=true,restored=false,workloadRestored=false;string phase="setup";
         string condition=Options.Get(args,"--condition",""),application=Options.Get(args,"--app","");
         using var self=Process.GetCurrentProcess();
         try {
             if(condition is not ("A" or "B" or "C") || application is not ("chrome" or "code"))throw new ArgumentException("Use --app chrome|code --condition A|B|C.");
-            if(Options.Get(args,"--protocol","real-app-abc-v3")!="real-app-abc-v3")throw new ArgumentException("Old v1/v2 plans are closed; preserve them and make a new v3 smoke plan.");
+            if(Options.Get(args,"--protocol","real-app-abc-v4-normal-qos")!="real-app-abc-v4-normal-qos")throw new ArgumentException("Preserve old plans; v4 requires a NEW explicit-normal-QoS input plan.");
             int seconds=Options.Int(args,"--phase-seconds",10,5,120);
             int threads=Options.Int(args,"--contention-threads",Math.Min(14,Math.Max(1,Environment.ProcessorCount-2)),1,Math.Min(16,Environment.ProcessorCount));
             string expectedBackgroundChecksum=CpuWork.Complete(20261111);
             string driver=Path.GetFullPath(Options.Get(args,"--driver","scripts/real_apps/driver.py"));
             string runtime=Path.Combine(Path.GetDirectoryName(root)!,"runtime-"+evidence.RunId);
-            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v3",started_utc=DateTimeOffset.UtcNow,
-                background_workload=CpuWork.WorkloadId,background_mode="cpu-arithmetic",expected_background_checksum=expectedBackgroundChecksum,
+            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v4-normal-qos",started_utc=DateTimeOffset.UtcNow,
+                background_workload=CpuWork.WorkloadId+":normal-qos",background_qos="explicit-normal",background_mode="cpu-arithmetic",expected_background_checksum=expectedBackgroundChecksum,
                 planned_phases=new[]{"Normal","Contention","Recovery"},seconds,threads,scope="One smoke session, synthetic CPU background, real generated app tasks; not efficacy evidence",runtime });
             Options.WriteNew(Path.Combine(root,"source-manifest.json"),Options.CaptureSources(root));
             string binary=Path.Combine(root,"fixture-bin");Directory.CreateDirectory(binary);
@@ -48,7 +49,15 @@ static class AppStudy
             app=await AppDriver.Start(Options.Get(args,"--python","python"),driver,application,runtime,root,evidence);
             background=new(backgroundExe,"background","cpu-arithmetic",4,threads,20261111,0,Path.Combine(root,"background-raw.jsonl"),evidence,initialThreads:0);
             await background.Ready();provider=new(background,evidence,()=>phase);
-            original=provider.ReadValues(background.Process.Id)??throw new IOException("Missing original readback.");
+            workloadOriginal=provider.ReadValues(background.Process.Id)??throw new IOException("Missing initial workload readback.");
+            Options.WriteNew(Path.Combine(root,"workload-original.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=workloadOriginal});
+            phase="workload-setup";
+            evidence.Write("workload-setup-intent",new {phase,pid=background.Process.Id,creation_filetime=background.Identity,original=workloadOriginal,
+                scope="Common input configuration for ALL A/B/C, not a RAM Flow policy action; change execution-speed QoS only"},true);
+            if(!provider.WriteWorkloadValues(workloadOriginal with {PowerControl=workloadOriginal.PowerControl|1U,PowerState=workloadOriginal.PowerState&~1U},false))throw new IOException("Workload normal-QoS setup/readback failed.");
+            original=provider.ReadValues(background.Process.Id)??throw new IOException("Missing configured workload baseline.");
+            Options.WriteNew(Path.Combine(root,"workload-effective.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=original,scope="Explicit normal QoS is part of the input, identical in A/B/C"});
+            phase="setup";
             provider.Processes(); // Prime CPU/IO activity before policy eligibility; unknown activity remains protected.
             Options.WriteNew(Path.Combine(root,"resource-original.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=original});
             var config=new Settings {DryRun=false,PolicyName=condition=="B"?"fixed":"v1",CpuManagement=true,EcoQos=true,CpuSets=false,WorkingSetTrim=false,Learning=false,BackgroundApps=[backgroundExe]};
@@ -145,6 +154,15 @@ static class AppStudy
             if(provider is not null && background is not null)try {
                 final=provider.ReadValues(background.Process.Id);restored=Same(original,final) && (engine?.GetState().PendingRestores??0)==0;
             }catch(Exception e){failures.Add(e.ToString());cleanup=false;}
+            if(provider is not null && background is not null && workloadOriginal is not null)try {
+                phase="workload-reset";
+                evidence.Write("workload-reset-intent",new {phase,pid=background.Process.Id,creation_filetime=background.Identity,original=workloadOriginal},true);
+                if((engine?.GetState().PendingRestores??0)>0)throw new IOException("Policy restoration pending; workload reset deferred to owned cleanup.");
+                if(!provider.WriteWorkloadValues(workloadOriginal,true))throw new IOException("Initial workload settings restoration failed.");
+                workloadFinal=provider.ReadValues(background.Process.Id);workloadRestored=Same(workloadOriginal,workloadFinal);restored&=workloadRestored;
+                Options.WriteNew(Path.Combine(root,"workload-final.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=workloadFinal,restored=workloadRestored});
+            }catch(Exception e){failures.Add(e.ToString());cleanup=false;restored=false;}
+            finally {phase="cleanup";}
             if(tray is not null)try {
                 using var dismiss=new EventWaitHandle(false,EventResetMode.AutoReset,UiHandoff.DismissName);dismiss.Set();
                 await tray.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
@@ -164,13 +182,13 @@ static class AppStudy
             try {engine?.Dispose();provider?.Dispose();audit?.Dispose();tray?.Dispose();}catch(Exception e){failures.Add(e.ToString());cleanup=false;}
         }
         string restorationStatus=background is null?"not-required-no-background-launched":restored?"confirmed-original-readback":"not-confirmed";
-        Options.WriteNew(Path.Combine(root,"resource-final.json"),new {values=final,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,protected_misinterventions=provider?.OutOfScopeRequests??0});
+        Options.WriteNew(Path.Combine(root,"resource-final.json"),new {values=final,scope="Policy baseline readback BEFORE separate common-workload reset",restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,protected_misinterventions=provider?.OutOfScopeRequests??0});
         if(background is not null&&!restored)failures.Add("Original background settings were not confirmed restored.");
         if((provider?.ReadbackFailures??0)>0)failures.Add("One or more OS readbacks differed from requested settings.");
         if((provider?.OutOfScopeRequests??0)>0)failures.Add("Out-of-scope resource write attempt.");
         if(condition is "B" or "C" && summaries.Count>0 && (audit?.Applies??0)==0)failures.Add("No active application: matched B/C readback not demonstrated.");
         string status=failures.Count==0&&cleanup?"completed":"failed";
-        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v3",background_workload=CpuWork.WorkloadId,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
+        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v4-normal-qos",background_workload=CpuWork.WorkloadId+":normal-qos",workload_restored=workloadRestored,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
             phases=summaries,observations=observations.Count,applies=audit?.Applies??0,readback_failures=provider?.ReadbackFailures??0,protected_misinterventions=provider?.OutOfScopeRequests??0,failures,
             inference="Smoke functionality only. One session per app/condition is not an independent efficacy replication; no superiority inference."});
         evidence.Seal(status,cleanup);Console.WriteLine(JsonSerializer.Serialize(new {root,status,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup,failures}));return status=="completed"?0:1;
@@ -205,11 +223,17 @@ sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<s
     bool Owns(int pid,long identity)=>pid==background.Process.Id && identity==background.Identity;
     public bool Validate(ProcessSample p,bool restoring=false)=>Owns(p.Pid,p.Identity)&&real.Validate(p,restoring);
     public ResourceValues? ReadValues(int pid)=>real.ReadValues(pid);
-    public bool WriteValues(int pid,ResourceValues values,long identity) {
+    public bool WriteValues(int pid,ResourceValues values,long identity)=>WriteOwned(pid,values,identity,"resource-write-readback");
+    public bool WriteWorkloadValues(ResourceValues values,bool restoring) {
+        var target=Processes().Single(p=>p.Pid==background.Process.Id);
+        if(!Validate(target,restoring))return false;
+        return WriteOwned(target.Pid,values,target.Identity,"workload-write-readback");
+    }
+    bool WriteOwned(int pid,ResourceValues values,long identity,string kind) {
         if(!Owns(pid,identity)) {OutOfScopeRequests++;evidence.Write("out-of-scope-write",new {phase=phase(),pid,creation_filetime=identity});return false;}
         bool result=real.WriteValues(pid,values,identity);var observed=real.ReadValues(pid);
         bool matched=result&&AppStudy.Same(values,observed)&&real.Identity(pid)==identity;
-        evidence.Write("resource-write-readback",new {phase=phase(),pid,creation_filetime=identity,requested=values,observed,api_result=result,matched},true);
+        evidence.Write(kind,new {phase=phase(),pid,creation_filetime=identity,requested=values,observed,api_result=result,matched},true);
         if(!matched)ReadbackFailures++;return matched;
     }
     public bool Trim(int pid,long identity) {OutOfScopeRequests++;return false;}

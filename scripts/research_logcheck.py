@@ -9,6 +9,15 @@ from pathlib import Path, PurePosixPath
 
 COMPLETED_REQUIRED=('started.json','pre-intervention.json','effective-settings.json','resource-original.json','resource-final.json','cost-observation.json')
 
+def workload_qos_errors(original,effective,final):
+    errors=[];before=original.get('values') or {};configured=effective.get('values') or {}
+    expected={**before,'PowerControl':before.get('PowerControl',0)|1,'PowerState':before.get('PowerState',0)&~1}
+    if configured!=expected:errors.append('workload_setup_changed_more_than_execution_speed')
+    for field in ('pid','creation_filetime'):
+        if not isinstance(original.get(field),int) or original[field]<=0 or effective.get(field)!=original[field] or final.get(field)!=original[field]:errors.append('workload_identity_mismatch')
+    if final.get('values')!=before or final.get('restored') is not True:errors.append('workload_initial_settings_not_restored')
+    return errors
+
 def app_profile_errors(records,outcome):
     """Semantic gate in addition to the fd17548 byte/index/lifecycle gate."""
     errors=[]
@@ -74,7 +83,7 @@ def check_run(directory):
         start,done,index=read('run-manifest.json'),read('completion.json'),read('artifact-index.json')
         run_id=start['run_id'];status=done['status'];kind='calibration-batch' if start.get('args',[None])[0:1]==['calibrate'] else 'trial'
         profile=start.get('evidence_profile','synthetic-trial-v1')
-        if profile in ('real-app-abc-v1','real-app-abc-v2','real-app-abc-v3'):kind='real-app-smoke'
+        if profile in ('real-app-abc-v1','real-app-abc-v2','real-app-abc-v3','real-app-abc-v4-normal-qos'):kind='real-app-smoke'
         elif profile!='synthetic-trial-v1':fail('unknown_evidence_profile')
         if done.get('run_id')!=run_id or index.get('run_id')!=run_id:fail('run_identity_mismatch')
         if any(x.get('evidence_schema_version')!=1 for x in (start,done,index)):fail('unsupported_evidence_schema')
@@ -98,7 +107,8 @@ def check_run(directory):
         else:required.extend(('manifest.json','run.result.json'))
         if status=='completed' and kind=='trial':required.extend(COMPLETED_REQUIRED)
         if status=='completed' and kind=='real-app-smoke':required.extend(('started.json','effective-settings.json','resource-original.json','resource-final.json','source-manifest.json','overhead-summary.json','app-driver.jsonl','app-driver.stderr.jsonl'))
-        if status=='completed' and profile in ('real-app-abc-v2','real-app-abc-v3'):required.append('pre-intervention.json')
+        if status=='completed' and profile in ('real-app-abc-v2','real-app-abc-v3','real-app-abc-v4-normal-qos'):required.append('pre-intervention.json')
+        if status=='completed' and profile=='real-app-abc-v4-normal-qos':required.extend(('workload-original.json','workload-effective.json','workload-final.json'))
         for name in required:
             if name not in indexed or not (root/name).is_file():fail('required_not_indexed:'+name)
         # Unindexed additions are not silently counted as part of the sealed run.
@@ -142,11 +152,19 @@ def check_run(directory):
                 if not any(r.get('kind')=='measurement-end' for r in records):fail('missing_measurement_end')
             if status=='completed' and kind=='real-app-smoke':
                 errors.extend(app_profile_errors(records,outcome))
-                if profile in ('real-app-abc-v2','real-app-abc-v3'):
+                if profile in ('real-app-abc-v2','real-app-abc-v3','real-app-abc-v4-normal-qos'):
                     baseline=read('pre-intervention.json')
                     if baseline.get('Eligible') is not True or baseline.get('Stable') is not True or baseline.get('Attained') is not True or baseline.get('Regime')!=1:fail('app_normal_baseline_not_confirmed')
                 original,final=read('resource-original.json'),read('resource-final.json')
                 if final.get('values')!=original.get('values') or final.get('restored') is not True or final.get('cleanup_completed') is not True:fail('app_original_final_readback_mismatch')
+                if profile=='real-app-abc-v4-normal-qos':
+                    wi,we,wf=read('workload-original.json'),read('workload-effective.json'),read('workload-final.json')
+                    errors.extend(workload_qos_errors(wi,we,wf))
+                    if we.get('values')!=original.get('values') or outcome.get('workload_restored') is not True:fail('workload_policy_baseline_mismatch')
+                    writes=[r['data'] for r in records if r['kind']=='workload-write-readback']
+                    if len(writes)!=2 or writes[0].get('observed')!=we.get('values') or writes[1].get('observed')!=wi.get('values'):fail('workload_setup_reset_readback_mismatch')
+                    for w in writes:
+                        if w.get('pid')!=wi.get('pid') or w.get('creation_filetime')!=wi.get('creation_filetime') or w.get('api_result') is not True or w.get('matched') is not True or w.get('requested')!=w.get('observed'):fail('workload_write_identity_or_result_mismatch')
                 for item in (r['data'] for r in records if r['kind']=='resource-write-readback'):
                     if item.get('pid')!=original.get('pid') or item.get('creation_filetime')!=original.get('creation_filetime'):fail('app_write_target_identity_mismatch')
                 driver_rows=[json.loads(line) for line in (root/'app-driver.jsonl').read_text(encoding='utf-8-sig').splitlines()]
@@ -156,7 +174,7 @@ def check_run(directory):
                 bg_rows=[json.loads(line) for line in (root/'background-raw.jsonl').read_text(encoding='utf-8-sig').splitlines()]
                 for boundary in (r['data'] for r in records if r['kind'] in ('phase-start','phase-end')):
                     if not any(r.get('Id',0)>0 and r.get('Units')==boundary.get('units') and r.get('Seconds')==boundary.get('seconds') and r.get('Phase')==boundary.get('phase') for r in bg_rows):fail('app_background_raw_boundary_mismatch')
-                    if profile=='real-app-abc-v3':
+                    if profile in ('real-app-abc-v3','real-app-abc-v4-normal-qos'):
                         expected=read('started.json').get('expected_background_checksum')
                         if not expected or boundary.get('work_checksum')!=expected or not any(r.get('Id',0)>0 and r.get('Units')==boundary.get('units') and r.get('Seconds')==boundary.get('seconds') and r.get('Checksum')==expected for r in bg_rows):fail('app_background_work_checksum_mismatch')
         audit=root/'audit/events.jsonl'

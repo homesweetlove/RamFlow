@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace ResearchLab;
 
 sealed record WorkerReply(int Id, string Kind, long Units, double Seconds, double? LatencyMs = null, string? Checksum = null,
-    double? CompletionSeconds = null, DateTimeOffset? ObservedUtc = null) { public string? Phase {get;init;} }
+    double? CompletionSeconds = null, DateTimeOffset? ObservedUtc = null) { public string? Phase {get;init;} public object? Telemetry {get;init;} }
 
 static class FixtureWorker
 {
@@ -30,13 +30,17 @@ static class FixtureWorker
         }
         var tasks = new List<Task>();
         int activeThreads=Options.Int(args,"--active-threads",threads,0,threads);
+        bool diagnostics=args.Contains("--diagnostics");
+        uint[] workerIds=new uint[threads],lastProcessors=Enumerable.Repeat(uint.MaxValue,threads).ToArray();long[] completed=new long[threads];
         if (role == "background") {
             for (int t = 0; t < threads; t++) {
                 int workerIndex=t;
                 tasks.Add(Task.Factory.StartNew(() => {
+                    if(diagnostics)Volatile.Write(ref workerIds[workerIndex],CpuInspection.GetCurrentThreadId());
                     while (!cancellation.IsCancellationRequested && (target == 0 || Interlocked.Read(ref units) < target)) {
                         if(workerIndex>=Volatile.Read(ref activeThreads)) { Thread.Sleep(10);continue; }
                         string checksum=Work();Volatile.Write(ref lastChecksum,checksum);Interlocked.Increment(ref units);
+                        if(diagnostics && (Interlocked.Increment(ref completed[workerIndex])&63)==1)Volatile.Write(ref lastProcessors[workerIndex],CpuInspection.Processor());
                     }
                 }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default));
             }
@@ -53,6 +57,11 @@ static class FixtureWorker
             using var command = JsonDocument.Parse(line); int id = command.RootElement.GetProperty("id").GetInt32();
             string verb = command.RootElement.GetProperty("verb").GetString()!;
             if (verb == "stop") break;
+            if (verb == "inspect") {
+                if(!diagnostics)throw new InvalidOperationException("Read-only inspection requires --diagnostics.");
+                Write(new(id,"inspect",Interlocked.Read(ref units),clock.Elapsed.TotalSeconds,Checksum:Volatile.Read(ref lastChecksum)) {
+                    Telemetry=CpuInspection.Capture(Volatile.Read(ref activeThreads),workerIds,completed,lastProcessors,tasks.ToArray()) });continue;
+            }
             if (verb == "load") {
                 int count=command.RootElement.GetProperty("activeThreads").GetInt32();
                 if(role!="background" || count<0 || count>threads)throw new ArgumentException("Invalid owned-worker load.");

@@ -81,6 +81,16 @@ class AppContract(unittest.TestCase):
 
 
 class AppVersionGate(unittest.TestCase):
+    def test_workload_qos_setup_is_separate_and_must_restore_initial_values(self):
+        value=dict(MemoryPriority=5,CpuPriority=32,PowerControl=0,PowerState=0,CpuSets=[])
+        original=dict(pid=12,creation_filetime=34,values=value)
+        effective=dict(pid=12,creation_filetime=34,values={**value,'PowerControl':1})
+        final=dict(pid=12,creation_filetime=34,values=value.copy(),restored=True)
+        check=getattr(gate,'workload_qos_errors',lambda *args:['missing_workload_qos_validation'])
+        self.assertEqual([],check(original,effective,final))
+        final['values']={**value,'PowerControl':1}
+        self.assertIn('workload_initial_settings_not_restored',check(original,effective,final))
+
     def test_v2_cannot_be_completed_without_frozen_healthy_baseline(self):
         helper=integrity_fixtures.EvidenceChecks('runTest');helper.setUp();self.addCleanup(helper.doCleanups);helper.fixture('completed')
         manifest=__import__('json').loads((helper.root/'run-manifest.json').read_text())

@@ -9,6 +9,15 @@ APP=Path(__file__).resolve().parent/'ResearchLab/bin/Release/net10.0-windows/Res
 
 @unittest.skipUnless(sys.platform=='win32' and APP.exists(),'built Windows apphost required')
 class CpuWorker(unittest.TestCase):
+    def test_read_only_worker_inspection_reports_identity_and_requested_load(self):
+        result=subprocess.run([str(APP),'worker','--role','background','--mode','cpu-arithmetic','--mib','4','--threads','1','--active-threads','0','--diagnostics'],
+            input='{"id":9,"verb":"inspect"}\n{"id":10,"verb":"stop"}\n',capture_output=True,text=True,timeout=20)
+        self.assertEqual(0,result.returncode,result.stderr)
+        info=next(json.loads(line)['Telemetry'] for line in result.stdout.splitlines() if json.loads(line).get('Id')==9)
+        self.assertGreater(info['pid'],0);self.assertGreater(info['creation_filetime'],0)
+        self.assertEqual(0,info['active_threads']);self.assertEqual(1,len(info['workers']))
+        self.assertEqual(0,info['control_writes'])
+
     def test_arithmetic_completed_unit_matches_independent_golden_vectors(self):
         # Independently computed xorshift64, 1,000,000 steps, unsigned 64-bit.
         for seed,expected in [(1,'9c52790c064cae4d'),(20261111,'bd2eeae7775b742c')]:

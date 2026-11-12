@@ -33,8 +33,8 @@ class SustainedAdmission(unittest.TestCase):
         repo=Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory(dir=repo/'work') as folder:
             root=Path(folder);lab=root/'SYNTHETIC.exe';lab.with_suffix('.dll').write_bytes(b'SYNTHETIC FORMAT FIXTURE')
-            started=dict(admission_version='cpu-preflight-v2-sustained',threads=14,workload='xorshift64-1000000-v1',controller_binary_sha256=hashlib.sha256(lab.with_suffix('.dll').read_bytes()).hexdigest())
-            result=dict(passed=True,cleanup=True,samples=[dict(phase='Contention',cpu_percent=90) for _ in range(8)])
+            started=dict(admission_version='cpu-preflight-v2-sustained',threads=14,qos_mode='normal',workload='xorshift64-1000000-v1:normal-qos',controller_binary_sha256=hashlib.sha256(lab.with_suffix('.dll').read_bytes()).hexdigest())
+            result=dict(passed=True,cleanup=True,restored=True,samples=[dict(phase='Contention',cpu_percent=90) for _ in range(8)])
             (root/'started.json').write_text(json.dumps(started));(root/'result.json').write_text(json.dumps(result))
             self.assertEqual(14,verify_preflight(root,lab,14)['threads'])
             lab.with_suffix('.dll').write_bytes(b'CHANGED SYNTHETIC BINARY')

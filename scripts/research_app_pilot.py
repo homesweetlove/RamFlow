@@ -21,8 +21,8 @@ def verify_preflight(directory,lab,threads,names=('started.json','result.json'))
     binary=hashlib.sha256(lab.with_suffix('.dll').read_bytes()).hexdigest()
     samples=[s['cpu_percent'] for s in result.get('samples',[]) if s.get('phase')=='Contention']
     if (started.get('admission_version')!='cpu-preflight-v2-sustained' or started.get('threads')!=threads or
-        started.get('workload')!='xorshift64-1000000-v1' or started.get('controller_binary_sha256')!=binary or
-        result.get('passed') is not True or result.get('cleanup') is not True or not pressure_stable(samples)):
+        started.get('workload')!='xorshift64-1000000-v1:normal-qos' or started.get('qos_mode')!='normal' or started.get('controller_binary_sha256')!=binary or
+        result.get('passed') is not True or result.get('cleanup') is not True or result.get('restored') is not True or not pressure_stable(samples)):
         raise ValueError('Sustained CPU preflight not admitted, cleanup unconfirmed, or workload/binary mismatch; no new app comparison launched')
     return dict(started_sha256=hashlib.sha256(start_bytes).hexdigest(),result_sha256=hashlib.sha256(result_bytes).hexdigest(),managed_binary_sha256=binary,threads=threads)
 
@@ -42,12 +42,12 @@ def main():
         for app in ['chrome','code']:
             conditions=list('ABC');rng.shuffle(conditions)
             schedule.extend(dict(app=app,condition=c,session=f'{app}-{c}') for c in conditions)
-        save_new(root/'pilot-plan.json',dict(protocol='real-app-abc-v3',background_workload='xorshift64-1000000-v1',seed=args.seed,created_utc=datetime.now(timezone.utc).isoformat(),schedule=schedule,
+        save_new(root/'pilot-plan.json',dict(protocol='real-app-abc-v4-normal-qos',background_workload='xorshift64-1000000-v1:normal-qos',input_qos='explicit-normal-common-in-A-B-C',seed=args.seed,created_utc=datetime.now(timezone.utc).isoformat(),schedule=schedule,
             phase_seconds=args.phase_seconds,contention_threads=args.contention_threads,admission=proof,scope='Six smoke sessions only; no main-study N or efficacy inference'))
         print(json.dumps(schedule));return 0
     if not args.app or not args.condition:p.error('Select --app and --condition for one planned slot')
     plan=json.loads((root/'pilot-plan.json').read_text());slot=next(x for x in plan['schedule'] if x['app']==args.app and x['condition']==args.condition)
-    if plan['protocol']!='real-app-abc-v3':p.error('v1/v2 plans are closed; create a NEW v3 plan, never replace failed slots')
+    if plan['protocol']!='real-app-abc-v4-normal-qos':p.error('Preserve old plans; create a NEW v4 normal-QoS plan, never replace failed slots')
     try:
         proof=verify_preflight(root,args.lab,plan['contention_threads'],('admission-started.json','admission-result.json'))
         if proof!=plan.get('admission'):raise ValueError('Preflight changed after planning')

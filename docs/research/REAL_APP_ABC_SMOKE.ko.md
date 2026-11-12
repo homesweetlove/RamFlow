@@ -1,6 +1,22 @@
 # 실제 앱 A/B/C 연결 검증
 
-현재 실행 버전은 `real-app-abc-v3`다. v2의 32 MiB SHA256/12스레드 부하에서는 실제 CPU가 V1의 80% 임계값에 닿지 않아 두 C가 무개입으로 끝났다. 이 자료를 변경하거나 성공으로 재분류하지 않는다. v3는 CPU 계산 경로를 분리한 `xorshift64-1000000-v1` 작업 단위와 14스레드(16논리CPU 장비에서 2개 여유)를 사용한다. 각 단위/단계 경계의 체크섬을 독립 golden vector로 검사한다. 처리율 단위가 달라 v1/v2의 SHA 처리율과 합치지 않는다. 새 실행 전 `python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14`로 실제 CPU가 임계값에 도달하는지 확인한다. 부하 스레드 수 자체를 실제 압박으로 간주하지 않는다. 별도 원시 결과와 사전 기준선을 유지하며 본실험 효과를 주장하지 않는다.
+## v4: 명시적 정상 QoS 입력층
+
+현재 새 실행은 `real-app-abc-v4-normal-qos`로 분리한다. 읽기 전용 진단에서 14개 작업자의 마지막 실행 샘플이 효율 클래스0인 12~15번 코어로 모였고, 같은 폐기용 PID의 기본 QoS→명시적 정상 QoS→기본값 복원 대조에서 CPU/코어 배치가 가역적으로 바뀌었다. 이는 이 PC/생성 부하의 관측이며 모든 Windows 앱의 분류를 일반화하지 않는다.
+
+v4는 공통 배경 워크로드가 실행 속도 정상 QoS(마스크 `0x1`: Control 설정, State 해제)를 요청하는 **별도 입력 조건**이다. A에도 동일한 워크로드 초기 설정이 있으며 RAM Flow 엔진/트레이는 없다. B/C 정책 조치는 이 초기값에서 시작한다. `workload-original/effective/final.json` 및 `workload-write-readback`은 공통 초기화/초기 상태 복원을 기록한다. `resource-original/final.json`은 그 안쪽의 정책 기준선 복원을 기록한다. 설정 전 저널을 기록하고 두 복원 모두 확인해야 완료된다. CPU 우선순위·메모리 우선순위·affinity를 공통 초기화에서 바꾸지 않는다.
+
+v2/v3의 OS-managed/default-QoS 결과와 합치거나 대체하지 않는다. v4의 A는 "워크로드의 정상 QoS 요청 + 관리 엔진 미실행"이며, 워크로드의 QoS까지 기본값 그대로인 A라고 서술하지 않는다. 임계값·센서·V1 알고리즘을 바꾸지 않는다. 새 계획은 같은 입력층의 지속 압박 검사·같은 바이너리·스레드 수·원복 증거가 있어야 생성/실행된다.
+
+```powershell
+python scripts/research_cpu_preflight.py --output work/NEW-normal-qos-check --threads 14 --qos-mode normal
+if ($LASTEXITCODE -ne 0) { throw '입력 압박/원복 미확인' }
+python scripts/research_app_pilot.py --plan --output work/NEW-v4-pilot --preflight work/NEW-normal-qos-check --contention-threads 14
+```
+
+아래 v1/v2/v3 설명은 과거 입력층과 실패/진단의 보존 기록이다. 새 실행 명령은 위 v4 절차를 사용한다.
+
+과거 실행 버전 `real-app-abc-v3` 기록이다. v2의 32 MiB SHA256/12스레드 부하에서는 실제 CPU가 V1의 80% 임계값에 닿지 않아 두 C가 무개입으로 끝났다. 이 자료를 변경하거나 성공으로 재분류하지 않는다. v3는 CPU 계산 경로를 분리한 `xorshift64-1000000-v1` 작업 단위와 14스레드(16논리CPU 장비에서 2개 여유)를 사용한다. 각 단위/단계 경계의 체크섬을 독립 golden vector로 검사한다. 처리율 단위가 달라 v1/v2의 SHA 처리율과 합치지 않는다. 새 실행 전 `python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14`로 실제 CPU가 임계값에 도달하는지 확인한다. 부하 스레드 수 자체를 실제 압박으로 간주하지 않는다. 별도 원시 결과와 사전 기준선을 유지하며 본실험 효과를 주장하지 않는다.
 
 2026-11-11~12 실앱 실행에서 v3도 앱 워밍업 이후 80%를 지속하지 못했다. 초기 부하 점검의 3개 상승 표본만으로 통과시키던 규칙은 불충분했다. 이후 사전 검사만 `cpu-preflight-v2-sustained`로 보강했다: 정상 워밍업 5초, 부하 점검 6초, 유효 표본 6개 이상·80% 이상 표본에서 CPU≥80%·마지막 3개도 CPU≥80%를 요구한다. 새 계획은 이 결과와 동일 관리 바이너리 해시·스레드 수·작업 단위가 맞는 `--preflight` 증거가 없으면 생성/실행하지 않는다. 기존 자료는 초기 규칙/소스 그대로 보존하고 스모크 성공으로 재분류하지 않았다. 지속 압박이 확인되기 전 추가 정책 비교를 진행하지 않는다.
 
@@ -28,7 +44,7 @@ dotnet build native/RamFlow.Tray -c Release
 python scripts/test_research_apps.py
 python scripts/test_research_logcheck.py
 python scripts/test_real_app_adapters_windows.py --run
-python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14
+python scripts/research_cpu_preflight.py --output work/NEW-cpu-check --threads 14 --qos-mode normal
 if ($LASTEXITCODE -ne 0) { throw '지속 CPU 압박 미확인: 추가 정책 비교 중단' }
 python scripts/research_app_pilot.py --plan --output work/NEW-pilot --preflight work/NEW-cpu-check --contention-threads 14
 # pilot-plan.json 순서대로 각 슬롯을 딱 한 번씩 실행:
