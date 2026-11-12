@@ -17,22 +17,26 @@ static class AppStudy
     }
     public static async Task<int> Run(string[] args) {
         string root=Path.GetFullPath(Options.Get(args,"--output",""));Options.NewDirectory(root);
-        using var evidence=new EvidenceJournal(root,args,"real-app-abc-v4-normal-qos");
+        string protocol=Options.Get(args,"--protocol","real-app-abc-v4-normal-qos");bool budget=protocol==BudgetPolicy.Protocol;
+        using var evidence=new EvidenceJournal(root,args,protocol);
         var failures=new List<string>();var summaries=new List<object>();var observations=new List<JsonElement>();
         FixtureChild? background=null;AppDriver? app=null;AppProvider? provider=null;Engine? engine=null;AppAudit? audit=null;
         IndependentObserver? observer=null;Process? tray=null;Task? pipe=null;CancellationTokenSource? lifetime=null;
+        BudgetPolicy? budgetPolicy=null;BudgetControl? budgetControl=null;Task? controlTask=null;using var controlCancel=new CancellationTokenSource();
         ResourceValues? original=null,final=null,workloadOriginal=null,workloadFinal=null;bool cleanup=true,restored=false,workloadRestored=false;string phase="setup";
         string condition=Options.Get(args,"--condition",""),application=Options.Get(args,"--app","");
         using var self=Process.GetCurrentProcess();
         try {
             if(condition is not ("A" or "B" or "C") || application is not ("chrome" or "code"))throw new ArgumentException("Use --app chrome|code --condition A|B|C.");
-            if(Options.Get(args,"--protocol","real-app-abc-v4-normal-qos")!="real-app-abc-v4-normal-qos")throw new ArgumentException("Preserve old plans; v4 requires a NEW explicit-normal-QoS input plan.");
+            if(protocol!="real-app-abc-v4-normal-qos"&&!budget)throw new ArgumentException("Unknown real-app protocol; historical plans cannot be silently changed.");
+            if(budget&&condition=="A")throw new ArgumentException("Budget placement study uses B fixed periodic / C response feedback only.");
             int seconds=Options.Int(args,"--phase-seconds",10,5,120);
+            if(budget&&seconds!=10)throw new ArgumentException("Budget v1 freezes 20 half-second epochs.");
             int threads=Options.Int(args,"--contention-threads",Math.Min(14,Math.Max(1,Environment.ProcessorCount-2)),1,Math.Min(16,Environment.ProcessorCount));
             string expectedBackgroundChecksum=CpuWork.Complete(20261111);
             string driver=Path.GetFullPath(Options.Get(args,"--driver","scripts/real_apps/driver.py"));
             string runtime=Path.Combine(Path.GetDirectoryName(root)!,"runtime-"+evidence.RunId);
-            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol="real-app-abc-v4-normal-qos",started_utc=DateTimeOffset.UtcNow,
+            Options.WriteNew(Path.Combine(root,"started.json"),new { application,condition,protocol,started_utc=DateTimeOffset.UtcNow,
                 background_workload=CpuWork.WorkloadId+":normal-qos",background_qos="explicit-normal",background_mode="cpu-arithmetic",expected_background_checksum=expectedBackgroundChecksum,
                 planned_phases=new[]{"Normal","Contention","Recovery"},seconds,threads,scope="One smoke session, synthetic CPU background, real generated app tasks; not efficacy evidence",runtime });
             Options.WriteNew(Path.Combine(root,"source-manifest.json"),Options.CaptureSources(root));
@@ -60,8 +64,9 @@ static class AppStudy
             phase="setup";
             provider.Processes(); // Prime CPU/IO activity before policy eligibility; unknown activity remains protected.
             Options.WriteNew(Path.Combine(root,"resource-original.json"),new {pid=background.Process.Id,creation_filetime=background.Identity,values=original});
-            var config=new Settings {DryRun=false,PolicyName=condition=="B"?"fixed":"v1",CpuManagement=true,EcoQos=true,CpuSets=false,WorkingSetTrim=false,Learning=false,BackgroundApps=[backgroundExe]};
-            Options.WriteNew(Path.Combine(root,"effective-settings.json"),new {condition,labels=new {A="no-engine-or-tray",B="fixed-v1-matched-bundle",C="adaptive-v1"},
+            if(budget)budgetPolicy=new(condition=="B"?"fixed":"feedback",Options.Int(args,"--budget-rotation",0,0,19),background.Process.Id,background.Identity);
+            var config=new Settings {DryRun=false,PolicyName=budget||condition=="B"?"fixed":"v1",CpuManagement=true,EcoQos=true,CpuSets=false,WorkingSetTrim=false,Learning=false,BackgroundApps=[backgroundExe]};
+            Options.WriteNew(Path.Combine(root,"effective-settings.json"),new {condition,protocol,labels=budget?new {A="not-in-study",B="budget-fixed-periodic",C="budget-response-feedback"}:new {A="no-engine-or-tray",B="fixed-v1-matched-bundle",C="adaptive-v1"},
                 settings=config,settings_sha256=FileResearchAuditSink.Hash(config),matched_action=(int)MatchedBundle,
                 target=new {CpuPriority=0x4000,MemoryPriority=3,EcoControlBit=1,EcoStateBit=1},
                 readback_rule="Compare requested and observed after EVERY write. B and C active writes must equal the same V1 transformation of each original; restored/no-action values are separate."});
@@ -87,7 +92,7 @@ static class AppStudy
             if(condition!="A") {
                 audit=new(root,evidence,()=>phase);
                 engine=new(provider,Path.Combine(root,"engine-data"),persist:true,allowRemote:false,audit:audit,
-                    researchPolicy:condition=="B"?new CandidatePolicy(MatchedBundle):null);
+                    researchPolicy:budgetPolicy is not null?budgetPolicy:condition=="B"?new CandidatePolicy(MatchedBundle):null);
                 engine.ApplySettings(config);
                 EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());lifetime=new();pipe=EnginePipe.ServeAsync(engine,lifetime);
                 string exe=Path.GetFullPath(Options.Get(args,"--tray-exe","native/RamFlow.Tray/bin/Release/net10.0-windows/RamFlow.Tray.exe"));
@@ -109,15 +114,21 @@ static class AppStudy
                 tray=tray is null?"not-started":"isolated actual tray",optional_service="not-started",observer="independent observer samples itself",app_driver="measured separately"},true);
             foreach(string nextPhase in new[]{"Normal","Contention","Recovery"}) {
                 phase=nextPhase;observer.SetPhase(phase=="Contention"?"intervene":"observe");
+                budgetPolicy?.Begin(phase);
                 int active=phase=="Contention"?threads:1;
                 var first=await background.Request("load",active,phase);
                 if(first.Units<=0 || first.Checksum!=expectedBackgroundChecksum)throw new IOException("Background completed work checksum missing or incorrect.");
                 evidence.Write("phase-start",new {phase,active_threads=active,units=first.Units,seconds=first.Seconds,observed_utc=first.ObservedUtc,work_checksum=first.Checksum},true);
                 var phaseRows=new List<JsonElement>();var watch=Stopwatch.StartNew();double nextTick=0;int rounds=0;
-                while(watch.Elapsed.TotalSeconds<seconds || rounds<12) {
+                if(budget&&phase=="Contention") {
+                    budgetControl=new(budgetPolicy!,engine!,provider,evidence,background.Process.Id);
+                    controlTask=Task.Run(()=>budgetControl.Run(controlCancel.Token));
+                }
+                while(watch.Elapsed.TotalSeconds<seconds || rounds<(budget&&phase=="Normal"?20:12)) {
                     if(File.Exists(Path.Combine(root,"cancel.request")))throw new OperationCanceledException("Owner cancellation; restore and seal as failure.");
                     if(watch.Elapsed.TotalSeconds>seconds+45)throw new TimeoutException("Bounded phase timeout.");
-                    if(watch.Elapsed.TotalSeconds>=nextTick) {
+                    if(controlTask?.IsFaulted is true)await controlTask;
+                    if(!(budget&&phase=="Contention")&&watch.Elapsed.TotalSeconds>=nextTick) {
                         // Reuse the exact decision snapshot: a second immediate sensor
                         // read would reset CPU deltas and log a different interval.
                         var sample=engine is null?provider.Sample():engine.Tick().Snapshot;var readback=provider.ReadValues(background.Process.Id);
@@ -129,8 +140,18 @@ static class AppStudy
                         var reply=await app.Request(feature,phase);phaseRows.Add(reply);observations.Add(reply);
                         evidence.Write("app-observation",reply);
                         if(!reply.GetProperty("correct").GetBoolean())throw new IOException("App correctness failed.");
+                        if(budgetPolicy is not null) {
+                            double now=BudgetControl.Now;int id=reply.GetProperty("id").GetInt32();double ms=reply.GetProperty("latency_ms").GetDouble();
+                            budgetPolicy.Observe(feature,ms,now,id);
+                            evidence.Write("budget-observation",new {phase,feature,id,latency_ms=ms,clock_seconds=now});
+                        }
                     }
                     rounds++;await Task.Delay(100);
+                }
+                if(budget&&phase=="Contention") {
+                    await controlTask!;controlTask=null;
+                    var result=budgetControl!.Result(original);Options.WriteNew(Path.Combine(root,"budget-result.json"),result);
+                    if(!JsonSerializer.SerializeToElement(result).GetProperty("matched_session").GetBoolean())throw new IOException("Budget dose/deadline mismatch; retain failed run, no matched-exposure inference.");
                 }
                 var last=await background.Request("progress");
                 if(last.Units<=first.Units || last.Checksum!=expectedBackgroundChecksum)throw new IOException("Background made no valid completed progress.");
@@ -143,11 +164,21 @@ static class AppStudy
                 }).ToArray();
                 var summary=new {phase,metrics,background_units=units,background_seconds=duration,background_units_per_second=units/duration};summaries.Add(summary);
                 evidence.Write("phase-end",new {phase,units=last.Units,seconds=last.Seconds,observed_utc=last.ObservedUtc,work_checksum=last.Checksum},true);
+                if(budget&&phase=="Normal") {
+                    var values=app.Features.ToDictionary(k=>k,k=>Quantile(phaseRows.Where(r=>r.GetProperty("feature").GetString()==k).Select(r=>r.GetProperty("latency_ms").GetDouble()).ToArray(),.95));
+                    var counts=app.Features.ToDictionary(k=>k,k=>phaseRows.Count(r=>r.GetProperty("feature").GetString()==k));
+                    double now=BudgetControl.Now;budgetPolicy!.Baseline(values,counts,now);
+                    var frozen=new {phase,clock_seconds=now,p95_ms=values,counts,scope="Session Normal phase; engineering response ratios, not validated user SLO"};
+                    Options.WriteNew(Path.Combine(root,"budget-baseline.json"),frozen);evidence.Write("budget-baseline-frozen",frozen,true);
+                }
                 if(phase=="Recovery" && condition=="C" && !Same(provider.ReadValues(background.Process.Id),original))
                     throw new IOException("V1 did not restore during Recovery; cleanup will retry. Phase transition smoke is not successful.");
             }
         } catch(Exception error) {failures.Add(error.ToString());evidence.TryWrite("app-failure",new {phase,error=error.ToString()});}
         finally {
+            controlCancel.Cancel();
+            if(controlTask is not null)try {await controlTask;}catch(Exception e){failures.Add(e.ToString());}
+            budgetPolicy?.End();
             phase="cleanup";
             if(observer is not null)try {observer.SetPhase("restore");}catch(Exception e){failures.Add(e.ToString());cleanup=false;}
             if(engine is not null)try {engine.Stop();}catch(Exception e){failures.Add(e.ToString());cleanup=false;}
@@ -188,7 +219,7 @@ static class AppStudy
         if((provider?.OutOfScopeRequests??0)>0)failures.Add("Out-of-scope resource write attempt.");
         if(condition is "B" or "C" && summaries.Count>0 && (audit?.Applies??0)==0)failures.Add("No active application: matched B/C readback not demonstrated.");
         string status=failures.Count==0&&cleanup?"completed":"failed";
-        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol="real-app-abc-v4-normal-qos",background_workload=CpuWork.WorkloadId+":normal-qos",workload_restored=workloadRestored,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
+        Options.WriteNew(Path.Combine(root,"outcome.json"),new {status,evidence_run_id=evidence.RunId,application,condition,protocol,background_workload=CpuWork.WorkloadId+":normal-qos",workload_restored=workloadRestored,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup_completed=cleanup,
             phases=summaries,observations=observations.Count,applies=audit?.Applies??0,readback_failures=provider?.ReadbackFailures??0,protected_misinterventions=provider?.OutOfScopeRequests??0,failures,
             inference="Smoke functionality only. One session per app/condition is not an independent efficacy replication; no superiority inference."});
         evidence.Seal(status,cleanup);Console.WriteLine(JsonSerializer.Serialize(new {root,status,restored=background is null?(bool?)null:restored,restoration_status=restorationStatus,cleanup,failures}));return status=="completed"?0:1;
@@ -197,6 +228,7 @@ static class AppStudy
 
 sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<string> phase) : IResourceProvider
 {
+    public List<(double Time,ResourceValues Values)> PolicyReadbacks {get;}=[];
     readonly WindowsResourceProvider real=new();
     (double Cpu,ulong Io,long Stamp)? previous;
     public int OutOfScopeRequests {get;private set;}
@@ -232,8 +264,10 @@ sealed class AppProvider(FixtureChild background,EvidenceJournal evidence,Func<s
     bool WriteOwned(int pid,ResourceValues values,long identity,string kind) {
         if(!Owns(pid,identity)) {OutOfScopeRequests++;evidence.Write("out-of-scope-write",new {phase=phase(),pid,creation_filetime=identity});return false;}
         bool result=real.WriteValues(pid,values,identity);var observed=real.ReadValues(pid);
+        double readbackSeconds=BudgetControl.Now;
         bool matched=result&&AppStudy.Same(values,observed)&&real.Identity(pid)==identity;
-        evidence.Write(kind,new {phase=phase(),pid,creation_filetime=identity,requested=values,observed,api_result=result,matched},true);
+        if(kind=="resource-write-readback"&&matched)PolicyReadbacks.Add((readbackSeconds,observed!));
+        evidence.Write(kind,new {phase=phase(),pid,creation_filetime=identity,requested=values,observed,api_result=result,matched,readback_clock_seconds=readbackSeconds},true);
         if(!matched)ReadbackFailures++;return matched;
     }
     public bool Trim(int pid,long identity) {OutOfScopeRequests++;return false;}
