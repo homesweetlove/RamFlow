@@ -13,7 +13,7 @@
 | R5. Cilantro, OSDI 2023 | 실제 작업 성능의 온라인 피드백, 자원–성능 관계 학습, 추정 불확실성을 정책에 반영한다. | 평가한 C는 CPU 압박 피드백을 쓰지만 전경 지연/배경 손실 피드백이나 비용 추정 모델을 쓰지 않는다. | 비용·관측·불확실성이라는 개념을 새로 제안했다고 쓰지 않는다. CARP 구현의 존재와 실앱 검증을 구별한다. |
 | R6. Prequal, NSDI 2024 | CPU 부하의 균형 대신 지연·진행 중 요청 신호로 분산 서버를 선택한다. | 같은 노드에서 CPU 압박을 개입 게이트로 쓸 때의 제한을 분석한다. 분산 부하분산기를 비교 실행한 것은 아니다. | CPU 사용률과 사용자 성능의 불일치는 선행 문제다. 직접 성능 우열 비교는 없다. |
 | R7. HoseinyFarahabady·Zomaya, CLOUD 2025 | 발행처 초록은 Linux cgroup 기반 CPU/I/O 제한과 간섭 관측·예측을 설명한다. | 프로세스 속성 API와 소유 PID 가역적 제어라는 구현 범위가 다르다. | 실시간·경량·간섭 인지 제어도 선행 주제다. 상세 알고리즘·실험 우열은 원문 미열람으로 비교하지 않는다. |
-| R8. 손용석 외, 2012 기관 저장소 사본 | Android의 대화형 태스크 식별과 우선순위 부스트·부하 분산을 설명한다. | 전경 태스크 부스트/커널 수정 대신 지정 배경 PID의 사용자 모드 제어를 평가했다. | 국내에서도 사용자 응답성 인지 스케줄링은 기존 주제다. 이 사본의 최종 게재 서지는 별도 확인이 필요하다. |
+| R8. 손용석 외, 2012 | Android의 대화형 태스크 식별과 우선순위 부스트·부하 분산을 설명한다. | 전경 태스크 부스트/커널 수정 대신 지정 배경 PID의 사용자 모드 제어를 평가했다. | 국내에서도 사용자 응답성 인지 스케줄링은 기존 주제다. 게재 서지는 연구실 목록으로 보완했고, 저장소 사본과 최종 본문의 동일성은 아직 대조하지 않았다. |
 
 차별화할 수 있는 부분은 특정 Windows API 제어의 적용 범위·측정 경계·전환 상태를 재현 가능한 자료로 설명하는 실증 사례다. 플랫폼이 다르거나 로그가 상세하다는 사실만으로 독창성이 성립한다고 보지 않는다. 선행 시스템을 Windows에 직접 포팅하거나 동일 조건으로 비교한 실험은 없다.
 
@@ -26,6 +26,6 @@
 5. Romil Bhardwaj 외. *Cilantro: Performance-Aware Resource Allocation for General Objectives via Online Feedback*. OSDI 2023, pp. 623–643. [발행처 서지·초록](https://www.usenix.org/conference/osdi23/presentation/bhardwaj). 성능 피드백과 신뢰 경계라는 개념적 중복을 확인했다.
 6. Bartek Wydrowski 외. *Load is not what you should balance: Introducing Prequal*. NSDI 2024, pp. 1285–1299. [발행처](https://www.usenix.org/conference/nsdi24/presentation/wydrowski), [원문](https://www.usenix.org/system/files/nsdi24-wydrowski.pdf). 제목·저자·연도·핵심 신호는 PDF/공식 서지로 대조했다. Google 소개 페이지의 저자 약칭 대신 공식 서지 이름을 기준으로 한다.
 7. MohammadReza HoseinyFarahabady, Albert Y. Zomaya. *Real-Time Interference-Aware CPU and I/O Capping Mechanism for Multi-Tenant Containers*. IEEE CLOUD 2025. [DOI](https://doi.org/10.1109/CLOUD67622.2025.00039), [발행처 색인](https://ieeexplore.ieee.org/abstract/document/11120584), [주최 측 프로그램](https://services.conferences.computer.org/2025/wp-content/uploads/sites/3/2025/07/SERVICES_webprogram.pdf). 검색에 노출된 발행처 초록 및 공식 프로그램에서 제목/저자를 대조했다. 직접 발행처 페이지 열기는 418 오류였고 전문은 읽지 못했다. 상세 결과는 인용하지 않았다.
-8. 손용석·허승주·유종훈·홍성수. *안드로이드 기반 스마트폰의 사용자 응답성 향상을 위한 프레임워크 지원 우선순위 부스트 기법과 로드 밸런싱 기법*. 2012. [서울대학교 기관 저장소 PDF](https://s-space.snu.ac.kr/bitstream/10371/81520/2/%28CSTV12-07-09-15%29.pdf). 본문은 확인했다. 사본에 권호·접수일 자리표시자가 남고 외부 색인과 쪽수가 맞지 않아 최종 권호/쪽수를 확정하지 않았다. 원고 참고문헌은 기관 저장소 버전으로 표기하고 투고 전에 최종 출판본을 확인해야 한다.
+8. 손용석·허승주·유종훈·홍성수. *안드로이드 기반 스마트폰의 사용자 응답성 향상을 위한 프레임워크 지원 우선순위 부스트 기법과 로드 밸런싱 기법*. 정보과학회논문지: 시스템 및 이론, 39(6), pp. 380–386, Dec. 2012. [저자 연구실 게재 목록](https://redwood.snu.ac.kr/wordpress/index.php/domestic-journals_new/), [기관 저장소 PDF](https://s-space.snu.ac.kr/bitstream/10371/81520/2/%28CSTV12-07-09-15%29.pdf). 2026-11-12 후속 확인에서 저자 연구실 목록의 검색 색인 본문에 위 서지가 기재되어 있고 RISS 서지와 일치함을 대조했다. 연구실 페이지 직접 열기는 시간 초과였다. 저장소 PDF의 자리표시자/쪽수는 게재 서지와 다르므로 최종 게재본의 본문까지 동일하다고 주장하지 않는다. 앞선 서지 미확정 기록은 이 후속 대조로 보완한다.
 
 국내 최신 동일 조건 연구를 모두 확인한 것은 아니다. 검색 결과가 적다는 이유로 국내 최초라고 주장하지 않는다. 이전 Acclaim·메모리 회수 비교는 [기존 문서](RELATED_WORK.ko.md)에 보존하며 CPU 중심 이번 원고의 결과 근거로 확장하지 않는다.
