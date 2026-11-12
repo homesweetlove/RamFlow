@@ -1,0 +1,141 @@
+{
+  "archive_sha256": "67a10b5bbb7772ec00f4ba8f652f52a53f9a59cdeedd18cadf1a01c6346cfdd8",
+  "runs": [
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\chrome-A",
+      "records": 1147
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\chrome-B",
+      "records": 1383
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\chrome-C",
+      "records": 1348
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\code-A",
+      "records": 945
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\code-B",
+      "records": 1174
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v3\\code-C",
+      "records": 1135
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\chrome-A",
+      "records": 1154
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\chrome-B",
+      "records": 5
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\chrome-C",
+      "records": 1360
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\code-A",
+      "records": 940
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\code-B",
+      "records": 1156
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\code-C",
+      "records": 1117
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfv-a738148f\\v2\\supplements\\chrome-B-startup-retry-1",
+      "records": 1400
+    }
+  ],
+  "completed_records": 8,
+  "failed_records": 5,
+  "failed_records_not_reclassified": true,
+  "remaining_owned_helper_names": [],
+  "scope": "ZIP CRC, index/hash, lifecycle and recorded status; not efficacy proof",
+  "extraction_note": "Use a short destination: the first deep extraction encountered Windows path length limits; the archive CRC was valid and short-path extraction/check passed."
+}

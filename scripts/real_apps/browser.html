@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8"><title>RAM Flow isolated research workload</title>
+<label>Group <input id="query" value="3"></label><button id="search">Search</button><button id="sort">Sort</button>
+<p id="status"></p><div id="rows"></div>
+<script>
+'use strict';
+const data=Array.from({length:20000},(_,id)=>({id,label:`record-${id}`,score:(id*7919)%20000,group:id%10}));
+window.prepare=(feature,id)=>{
+  window.pending=new Promise(resolve=>window.resolveResult=resolve);
+  window.requestId=id;
+  const rect=document.getElementById(feature).getBoundingClientRect();
+  return {x:rect.x+rect.width/2,y:rect.y+rect.height/2};
+};
+function run(feature){
+  const start=performance.now();
+  let selected=feature==='search'?data.filter(x=>x.group===Number(query.value)):data.slice().sort((a,b)=>b.score-a.score);
+  rows.replaceChildren(...selected.slice(0,1000).map(x=>{
+    let row=document.createElement('div');row.textContent=`${x.id} ${x.label} ${x.score} ${x.group}`;return row;
+  }));
+  const correct=selected.length===(feature==='search'?2000:20000)&&rows.children.length===1000&&
+    (feature==='search'?selected.every(x=>x.group===3):selected.every((x,i)=>i===0||selected[i-1].score>=x.score));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>window.resolveResult({
+    feature,id:window.requestId,latency_ms:performance.now()-start,correct,checksum:`${selected.length}:${selected[0].id}:${selected.at(-1).id}`,
+    endpoint:'DOM click handler entry to second requestAnimationFrame; no physical input/display claim'
+  })));
+}
+search.onclick=()=>run('search');sort.onclick=()=>run('sort');
+</script>

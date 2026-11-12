@@ -1,0 +1,25 @@
+2026-11-12T03:29:46.5584834Z Ran 38 tests in 0.135s
+2026-11-12T03:29:51.3082250Z Ran 28 tests in 4.518s
+2026-11-12T03:29:52.6697182Z Ran 25 tests in 1.060s
+2026-11-12T03:29:52.8689129Z Ran 10 tests in 0.103s
+2026-11-12T03:29:52.9991673Z Ran 14 tests in 0.037s
+2026-11-12T03:29:53.1771859Z Ran 5 tests in 0.079s
+2026-11-12T03:29:53.3356927Z Ran 5 tests in 0.026s
+2026-11-12T03:30:06.8184854Z Native regression: 437 assertions passed; no live Windows processes changed.
+2026-11-12T03:30:06.8733425Z Native persisted recovery: 439 assertions passed.
+2026-11-12T03:30:06.9655620Z Native safety regression: 446 assertions passed.
+2026-11-12T03:30:06.9829002Z Native warm-page protection regression: 459 assertions passed.
+2026-11-12T03:30:06.9936386Z Native pressure relief regression: 499 assertions passed.
+2026-11-12T03:30:06.9963912Z Native app-group activity regression: 503 assertions passed.
+2026-11-12T03:30:57.0000515Z Native regression: 437 assertions passed; no live Windows processes changed.
+2026-11-12T03:30:57.1026737Z Native persisted recovery: 439 assertions passed.
+2026-11-12T03:30:57.2351390Z Native safety regression: 446 assertions passed.
+2026-11-12T03:30:57.2728263Z Native warm-page protection regression: 459 assertions passed.
+2026-11-12T03:30:57.2897083Z Native pressure relief regression: 499 assertions passed.
+2026-11-12T03:30:57.2945618Z Native app-group activity regression: 503 assertions passed.
+2026-11-12T03:31:02.2427099Z Native Windows verification: 515 assertions passed.
+2026-11-12T03:31:02.4244333Z Native IPC verification: 525 assertions passed.
+2026-11-12T03:31:10.3886370Z Ran 2 tests in 0.604s
+2026-11-12T03:31:10.4813956Z Ran 2 tests in 0.016s
+2026-11-12T03:32:20.7203108Z ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.
+2026-11-12T03:32:51.5219232Z Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at D:\a\RamFlow\RamFlow\work\logging-integration-a2500018e81a402baaeeef8d772c6b35

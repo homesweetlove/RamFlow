@@ -1,0 +1,14 @@
+{
+  "scope": "Exploratory CPU pilot, not a confirmatory experiment or preregistration",
+  "source_commit": "cd699bd262592e6da5cad4726fe8b9ed0742dd22",
+  "disposable_targets_only": true,
+  "chosen_after_setup_probes": {"threads": 12, "probe_cpu_percent_range": [86.7,95.5]},
+  "foreground_mib": 8,
+  "background_mib": 32,
+  "measurement_seconds_per_trial": 8,
+  "calibration": {"fit_blocks":6,"validation_blocks":3,"candidate_actions":[0,1,3],"seed":2026111003,"max_failures":2},
+  "model_acceptance": "Existing frozen defaults; no posthoc threshold relaxation",
+  "comparison": {"paired_blocks":3,"seconds":8,"seed":2026111004,"conditions":["A","B","C","D","E","F"],"variant_F":"WithoutBackgroundCost","model_id":"6d23a96a138896bba251481a7150ab8647f21add8d5d1aa98435a21e6c546cb0","accepted_cells":0},
+  "followup": "A-F paired pilot using an accepted frozen model if available; rejected predictions remain nonintervention and are not efficacy evidence",
+  "limitations": ["synthetic role latency, not actual UI input", "one physical PC", "short observation windows", "no RAM exhaustion", "unattained regimes and failures retained"]
+}

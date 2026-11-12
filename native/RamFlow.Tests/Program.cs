@@ -5,10 +5,22 @@ using System.Security.Principal;
 using System.Text.Json;
 
 int passed = 0;
+if(args.Length==2 && args[0]=="--evidence-open-child") {
+    Directory.CreateDirectory(args[1]);using var evidence=new ResearchLab.EvidenceJournal(args[1],args);
+    evidence.Write("diagnostic-ready",new { scope="SYNTHETIC logger interruption test; no resource action" },true);
+    Console.WriteLine("ready");await Task.Delay(TimeSpan.FromMinutes(2));return;
+}
+if (args.Contains("--research-disposable-child")) { await Task.Delay(TimeSpan.FromMinutes(2)); return; }
 if(args.Length>=3 && args[0]=="--queue-echo") { await Task.Delay(1000);File.WriteAllText(args[1],JsonSerializer.Serialize(args.Skip(2).ToArray()));return; }
 if (args.Contains("--ipc")) EnginePipe.ConfigureVerificationNamespace(Guid.NewGuid());
 void Check(bool value, string message) { if (!value) throw new Exception(message); passed++; }
 BackgroundControlTests.Run(Check);
+ResearchPolicyTests.Run(Check);
+CostModelTests.Run(Check);
+PreInterventionTests.Run(Check);
+ObserverControlTests.Run(Check);
+EvidenceJournalTests.Run(Check);
+StarvationTests.Run(Check);
 BackgroundJobsTests.Run(Check);
 UiHandoffTests.Run(Check);
 await BenchmarkTests.RunAsync(Check);
@@ -220,6 +232,7 @@ foreach (string siblingActivity in new[] { "cpu", "io", "unknown", "new" }) {
 Console.WriteLine($"Native app-group activity regression: {passed} assertions passed.");
 
 if (args.Contains("--windows")) {
+    ResearchWindowsTests.Run(Check);
     await BackgroundJobsWindowsTests.RunAsync(Check);
     using var provider = new WindowsResourceProvider();
     var snapshot = provider.Sample(); Check(snapshot.RamTotal > 0 && snapshot.CommitLimit >= snapshot.Commit, "Windows telemetry invalid");

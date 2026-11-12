@@ -4,12 +4,21 @@ namespace RamFlow.Core;
 
 public sealed class Engine : IDisposable
 {
-    private sealed record Original(ProcessSample Process, ResourceValues Values);
+    private sealed record Original(ProcessSample Process, ResourceValues Values, DateTimeOffset? AppliedAt = null);
     private readonly object gate = new();
     private readonly IResourceProvider provider;
     private readonly string root;
     private readonly bool persist;
     private readonly BackgroundJobQueue jobs;
+    private readonly IPolicyObservationSource? observations;
+    private readonly IResearchAuditSink? audit;
+    private readonly IResourcePolicy? researchPolicy;
+    private IResourcePolicy resourcePolicy = new V1ResourcePolicy();
+    private readonly Dictionary<(int, long), ResourceAction> appliedActions = new();
+    private string settingsHash = FileResearchAuditSink.Hash(new Settings());
+    private DateTimeOffset? policyTimestamp;
+    private readonly System.Diagnostics.Stopwatch policyClock = new();
+    private DateTimeOffset PolicyNow => policyTimestamp is {} time ? time + policyClock.Elapsed : DateTimeOffset.UtcNow;
     private Settings settings = new();
     private readonly Pressure pressure = new();
     private readonly Dictionary<int, Original> originals = new();
@@ -36,9 +45,16 @@ public sealed class Engine : IDisposable
         if(!remote)throw new InvalidOperationException("로컬 엔진 소유자는 복원 없이 분리할 수 없습니다.");
         if(disposed)return; jobs.Dispose();provider.Dispose();disposed=true;
     }
-    public Engine(IResourceProvider provider, string? dataRoot = null, bool persist = true, bool allowRemote = true, IBackgroundJobLauncher? jobLauncher = null)
+    public Engine(IResourceProvider provider, string? dataRoot = null, bool persist = true, bool allowRemote = true, IBackgroundJobLauncher? jobLauncher = null,
+        IPolicyObservationSource? observations = null, IResearchAuditSink? audit = null, IResourcePolicy? researchPolicy = null)
     {
         this.provider = provider; this.persist = persist;
+        this.observations = observations; this.audit = audit;
+        this.researchPolicy = researchPolicy;
+        if (researchPolicy is not null && (allowRemote || dataRoot is null))
+            throw new ArgumentException("A research policy override requires an isolated explicit dataRoot and allowRemote:false.");
+        if ((observations is not null || audit is not null) && provider is WindowsResourceProvider && (allowRemote || dataRoot is null))
+            throw new ArgumentException("A research Windows host must use allowRemote:false and an isolated explicit dataRoot.");
         jobs = new(jobLauncher);
         root = dataRoot ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RamFlowNative");
         if (persist && allowRemote && provider is WindowsResourceProvider) {
@@ -62,6 +78,8 @@ public sealed class Engine : IDisposable
             } } catch { }
             try { foreach (var item in JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(Path.Combine(root, "usage.json"))) ?? []) learning[item.Key] = item.Value; } catch { }
         }
+        resourcePolicy = CreatePolicy(settings);
+        settingsHash = FileResearchAuditSink.Hash(settings);
     }
     private static Settings CopySettings(Settings value) => value with { Whitelist = value.Whitelist.ToArray(), BackgroundApps = value.BackgroundApps.ToArray() };
     public Settings Settings { get { if (remote) return EnginePipe.Request<Settings>(new("settings")); lock (gate) return CopySettings(settings); } }
@@ -77,6 +95,7 @@ public sealed class Engine : IDisposable
         lock (gate) {
             next = Validate(next);
             RestoreAll(); settings = CopySettings(next);
+            resourcePolicy = CreatePolicy(settings); settingsHash = FileResearchAuditSink.Hash(settings);
             lastScan = DateTimeOffset.MinValue;
             if (persist) Save("settings.json", settings);
             Log("설정 변경 · 원래 자원 설정 복원 요청", next.DryRun);
@@ -84,10 +103,26 @@ public sealed class Engine : IDisposable
     }
     public static Settings Validate(Settings value)
     {
+        if (value.PolicyName is not ("v1" or "carp" or "fixed") || value.Carp is null) throw new ArgumentException("Unknown research policy.");
+        CarpOptions.Validate(value.Carp);
         if (!Display.Modes.Contains(value.Mode) || value.Whitelist is null || value.Whitelist.Length > 256 || value.Whitelist.Any(x => string.IsNullOrWhiteSpace(x) || x.Length > 260)) throw new ArgumentException("설정 모드 또는 예외 목록이 올바르지 않습니다.");
         if (value.BackgroundApps is null || value.BackgroundApps.Length > 256 || value.BackgroundApps.Any(x => string.IsNullOrWhiteSpace(x) || x.Length > 32767 || x.IndexOf('\0') >= 0 || !Path.IsPathFullyQualified(x))) throw new ArgumentException("배경 작업은 실행 파일의 전체 경로로 지정하세요.");
         if(value.BackgroundConcurrency is <1 or >16 || value.BackgroundReserveMiB is <256 or >65536) throw new ArgumentException("동시 실행은 1–16개, 메모리 여유는 256–65536 MiB로 지정하세요.");
         return value;
+    }
+    private IResourcePolicy CreatePolicy(Settings value) => researchPolicy ?? (value.PolicyName switch {
+        "carp" => new CarpPolicy(value.Carp), "fixed" => new FixedResourcePolicy(), _ => new V1ResourcePolicy()
+    });
+    private bool Audit(string kind, DateTimeOffset time, ProcessSample? process, string result, object? detail = null) {
+        if (audit is null) return true;
+        try { audit.Write(new(kind, time, resourcePolicy.Name, resourcePolicy.Version, settingsHash,
+            process?.Pid, process?.Identity, result, detail)); return true; }
+        catch (Exception e) {
+            // Audit plugins and their fallback reporting must never prevent
+            // foreground restoration, including under permission/disk failures.
+            try { Log("연구 로그 기록 실패: " + e.Message); } catch (Exception) { }
+            return false;
+        }
     }
     public void Start()
     {
@@ -113,14 +148,24 @@ public sealed class Engine : IDisposable
         lock (gate) {
             foreach (int pid in originals.Keys.ToArray()) {
                 var identity = provider.Identity(pid);
-                if (identity is not null && identity != originals[pid].Process.Identity || identity is null && provider.Exited(pid)) { originals.Remove(pid); pending.Remove(pid); }
+                if (identity is not null && identity != originals[pid].Process.Identity || identity is null && provider.Exited(pid)) {
+                    var previous = originals[pid].Process;
+                    Audit("restore", DateTimeOffset.UtcNow, previous, identity is null ? "process-exited" : "pid-reused-no-write");
+                    originals.Remove(pid); pending.Remove(pid); appliedActions.Remove((pid, previous.Identity));
+                }
             }
             foreach (int pid in pending.ToArray()) Restore(pid);
             if (settings.Paused || settings.DryRun) RestoreAll();
             var snap = provider.Sample(); var now = snap.Time;
+            policyTimestamp = now; policyClock.Restart();
+            var tickClock = System.Diagnostics.Stopwatch.StartNew();
             cpuPressure = snap.CpuPercent >= 80 || cpuPressure && snap.CpuPercent >= 60;
             var count = jobs.Summaries.Count(x=>x.Status=="Running");
-            jobs.Tick(snap,settings);
+            // Queue admission is a conservative safety guard, not an estimated
+            // foreground benefit. Running jobs are never suspended or killed.
+            bool deferStarts = settings.PolicyName == "carp" && (cpuPressure || snap.CommitLimit == 0 || snap.Available < (ulong)settings.BackgroundReserveMiB * 1048576);
+            bool queueRecorded = Audit("queue-admission", now, null, deferStarts ? "defer-new-starts" : "normal-reserve-gates", new { CpuPressure = cpuPressure, Snapshot = snap, Jobs = jobs.Summaries });
+            jobs.Tick(snap,settings, deferStarts || !queueRecorded);
             if(jobs.Summaries.Count(x=>x.Status=="Running")!=count) lastScan=DateTimeOffset.MinValue;
             var foreground = provider.Foreground(); bool fullscreen = provider.Fullscreen();
             if (foreground.Name.Length > 0) activity[foreground.Name] = now;
@@ -161,13 +206,34 @@ public sealed class Engine : IDisposable
                 bool ownedJob = jobs.Owns(p);
                 bool designated = ownedJob || settings.BackgroundApps.Contains(p.Path, StringComparer.OrdinalIgnoreCase);
                 string? priorityProtection = designated ? Policy.Protect(p, foreground, settings, mode, true) : protection;
-                bool priorityContext = canManage || designated && foreground.Pid > 0 && foreground.Name.Length > 0 && !settings.Paused;
-                bool eligible = priorityProtection is null && (designated || idle >= 1800) && priorityContext &&
-                    (ownedJob || pressure.Level >= PressureLevel.Moderate || cpuPressure || snap.OnBattery);
-                if (!eligible) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); }
-                else if (settings.DryRun) Log($"{p.Name} · {category} · Memory Priority / CPU / EcoQoS 조정 예상", true);
-                else if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, now, designated);
-                bool memoryCandidate = protection is null && canManage && settings.WorkingSetTrim &&
+                CarpEvidence? evidence = null;
+                if (settings.PolicyName == "carp" && designated && priorityProtection is null) {
+                    try {
+                        var kind = (cpuPressure, pressure.Level >= PressureLevel.Moderate) switch {
+                            (true, true) => ContentionKind.Mixed, (true, false) => ContentionKind.Cpu,
+                            (false, true) => ContentionKind.Ram, _ => ContentionKind.Healthy };
+                        evidence = observations is IPolicyContextObservationSource contextual ? contextual.Read(p, snap, kind) : observations?.Read(p, snap);
+                        if (observations is IPolicyContextObservationSource diagnostic) Audit("model-observation", now, p, diagnostic.Diagnostic);
+                    }
+                    catch (Exception e) { Audit("observation", now, p, "source-failed", new { Error = e.Message }); }
+                }
+                var input = new PolicyInput(snap, p, settings, foreground.Pid, foreground.Name, fullscreen, mode,
+                    pressure.Level, cpuPressure, idle, designated, ownedJob, appliedActions.GetValueOrDefault((p.Pid, p.Identity)), evidence);
+                PolicyDecision decision;
+                var decisionClock = System.Diagnostics.Stopwatch.StartNew();
+                try { decision = resourcePolicy.Decide(input); }
+                catch (Exception e) { decision = new(ResourceAction.None, "policy-failed-restore", ContentionKind.Unknown, []); Audit("policy-error", now, p, "failed", new { Error = e.Message }); }
+                // Learned future-app protection stays outside the swappable policy.
+                if (!designated && protection is not null) decision = decision with { Action = ResourceAction.None, Reason = protection };
+                double decisionMs = decisionClock.Elapsed.TotalMilliseconds;
+                bool recorded = Audit("decision", now, p, decision.Reason, new { Input = input, Decision = decision, DryRun = settings.DryRun, DecisionElapsedMs = decisionMs });
+                if (decision.Action == ResourceAction.None || !recorded) { if (originals.ContainsKey(p.Pid)) Restore(p.Pid); }
+                else if (settings.DryRun) Log($"{p.Name} · {resourcePolicy.Name} · {decision.Action} 조정 예상", true);
+                else {
+                    if (settings.PolicyName != "v1" && originals.ContainsKey(p.Pid) && input.CurrentAction != decision.Action) Restore(p.Pid);
+                    if (!originals.ContainsKey(p.Pid) && !pending.Contains(p.Pid) && (!failures.TryGetValue(p.Pid, out var failed) || (now - failed).TotalSeconds >= 60)) Apply(p, snap, decision.Action, designated, evidence, tickClock);
+                }
+                bool memoryCandidate = settings.PolicyName == "v1" && protection is null && canManage && settings.WorkingSetTrim &&
                     needsMemoryRelief && p.WorkingSet >= 150 * 1048576UL;
                 if (!memoryCandidate) continue;
                 if (idle < trimDelay) { nextIdleSeconds = Math.Min(nextIdleSeconds ?? double.MaxValue, trimDelay - idle); continue; }
@@ -192,7 +258,7 @@ public sealed class Engine : IDisposable
             foreach (var key in seen.Keys.Except(alive).ToArray()) seen.Remove(key);
             foreach (var name in activity.Keys.Except(processes.Select(p => p.Name)).ToArray()) activity.Remove(name);
             if (persist) SaveJournal();
-            string memoryStatus = settings.Paused ? "메모리 관리 일시정지" : !settings.WorkingSetTrim ? "RAM 정리 꺼짐" :
+            string memoryStatus = settings.Paused ? "메모리 관리 일시정지" : settings.PolicyName != "v1" ? "현재 정책은 강제 RAM 정리를 사용하지 않음" : !settings.WorkingSetTrim ? "RAM 정리 꺼짐" :
                 !canManage ? "활성 창 확인 또는 전체화면 종료 대기" : pressure.Level < PressureLevel.High ? "메모리 여유 · 정리하지 않음" :
                 !needsMemoryRelief ? "앱 복귀 보호 · 가용 RAM 여유로 강제 정리 보류" :
                 trimCandidates > 0 ? $"RAM 정리 대상 {trimCandidates}개 · 전역 2분 / 같은 앱 15분 간격" :
@@ -202,41 +268,73 @@ public sealed class Engine : IDisposable
             state = new(snap, pressure.Score, pressure.Level, mode, foreground.Name, rows.OrderByDescending(x => x.WorkingSet).ToArray(), events.ToArray(), pending.Count, provider.Topology(), predictions) {
                 MemoryStatus = memoryStatus, TrimCount = trimCount, LastWorkingSetReduction = lastWorkingSetReduction
             };
+            Audit("tick", now, null, "complete", new { Snapshot = snap, TickElapsedMsBeforeAudit = tickClock.Elapsed.TotalMilliseconds,
+                ForegroundPid = foreground.Pid, ForegroundName = foreground.Name, PendingRestores = pending.Count, ProcessCount = processes.Count,
+                SystemPagesInputPerSecond = snap.PagesInput, PerProcessHardFaults = (double?)null });
             return state;
         }
     }
-    private void Apply(ProcessSample process, DateTimeOffset now, bool designated = false)
+    private void Apply(ProcessSample process, Snapshot snapshot, ResourceAction action, bool designated,
+        CarpEvidence? evidence, System.Diagnostics.Stopwatch tickClock)
     {
-        if (!provider.Validate(process)) return;
+        var now = snapshot.Time;
+        if (!provider.Validate(process)) { Audit("apply", now, process, "validation-rejected"); return; }
         var foreground = provider.Foreground(); bool fullscreen = provider.Fullscreen();
-        if (foreground.Pid <= 0 || foreground.Name.Length == 0 || fullscreen && !designated || Policy.Protect(process, foreground, settings, Policy.Mode(settings, foreground.Name, state.Snapshot, fullscreen), designated) is not null) return;
+        if (settings.DryRun || settings.Paused || foreground.Pid <= 0 || foreground.Name.Length == 0 || fullscreen && !designated || Policy.Protect(process, foreground, settings, Policy.Mode(settings, foreground.Name, snapshot, fullscreen), designated) is not null) {
+            Audit("apply", now, process, "final-safety-rejected"); return;
+        }
         var old = provider.ReadValues(process.Pid);
         if (old is null || old.CpuPriority is not (0x40 or 0x4000 or 0x20) || provider.Identity(process.Pid) != process.Identity) return;
         uint[] sets = old.CpuSets;
-        if (settings.CpuSets) {
+        if (action.HasFlag(ResourceAction.CpuSets)) {
             var topology = provider.Topology(); var efficiency = topology.Where(x => !x.Parked && !x.Allocated).ToArray();
             if (efficiency.Select(x => x.Efficiency).Distinct().Count() > 1 && topology.Select(x => x.Group).Distinct().Count() == 1)
                 sets = efficiency.Where(x => x.Efficiency == efficiency.Min(x => x.Efficiency)).Select(x => x.Id).ToArray();
         }
-        var value = old with { MemoryPriority = Math.Min(old.MemoryPriority, 3), CpuPriority = settings.CpuManagement && old.CpuPriority != 0x40 ? 0x4000U : old.CpuPriority,
-            PowerControl = settings.EcoQos ? old.PowerControl | 1U : old.PowerControl, PowerState = settings.EcoQos ? old.PowerState | 1U : old.PowerState, CpuSets = sets };
-        originals[process.Pid] = new(process, old);
+        var value = old with { MemoryPriority = action.HasFlag(ResourceAction.LowerMemory) ? Math.Min(old.MemoryPriority, 3) : old.MemoryPriority,
+            CpuPriority = action.HasFlag(ResourceAction.LowerCpu) && old.CpuPriority != 0x40 ? 0x4000U : old.CpuPriority,
+            PowerControl = action.HasFlag(ResourceAction.EcoQos) ? old.PowerControl | 1U : old.PowerControl,
+            PowerState = action.HasFlag(ResourceAction.EcoQos) ? old.PowerState | 1U : old.PowerState, CpuSets = sets };
+        if (!SafeValues(old) || !Audit("apply-intent", now, process, "journal-before-write", new { Original = old, Requested = value, Action = action })) return;
+        originals[process.Pid] = new(process, old, PolicyNow);
         // 일부 성공이나 강제 종료에 대비해 API 호출 전에 복원할 값을 보존한다.
         if (persist) SaveJournal();
-        if (!provider.Validate(process)) { originals.Remove(process.Pid); return; }
+        // A sensor/model/log/journal stall must not turn old observations into
+        // an action. Use elapsed monotonic time so replay clocks remain honest.
+        bool finalValidated = provider.Validate(process);
+        bool evidenceExpired = settings.PolicyName == "carp" && (evidence is null ||
+            (snapshot.Time - evidence.ObservedAt).TotalSeconds + tickClock.Elapsed.TotalSeconds > settings.Carp.MaxEvidenceAgeSeconds);
+        if (!finalValidated || evidenceExpired) {
+            originals.Remove(process.Pid);
+            Audit("apply", now, process, evidenceExpired ? "evidence-expired-before-write" : "final-validation-rejected"); return;
+        }
         bool ok = provider.WriteValues(process.Pid, value, process.Identity);
+        appliedActions[(process.Pid, process.Identity)] = action;
+        resourcePolicy.OnActionChanged(process.Pid, process.Identity, action, PolicyNow);
         if (!ok) { pending.Add(process.Pid); failures[process.Pid] = now; }
+        Audit("apply", now, process, ok ? "applied" : "partial-failure-restore-pending", new { Requested = value, Action = action });
         Log($"{process.Name} · 우선순위/EcoQoS/CPU Sets {(ok ? "적용" : "일부 실패 · 원복 재시도")}");
     }
     private void Restore(int pid)
     {
         if (!originals.TryGetValue(pid, out var original)) return;
         long? identity = provider.Identity(pid);
-        if (identity is null) { if (provider.Exited(pid)) { originals.Remove(pid); pending.Remove(pid); } else pending.Add(pid); return; }
-        if (identity != original.Process.Identity) { originals.Remove(pid); pending.Remove(pid); return; }
-        if (!provider.Validate(original.Process, restoring: true) || !SafeValues(original.Values)) { pending.Add(pid); return; }
-        if (provider.WriteValues(pid, original.Values, identity.Value)) { originals.Remove(pid); pending.Remove(pid); Log($"{original.Process.Name} · 원래 자원 설정 복원"); }
+        if (identity is null) {
+            if (provider.Exited(pid)) { originals.Remove(pid); pending.Remove(pid); appliedActions.Remove((pid, original.Process.Identity)); }
+            else pending.Add(pid);
+            Audit("restore", DateTimeOffset.UtcNow, original.Process, pending.Contains(pid) ? "identity-unavailable-pending" : "process-exited"); return;
+        }
+        if (identity != original.Process.Identity) { originals.Remove(pid); pending.Remove(pid); appliedActions.Remove((pid, original.Process.Identity)); Audit("restore", DateTimeOffset.UtcNow, original.Process, "pid-reused-no-write"); return; }
+        if (!provider.Validate(original.Process, restoring: true) || !SafeValues(original.Values)) { pending.Add(pid); Audit("restore", DateTimeOffset.UtcNow, original.Process, "validation-pending"); return; }
+        bool restored = provider.WriteValues(pid, original.Values, identity.Value);
+        if (restored) {
+            originals.Remove(pid); pending.Remove(pid); appliedActions.Remove((pid, original.Process.Identity));
+            resourcePolicy.OnActionChanged(pid, original.Process.Identity, ResourceAction.None, PolicyNow);
+            Log($"{original.Process.Name} · 원래 자원 설정 복원");
+        }
         else pending.Add(pid);
+        Audit("restore", DateTimeOffset.UtcNow, original.Process, restored ? "restored" : "write-failed-pending", new {
+            Original = original.Values, RestrictedDurationMs = original.AppliedAt is {} since ? (double?)Math.Max(0, (PolicyNow - since).TotalMilliseconds) : null });
     }
     private static bool SafeValues(ResourceValues value) => value.MemoryPriority is >= 1 and <= 5 && value.CpuPriority is 0x20 or 0x4000 or 0x40 &&
         (value.PowerControl & ~5U) == 0 && (value.PowerState & ~5U) == 0 && value.CpuSets is { Length: <= 4096 };
@@ -259,7 +357,7 @@ public sealed class Engine : IDisposable
     private void Log(string message, bool dry = false)
     {
         events.Enqueue(new(DateTimeOffset.UtcNow, message, dry)); while (events.Count > 300) events.Dequeue();
-        if (persist && !dry) try { File.AppendAllText(Path.Combine(root, "events.jsonl"), JsonSerializer.Serialize(new LogEntry(DateTimeOffset.UtcNow, message, dry)) + "\n"); } catch (IOException) { }
+        if (persist && !dry) try { File.AppendAllText(Path.Combine(root, "events.jsonl"), JsonSerializer.Serialize(new LogEntry(DateTimeOffset.UtcNow, message, dry)) + "\n"); } catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
     public void Stop()
     {

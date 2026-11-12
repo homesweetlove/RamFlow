@@ -60,12 +60,12 @@ public sealed class BackgroundJobQueue : IDisposable
         var entry=entries.FirstOrDefault(x=>x.Id==id && x.Status=="Waiting"); if(entry is null) return false;
         entry.Status="Cancelled";entry.Message="대기 작업 취소";return true;
     }
-    public void Tick(Snapshot snapshot,Settings settings) {
+    public void Tick(Snapshot snapshot,Settings settings, bool deferStarts = false) {
         foreach(var entry in entries.Where(x=>x.Status=="Running")) {
             try { if(!entry.Process!.HasExited) continue; entry.Exit=entry.Process.ExitCode; entry.Status=entry.Exit==0?"Completed":"Failed";entry.Message="종료 코드 "+entry.Exit; }
             catch(Exception e) { entry.Message="종료 확인 대기: "+e.Message; }
         }
-        if(stopped || settings.DryRun || settings.Paused) return;
+        if(stopped || settings.DryRun || settings.Paused || deferStarts) return;
         ulong reserved=0;
         foreach(var entry in entries.Where(x=>x.Status=="Running")) {
             ulong estimate=(ulong)entry.Request.EstimatedMemoryMiB*1048576;

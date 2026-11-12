@@ -1,0 +1,28 @@
+{
+  "commit": "2715b8777d5dddd3973e0745c3f2571386ac5b56",
+  "native_run": 43045561114,
+  "product_run": 43045561032,
+  "status": "success",
+  "excerpt": [
+    "2026-11-11T15:10:37.2950878Z Ran 10 tests in 0.084s\r",
+    "2026-11-11T15:10:37.4096697Z Ran 13 tests in 0.024s\r",
+    "2026-11-11T15:10:37.5770156Z Ran 5 tests in 0.074s\r",
+    "2026-11-11T15:10:37.7268613Z Ran 5 tests in 0.021s\r",
+    "2026-11-11T15:10:48.9505627Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T15:10:48.9949421Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T15:10:49.0695565Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T15:10:49.0888439Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T15:10:49.1013419Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T15:10:49.1040049Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T15:11:33.6704453Z Native regression: 437 assertions passed; no live Windows processes changed.\r",
+    "2026-11-11T15:11:33.7256252Z Native persisted recovery: 439 assertions passed.\r",
+    "2026-11-11T15:11:33.8029632Z Native safety regression: 446 assertions passed.\r",
+    "2026-11-11T15:11:33.8220424Z Native warm-page protection regression: 459 assertions passed.\r",
+    "2026-11-11T15:11:33.8341625Z Native pressure relief regression: 499 assertions passed.\r",
+    "2026-11-11T15:11:33.8366951Z Native app-group activity regression: 503 assertions passed.\r",
+    "2026-11-11T15:11:38.6837778Z Native Windows verification: 515 assertions passed.\r",
+    "2026-11-11T15:11:38.8648945Z Native IPC verification: 525 assertions passed.\r",
+    "2026-11-11T15:13:16.4210041Z ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.\r",
+    "2026-11-11T15:14:06.9111063Z Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at D:\\a\\RamFlow\\RamFlow\\work\\logging-integration-5c82ab95ce16487ca1f62d226f45d773\r"
+  ]
+}

@@ -1,0 +1,28 @@
+TEST test_research_paper_audit.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+TEST test_research_app_batch.py
+{"event": "session-start", "index": 1, "total": 3, "session": "one", "app": "chrome", "condition": "A", "block": 1}
+{"event": "session-end", "index": 1, "status": "completed", "safe_to_continue": true}
+{"event": "session-start", "index": 2, "total": 3, "session": "two", "app": "chrome", "condition": "A", "block": 2}
+{"event": "session-end", "index": 2, "status": "failed", "safe_to_continue": false}
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.040s
+
+OK
+TEST test_research_analyze.py
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 2.346s
+
+OK
+TEST test_research_logcheck.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.293s
+
+OK

@@ -32,6 +32,18 @@ static class BackgroundJobsTests
         uncertain.Enqueue(request);uncertain.Tick(memory,settings with { BackgroundConcurrency=1 });
         brokenStatusLauncher.Children[0].Unknown=true;uncertain.Enqueue(request);uncertain.Tick(memory,settings with { BackgroundConcurrency=1 });
         check(brokenStatusLauncher.Children.Count==1 && uncertain.Summaries[0].Status=="Running","Unknown child exit status freed a running slot");
+        var deferredLauncher = new Launcher(); using var deferred = new BackgroundJobQueue(deferredLauncher);
+        var deferredJob = deferred.Enqueue(request); deferred.Tick(memory, settings, deferStarts: true);
+        check(deferredLauncher.Children.Count == 0, "CARP admission guard launched a deferred job");
+        deferred.Tick(memory, settings); check(deferredLauncher.Children.Count == 1, "Admission guard never released a waiting job");
+        deferredLauncher.Children[0].Finished = true; deferred.Enqueue(request); deferred.Tick(memory, settings, deferStarts: true);
+        check(deferred.Summaries.Single(x => x.Id == deferredJob.Id).Status == "Completed" && deferredLauncher.Children.Count == 1,
+            "Admission deferral skipped completion accounting or launched new work");
+        var blockedLauncher = new Launcher(); using var provider = new MockResourceProvider();
+        using (var engine = new Engine(provider, persist: false, jobLauncher: blockedLauncher, audit: new BrokenAudit())) {
+            engine.ApplySettings(new() { PolicyName = "carp", DryRun = false }); engine.EnqueueBackgroundJob(request); engine.Tick();
+            check(blockedLauncher.Children.Count == 0, "Audit failure started a new queued research job");
+        }
         Console.WriteLine("Background queue regressions passed.");
     }
     sealed class Launcher : IBackgroundJobLauncher {
@@ -39,6 +51,7 @@ static class BackgroundJobsTests
         public IBackgroundJobProcess Start(BackgroundJobRequest request) { var c=new Child(100+Children.Count);Children.Add(c);return c; }
     }
     sealed class BrokenLauncher : IBackgroundJobLauncher { public IBackgroundJobProcess Start(BackgroundJobRequest request)=>throw new IOException("test launch failure"); }
+    sealed class BrokenAudit : IResearchAuditSink { public void Write(ResearchAuditEvent entry) => throw new IOException("test audit failure"); }
     sealed class Child(int pid) : IBackgroundJobProcess {
         public bool Finished,Unknown; public int Id=>pid; public long Identity=>pid; public bool HasExited=>Unknown?throw new IOException("temporary status failure"):Finished; public int ExitCode=>0; public ulong PrivateBytes=>0; public void Dispose(){}
     }

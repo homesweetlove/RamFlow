@@ -1,0 +1,11 @@
+{
+  "captured_kst": "2026-11-12",
+  "cpu_name": "13th Gen Intel(R) Core(TM) i5-13400",
+  "physical_cores": 10,
+  "logical_processors": 16,
+  "os_build": "10.0.26200.0",
+  "ram_total_bytes": 25430679552,
+  "source": "CPU: read-only Win32_Processor after sessions; OS/RAM: sealed run-manifest and system snapshots",
+  "chrome_version": "157.0.8103.39",
+  "vscode_version": "1.140.0"
+}

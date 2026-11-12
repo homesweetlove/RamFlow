@@ -1,0 +1,51 @@
+{
+  "archive_sha256": "f2aa2c4855a298e7cc6a62edafe3f5dce004427a450427605039b58faa7b105d",
+  "checked_archive": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\outputs\\RamFlow-real-app-ABC-smoke-evidence.zip",
+  "runs": [
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\app-archive-check-d3de6ad3695145a8b7090f5570b0c980\\pilot\\chrome-A",
+      "records": 423
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\app-archive-check-d3de6ad3695145a8b7090f5570b0c980\\pilot\\chrome-B",
+      "records": 4
+    },
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-11-10\\referenced-chatgpt-conversation-this-is-an\\work\\RamFlow\\work\\app-archive-check-d3de6ad3695145a8b7090f5570b0c980\\pilot\\chrome-C",
+      "records": 646
+    }
+  ],
+  "no_failed_run_reclassified": true,
+  "complete_phase_raw_summary_diagnostics": [
+    {
+      "session": "chrome-A",
+      "status": "completed",
+      "raw_to_summary_errors": [],
+      "promoted_to_success": false
+    },
+    {
+      "session": "chrome-C",
+      "status": "failed",
+      "raw_to_summary_errors": [],
+      "promoted_to_success": false
+    }
+  ]
+}

@@ -5,3 +5,7 @@
 *.yml text eol=lf
 *.ps1 text eol=crlf
 *.bat text eol=crlf
+# Sealed derived artifacts retain their indexed bytes across Git checkouts.
+docs/research/evidence/2026-11-12-qos-v4/** -text
+docs/research/evidence/2026-11-12-abc-batch/** -text
+docs/research/evidence/2026-11-12-paper-audit/** -text

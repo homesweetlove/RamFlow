@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "seed": 20261110,
+  "blocks": 6,
+  "purpose": "Comparison experiment skeleton only. No experiment or latency results are supplied.",
+  "workloads": {
+    "cpu": {
+      "kind": "synthetic",
+      "description": "Proposed CPU contention regime. Workload generator, pressure target, foreground task, correctness check and fixture must be supplied."
+    },
+    "ram": {
+      "kind": "synthetic",
+      "description": "Proposed memory contention regime. Allocation budget and memory headroom must be defined by the supplied adapter."
+    },
+    "mixed": {
+      "kind": "synthetic",
+      "description": "Proposed combined CPU and memory contention regime. Define pressure and foreground/background work together."
+    },
+    "healthy": {
+      "kind": "synthetic",
+      "description": "Proposed healthy-headroom control regime. It is a control label, not a measurement of the host."
+    }
+  },
+  "conditions": {
+    "A": {
+      "label": "no engine",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Externally establish absence without stopping an existing user engine. Supply a workload adapter and independent absence evidence."
+    },
+    "B": {
+      "label": "dry",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Externally select dry run. Define engine binary, configuration and restoration evidence."
+    },
+    "C": {
+      "label": "fixed",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Specify the fixed policy's exact parameters and binary. The coarse observer cannot distinguish it from D/E/F."
+    },
+    "D": {
+      "label": "V1",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Specify and pin the V1 implementation and settings; no V1 runner adapter is built in."
+    },
+    "E": {
+      "label": "CARP",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Specify and pin CARP implementation and settings; no CARP runner adapter is built in."
+    },
+    "F": {
+      "label": "ablation",
+      "adapter": "unimplemented",
+      "command": null,
+      "definition": "Predeclare the single mechanism removed from CARP, all retained settings and the matching binary. No ablation is implemented here."
+    }
+  },
+  "protocol": {
+    "reset": {
+      "mode": "unimplemented",
+      "description": "Before every condition trial, define restoration of adapter-owned processes, fixture state, cache policy, cooldown and verification of baseline. No automatic user-app reset is provided.",
+      "command": null
+    },
+    "warmup": {
+      "mode": "unimplemented",
+      "description": "After reset, before observation and measurement, define warmup work, duration, cache semantics and the excluded evidence. No default sleep or warmup workload is run.",
+      "command": null
+    },
+    "timeout_seconds": 300
+  },
+  "observer": {
+    "enabled": false,
+    "duration_seconds": 120,
+    "sample_seconds": 2,
+    "measurement": "off",
+    "ramflow_pids": [],
+    "settings_pipe": null,
+    "acknowledge_existing_intervention": false,
+    "by_condition": {}
+  },
+  "binaries": []
+}

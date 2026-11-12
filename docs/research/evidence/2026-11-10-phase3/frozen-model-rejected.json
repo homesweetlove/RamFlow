@@ -1,0 +1,200 @@
+{
+  "SchemaVersion": 3,
+  "ModelId": "6d23a96a138896bba251481a7150ab8647f21add8d5d1aa98435a21e6c546cb0",
+  "HardwareId": "251b947a03c93baa09a14ca24570e1e9e4c9c47cc99f54f955f8cc3224d45199",
+  "WorkloadId": "synthetic-sha-pagewalk-v1:cpu:fg8:bg32:threads12:units0:gap5:observer-independent-v1",
+  "Options": {
+    "MinFitBlocks": 3,
+    "MinValidationBlocks": 3,
+    "Neighbours": 3,
+    "SupportRadius": 0.15,
+    "MaxValidationMae": 0.15,
+    "MinQuality": 0.8
+  },
+  "FitBlockIds": [
+    "2581b3db2f6b47fab41bd72aebc2d4a9",
+    "2a1b15be1ac4412caf19a9e963055072",
+    "32e3d24daa294fba9cc657e98f867425",
+    "3d18d0b93ec14221a9c8abde23919ea5",
+    "5671f6592a87428f88388bbfa402af51",
+    "baebfe277447428c88824df532989bec"
+  ],
+  "ValidationBlockIds": [
+    "1b7987d1e8444f53838a6052a6b33d32",
+    "3a5a497a7d334e53936c086fe6dbfea8",
+    "586cfbe0a55c4fc5b4c72ea3f990712e"
+  ],
+  "Cells": [
+    {
+      "Contention": "Cpu",
+      "Action": "LowerCpu",
+      "Fit": [
+        {
+          "BlockId": "3d18d0b93ec14221a9c8abde23919ea5",
+          "Features": {
+            "CpuPercent": 89.85365853658537,
+            "AvailableFraction": 0.4053916930894289,
+            "CommitFraction": 0.5907767073351965,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.007492517042449132,
+          "BackgroundLoss": 0.004947864392282675,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.016213858066900066
+        },
+        {
+          "BlockId": "2a1b15be1ac4412caf19a9e963055072",
+          "Features": {
+            "CpuPercent": 84.32692307692308,
+            "AvailableFraction": 0.40667264541055703,
+            "CommitFraction": 0.5900191349274813,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.0003132650829373862,
+          "BackgroundLoss": 0.011598643831159827,
+          "ReaccessRisk": 0.09892888123988142,
+          "ControlCost": 0.007314898563431635
+        },
+        {
+          "BlockId": "baebfe277447428c88824df532989bec",
+          "Features": {
+            "CpuPercent": 89.20454545454545,
+            "AvailableFraction": 0.4064506974288502,
+            "CommitFraction": 0.5901608252877112,
+            "PagesInputPerSecond": 0.9818154041731475,
+            "Valid": true
+          },
+          "ForegroundGain": -0.00894921726504383,
+          "BackgroundLoss": -0.02274081437464681,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.008654792284111413
+        },
+        {
+          "BlockId": "32e3d24daa294fba9cc657e98f867425",
+          "Features": {
+            "CpuPercent": 88.36538461538461,
+            "AvailableFraction": 0.4059906949355594,
+            "CommitFraction": 0.5897806452505949,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.0006649518775527774,
+          "BackgroundLoss": -0.0016690441143305534,
+          "ReaccessRisk": 0,
+          "ControlCost": 0.008282080106068495
+        },
+        {
+          "BlockId": "2581b3db2f6b47fab41bd72aebc2d4a9",
+          "Features": {
+            "CpuPercent": 90.48076923076923,
+            "AvailableFraction": 0.4052328827048404,
+            "CommitFraction": 0.5901045913252048,
+            "PagesInputPerSecond": 0.9819996517829236,
+            "Valid": true
+          },
+          "ForegroundGain": 0.002518725106967601,
+          "BackgroundLoss": 0.029430799909168193,
+          "ReaccessRisk": 0.4572094888354228,
+          "ControlCost": 0.00888810883317582
+        },
+        {
+          "BlockId": "5671f6592a87428f88388bbfa402af51",
+          "Features": {
+            "CpuPercent": 85.09615384615384,
+            "AvailableFraction": 0.4057154343399592,
+            "CommitFraction": 0.5901227592207837,
+            "PagesInputPerSecond": 0,
+            "Valid": true
+          },
+          "ForegroundGain": -0.00010855008106025466,
+          "BackgroundLoss": 0.007487729342220972,
+          "ReaccessRisk": 0.05321020734385962,
+          "ControlCost": 0.007437555791520149
+        }
+      ],
+      "ValidationBlocks": 3,
+      "ForegroundMae": 0.008065747758182917,
+      "BackgroundMae": 0.016239469908912542,
+      "ReaccessMae": 0.021964052530203948,
+      "OverheadMae": 0.0017785149814712664,
+      "ErrorBounds": [
+        0.013781713469913711,
+        0.019256050909325695,
+        0.039427000973209614,
+        0.0024692953366907498
+      ],
+      "Quality": 0.9605729990267904,
+      "Accepted": false,
+      "Reason": "validation-outside-fit-support",
+      "ReferenceBackgroundUnitsPerSecond": 518.3299934097794
+    }
+  ],
+  "DatasetSha256": "f0adeb91cb53c834fadaeba1583c5017fc50f661e0d773f5e569b6b57f185554",
+  "ValidationPredictions": [
+    {
+      "BlockId": "3a5a497a7d334e53936c086fe6dbfea8",
+      "Contention": "Cpu",
+      "Action": "LowerCpu",
+      "Actual": [
+        0.013419457789396905,
+        0.019028665261516142,
+        0.046211925440715396,
+        0.006590443527421643
+      ],
+      "Predicted": [
+        -0.00036225568051680607,
+        0.005805776353016749,
+        0.05071302952791368,
+        0.007678178153673426
+      ],
+      "AbsoluteErrors": [
+        0.013781713469913711,
+        0.013222888908499392,
+        0.004501104087198282,
+        0.001087734626251783
+      ],
+      "Status": "predicted-held-out-block"
+    },
+    {
+      "BlockId": "586cfbe0a55c4fc5b4c72ea3f990712e",
+      "Contention": "Cpu",
+      "Action": "LowerCpu",
+      "Actual": [
+        0.002023919043238398,
+        -0.0005813264564369369,
+        0.018301369068547624,
+        0.009515888794491618
+      ],
+      "Predicted": null,
+      "AbsoluteErrors": null,
+      "Status": "outside-fit-feature-support"
+    },
+    {
+      "BlockId": "1b7987d1e8444f53838a6052a6b33d32",
+      "Contention": "Cpu",
+      "Action": "LowerCpu",
+      "Actual": [
+        -0.00040555762056859734,
+        0.022844900782716726,
+        0.05716373675449615,
+        0.008175202651472153
+      ],
+      "Predicted": [
+        -0.002755339667020721,
+        0.0035888498733910312,
+        0.01773673578128654,
+        0.010644497988162903
+      ],
+      "AbsoluteErrors": [
+        0.0023497820464521237,
+        0.019256050909325695,
+        0.039427000973209614,
+        0.0024692953366907498
+      ],
+      "Status": "predicted-held-out-block"
+    }
+  ],
+  "Scope": "paired instrumented task effects; not physical user input latency; quality is not a probability"
+}

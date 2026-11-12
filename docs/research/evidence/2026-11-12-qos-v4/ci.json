@@ -1,0 +1,20 @@
+{
+  "source_commit": "bff7583801c2a09beaf352673de10256e652e08a",
+  "native_run_id": 43148479476,
+  "native_job_id": 130951819387,
+  "native_conclusion": "success",
+  "product_run_id": 43148479412,
+  "product_conclusion": "success",
+  "windows_assertions": 515,
+  "ipc_assertions": 525,
+  "local_python_tests": {
+    "app_contract": 14,
+    "sustained_admission": 5,
+    "cpu_worker_windows": 2,
+    "owned_qos_windows": 2,
+    "integrity": 10
+  },
+  "local_windows_lab_integration": "passed",
+  "local_logging_failure_cancellation_integration": "passed",
+  "note": "CI Windows API/IPC tests are distinct from the six local real-app smoke sessions. Counts are cumulative within native executable."
+}

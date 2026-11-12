@@ -1,0 +1,36 @@
+  RamFlow.Core -> C:\Users\user\Documents\Codex\2026-11-10\referenced-chatgpt-conversation-this-is-an\work\RamFlow\native\RamFlow.Core\bin\Release\net10.0-windows\RamFlow.Core.dll
+  ResearchLab -> C:\Users\user\Documents\Codex\2026-11-10\referenced-chatgpt-conversation-this-is-an\work\RamFlow\scripts\ResearchLab\bin\Release\net10.0-windows\ResearchLab.dll
+
+빌드했습니다.
+    경고 0개
+    오류 0개
+
+경과 시간: 00:00:00.72
+TEST test_research_apps.py
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.064s
+
+OK
+TEST test_research_cpu_preflight.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.172s
+
+OK
+TEST test_research_cpu_worker_windows.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.433s
+
+OK
+TEST test_owned_process_qos_windows.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.023s
+
+OK
+TEST test_research_lab_windows.py
+ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.
+TEST test_research_logging_windows.py
+Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at C:\Users\user\Documents\Codex\2026-11-10\referenced-chatgpt-conversation-this-is-an\work\RamFlow\work\logging-integration-20885969501f4864a0d001c977fc4ff4

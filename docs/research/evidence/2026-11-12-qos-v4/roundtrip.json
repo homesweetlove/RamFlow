@@ -1,0 +1,67 @@
+{
+  "short_extraction_root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed",
+  "archive_sha256": "44a2c0ef1b6c7e5e1d5cbeee74e4ba7507d6f0bd11de18a892ad02e23a214f38",
+  "sealed_sessions": [
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\chrome-A",
+      "records": 1180
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\chrome-C",
+      "records": 1421
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\chrome-B",
+      "records": 1393
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\code-C",
+      "records": 1155
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\code-A",
+      "records": 933
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfq-247da6ed\\v4\\code-B",
+      "records": 1155
+    }
+  ],
+  "diagnostic_indices_verified": true
+}

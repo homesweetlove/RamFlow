@@ -1,4 +1,4 @@
-param([string]$Dotnet = 'dotnet', [switch]$SkipTests, [string]$ArchiveName = 'RamFlow-0.3.4-windows-x64.zip')
+param([string]$Dotnet = 'dotnet', [switch]$SkipTests, [string]$ArchiveName = 'RamFlow-0.4.0-carp.2-research-windows-x64.zip')
 $ErrorActionPreference = 'Stop'
 $ramRoot = Split-Path -Parent $PSScriptRoot
 $ramDotnet = $Dotnet
@@ -11,6 +11,22 @@ try {
     if (-not $SkipTests) {
         python scripts/test_benchmark_observer.py
         if ($LASTEXITCODE -ne 0) { throw 'Standalone benchmark observer regression failed' }
+        python scripts/test_research_matrix.py
+        if ($LASTEXITCODE -ne 0) { throw 'Research matrix regression failed' }
+        python scripts/test_research_analyze.py
+        if ($LASTEXITCODE -ne 0) { throw 'Research analysis regression failed' }
+        python scripts/test_research_logcheck.py
+        if ($LASTEXITCODE -ne 0) { throw 'Research evidence-integrity regression failed' }
+        python scripts/test_research_apps.py
+        if ($LASTEXITCODE -ne 0) { throw 'Real-app evidence-contract regression failed' }
+        python scripts/test_research_app_batch.py
+        if ($LASTEXITCODE -ne 0) { throw 'Real-app batch/order/pairing/safety-stop regression failed' }
+        python scripts/test_research_paper_audit.py
+        if ($LASTEXITCODE -ne 0) { throw 'Paper audit readback-state interval regression failed' }
+        python scripts/test_research_cpu_preflight.py
+        if ($LASTEXITCODE -ne 0) { throw 'CPU preflight sustained-pressure regression failed' }
+        python scripts/test_research_lab_adapter.py
+        if ($LASTEXITCODE -ne 0) { throw 'Research lab binding regression failed' }
         & $ramDotnet run --project native/RamFlow.Tests/RamFlow.Tests.csproj -c Release
         if ($LASTEXITCODE -ne 0) { throw 'Native regression failed' }
         & $ramDotnet run --project native/RamFlow.Storage.Tests/RamFlow.Storage.Tests.csproj -c Release

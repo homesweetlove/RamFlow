@@ -1,0 +1,228 @@
+[
+  {
+    "split": "exploratory-batch",
+    "hardware_id": "i5-13400/24GB",
+    "workload_id": "chrome/search",
+    "regime": "Contention",
+    "regime_basis": "v4 normal-QoS input",
+    "baseline_condition": "A",
+    "candidate_condition": "C",
+    "baseline_policy_variant": "absent",
+    "candidate_policy_variant": "v1",
+    "n_blocks": 6,
+    "block_points": [
+      {
+        "session_block_id": "b01",
+        "baseline_fg_p95_ms": 32.079999999701975,
+        "candidate_fg_p95_ms": 32.00499999523163,
+        "baseline_bg_units_per_s": 8245.724794050704,
+        "candidate_bg_units_per_s": 5246.900324330871
+      },
+      {
+        "session_block_id": "b02",
+        "baseline_fg_p95_ms": 32.35999999791384,
+        "candidate_fg_p95_ms": 33.21999999582767,
+        "baseline_bg_units_per_s": 8250.13906028313,
+        "candidate_bg_units_per_s": 5272.818249620456
+      },
+      {
+        "session_block_id": "b03",
+        "baseline_fg_p95_ms": 32.01000000536441,
+        "candidate_fg_p95_ms": 31.87500000298023,
+        "baseline_bg_units_per_s": 8277.480251415172,
+        "candidate_bg_units_per_s": 5095.351001746007
+      },
+      {
+        "session_block_id": "b04",
+        "baseline_fg_p95_ms": 31.11500000804663,
+        "candidate_fg_p95_ms": 32.53000000268221,
+        "baseline_bg_units_per_s": 8228.863018327924,
+        "candidate_bg_units_per_s": 5037.248938058581
+      },
+      {
+        "session_block_id": "b05",
+        "baseline_fg_p95_ms": 32.00999999940395,
+        "candidate_fg_p95_ms": 31.510000000894063,
+        "baseline_bg_units_per_s": 8269.962072786906,
+        "candidate_bg_units_per_s": 5070.7159329741535
+      },
+      {
+        "session_block_id": "b06",
+        "baseline_fg_p95_ms": 31.715000002086164,
+        "candidate_fg_p95_ms": 32.790000000596045,
+        "baseline_bg_units_per_s": 8219.11448109747,
+        "candidate_bg_units_per_s": 5173.076564132091
+      }
+    ],
+    "baseline_fg_p95_ms": 31.88166666875283,
+    "candidate_fg_p95_ms": 32.32166666636864,
+    "baseline_bg_units_per_s": 8248.547279660217,
+    "candidate_bg_units_per_s": 5149.351835143693
+  },
+  {
+    "split": "exploratory-batch",
+    "hardware_id": "i5-13400/24GB",
+    "workload_id": "chrome/search",
+    "regime": "Contention",
+    "regime_basis": "v4 normal-QoS input",
+    "baseline_condition": "B",
+    "candidate_condition": "C",
+    "baseline_policy_variant": "fixed",
+    "candidate_policy_variant": "v1",
+    "n_blocks": 6,
+    "block_points": [
+      {
+        "session_block_id": "b01",
+        "baseline_fg_p95_ms": 32.30500000119209,
+        "candidate_fg_p95_ms": 32.00499999523163,
+        "baseline_bg_units_per_s": 1801.4243670981823,
+        "candidate_bg_units_per_s": 5246.900324330871
+      },
+      {
+        "session_block_id": "b02",
+        "baseline_fg_p95_ms": 30.61499999538064,
+        "candidate_fg_p95_ms": 33.21999999582767,
+        "baseline_bg_units_per_s": 1813.4588177493479,
+        "candidate_bg_units_per_s": 5272.818249620456
+      },
+      {
+        "session_block_id": "b03",
+        "baseline_fg_p95_ms": 31.809999997913838,
+        "candidate_fg_p95_ms": 31.87500000298023,
+        "baseline_bg_units_per_s": 1838.0807436249988,
+        "candidate_bg_units_per_s": 5095.351001746007
+      },
+      {
+        "session_block_id": "b04",
+        "baseline_fg_p95_ms": 32.959999991953374,
+        "candidate_fg_p95_ms": 32.53000000268221,
+        "baseline_bg_units_per_s": 1733.4427843268015,
+        "candidate_bg_units_per_s": 5037.248938058581
+      },
+      {
+        "session_block_id": "b05",
+        "baseline_fg_p95_ms": 33.20000000298023,
+        "candidate_fg_p95_ms": 31.510000000894063,
+        "baseline_bg_units_per_s": 1832.199397832543,
+        "candidate_bg_units_per_s": 5070.7159329741535
+      },
+      {
+        "session_block_id": "b06",
+        "baseline_fg_p95_ms": 33.20000000298023,
+        "candidate_fg_p95_ms": 32.790000000596045,
+        "baseline_bg_units_per_s": 1826.7650228240457,
+        "candidate_bg_units_per_s": 5173.076564132091
+      }
+    ],
+    "baseline_fg_p95_ms": 32.34833333206674,
+    "candidate_fg_p95_ms": 32.32166666636864,
+    "baseline_bg_units_per_s": 1807.5618555759866,
+    "candidate_bg_units_per_s": 5149.351835143693
+  },
+  {
+    "split": "exploratory-batch",
+    "hardware_id": "i5-13400/24GB",
+    "workload_id": "code/completion",
+    "regime": "Contention",
+    "regime_basis": "v4 normal-QoS input",
+    "baseline_condition": "A",
+    "candidate_condition": "C",
+    "baseline_policy_variant": "absent",
+    "candidate_policy_variant": "v1",
+    "n_blocks": 5,
+    "block_points": [
+      {
+        "session_block_id": "b02",
+        "baseline_fg_p95_ms": 131.92086000000307,
+        "candidate_fg_p95_ms": 98.5873649999965,
+        "baseline_bg_units_per_s": 7687.464193272279,
+        "candidate_bg_units_per_s": 5038.331984346731
+      },
+      {
+        "session_block_id": "b03",
+        "baseline_fg_p95_ms": 127.67047000000167,
+        "candidate_fg_p95_ms": 120.49987000000473,
+        "baseline_bg_units_per_s": 7742.0669453078135,
+        "candidate_bg_units_per_s": 4826.29822659793
+      },
+      {
+        "session_block_id": "b04",
+        "baseline_fg_p95_ms": 114.83407000000224,
+        "candidate_fg_p95_ms": 115.6140000000014,
+        "baseline_bg_units_per_s": 7679.6859203209115,
+        "candidate_bg_units_per_s": 4653.698159588025
+      },
+      {
+        "session_block_id": "b05",
+        "baseline_fg_p95_ms": 118.60980000000286,
+        "candidate_fg_p95_ms": 107.11715999999939,
+        "baseline_bg_units_per_s": 7668.022137877533,
+        "candidate_bg_units_per_s": 5084.203734923137
+      },
+      {
+        "session_block_id": "b06",
+        "baseline_fg_p95_ms": 106.2003849999999,
+        "candidate_fg_p95_ms": 107.66060000000289,
+        "baseline_bg_units_per_s": 7643.69161161403,
+        "candidate_bg_units_per_s": 4994.169214796495
+      }
+    ],
+    "baseline_fg_p95_ms": 119.84711700000194,
+    "candidate_fg_p95_ms": 109.89579900000098,
+    "baseline_bg_units_per_s": 7684.186161678514,
+    "candidate_bg_units_per_s": 4919.340264050464
+  },
+  {
+    "split": "exploratory-batch",
+    "hardware_id": "i5-13400/24GB",
+    "workload_id": "code/completion",
+    "regime": "Contention",
+    "regime_basis": "v4 normal-QoS input",
+    "baseline_condition": "B",
+    "candidate_condition": "C",
+    "baseline_policy_variant": "fixed",
+    "candidate_policy_variant": "v1",
+    "n_blocks": 5,
+    "block_points": [
+      {
+        "session_block_id": "b02",
+        "baseline_fg_p95_ms": 71.84481500000365,
+        "candidate_fg_p95_ms": 98.5873649999965,
+        "baseline_bg_units_per_s": 1776.7809095415237,
+        "candidate_bg_units_per_s": 5038.331984346731
+      },
+      {
+        "session_block_id": "b03",
+        "baseline_fg_p95_ms": 76.43796000000293,
+        "candidate_fg_p95_ms": 120.49987000000473,
+        "baseline_bg_units_per_s": 1778.2521183022418,
+        "candidate_bg_units_per_s": 4826.29822659793
+      },
+      {
+        "session_block_id": "b04",
+        "baseline_fg_p95_ms": 79.94038999999756,
+        "candidate_fg_p95_ms": 115.6140000000014,
+        "baseline_bg_units_per_s": 1734.5549368162492,
+        "candidate_bg_units_per_s": 4653.698159588025
+      },
+      {
+        "session_block_id": "b05",
+        "baseline_fg_p95_ms": 73.22112000000052,
+        "candidate_fg_p95_ms": 107.11715999999939,
+        "baseline_bg_units_per_s": 1767.8459045840475,
+        "candidate_bg_units_per_s": 5084.203734923137
+      },
+      {
+        "session_block_id": "b06",
+        "baseline_fg_p95_ms": 78.62373999999909,
+        "candidate_fg_p95_ms": 107.66060000000289,
+        "baseline_bg_units_per_s": 1764.600149804549,
+        "candidate_bg_units_per_s": 4994.169214796495
+      }
+    ],
+    "baseline_fg_p95_ms": 76.01360500000075,
+    "candidate_fg_p95_ms": 109.89579900000098,
+    "baseline_bg_units_per_s": 1764.4068038097223,
+    "candidate_bg_units_per_s": 4919.340264050464
+  }
+]

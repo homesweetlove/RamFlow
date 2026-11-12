@@ -1,0 +1,26 @@
+2026-11-12T04:07:47.5792348Z Ran 38 tests in 0.089s
+2026-11-12T04:07:52.2137019Z Ran 28 tests in 4.420s
+2026-11-12T04:07:53.5589390Z Ran 25 tests in 1.065s
+2026-11-12T04:07:53.7582075Z Ran 10 tests in 0.106s
+2026-11-12T04:07:53.8771720Z Ran 14 tests in 0.028s
+2026-11-12T04:07:54.0356732Z Ran 6 tests in 0.048s
+2026-11-12T04:07:54.2096041Z Ran 5 tests in 0.073s
+2026-11-12T04:07:54.3615566Z Ran 5 tests in 0.020s
+2026-11-12T04:08:06.2428495Z Native regression: 437 assertions passed; no live Windows processes changed.
+2026-11-12T04:08:06.6224408Z Native persisted recovery: 439 assertions passed.
+2026-11-12T04:08:06.6923012Z Native safety regression: 446 assertions passed.
+2026-11-12T04:08:06.7066986Z Native warm-page protection regression: 459 assertions passed.
+2026-11-12T04:08:06.7158288Z Native pressure relief regression: 499 assertions passed.
+2026-11-12T04:08:06.7176846Z Native app-group activity regression: 503 assertions passed.
+2026-11-12T04:08:53.6842933Z Native regression: 437 assertions passed; no live Windows processes changed.
+2026-11-12T04:08:53.7389435Z Native persisted recovery: 439 assertions passed.
+2026-11-12T04:08:53.8277052Z Native safety regression: 446 assertions passed.
+2026-11-12T04:08:53.8464432Z Native warm-page protection regression: 459 assertions passed.
+2026-11-12T04:08:53.8579442Z Native pressure relief regression: 499 assertions passed.
+2026-11-12T04:08:53.8604019Z Native app-group activity regression: 503 assertions passed.
+2026-11-12T04:08:58.7734327Z Native Windows verification: 515 assertions passed.
+2026-11-12T04:08:58.9620581Z Native IPC verification: 525 assertions passed.
+2026-11-12T04:09:06.4238353Z Ran 2 tests in 0.601s
+2026-11-12T04:09:06.5280505Z Ran 2 tests in 0.019s
+2026-11-12T04:10:18.3096557Z ResearchLab Windows integration passed: absence/fixed setters/readback/independent observer/timings/overwrite/failure preservation; no user process modified.
+2026-11-12T04:10:55.3231974Z Logging integration passed: setup/commit/batch failures, abrupt logger-only termination, graceful cancellation, adapter streams/alias/integrity gate; retained at D:\a\RamFlow\RamFlow\work\logging-integration-0c932df2d5b14ccb9399f0c389a5bb96
