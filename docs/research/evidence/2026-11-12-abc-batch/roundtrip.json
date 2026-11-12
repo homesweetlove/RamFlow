@@ -1,0 +1,367 @@
+{
+  "extraction_root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085",
+  "archive_sha256": "9a12337fe045a0e404cba518a0f49a5a92966aafd5974530df9f07d7bb04da7e",
+  "indexed_files_verified": 3143,
+  "sealed_runs": [
+    {
+      "ok": true,
+      "status": "failed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\code-C",
+      "records": 44
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\code-B",
+      "records": 1161
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\code-A",
+      "records": 933
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\chrome-B",
+      "records": 1387
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\chrome-A",
+      "records": 1181
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b01\\chrome-C",
+      "records": 1409
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\chrome-A",
+      "records": 1176
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\chrome-B",
+      "records": 1398
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\chrome-C",
+      "records": 1410
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\code-B",
+      "records": 1178
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\code-A",
+      "records": 914
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b02\\code-C",
+      "records": 1121
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\code-B",
+      "records": 1149
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\code-C",
+      "records": 1132
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\code-A",
+      "records": 897
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\chrome-B",
+      "records": 1410
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\chrome-C",
+      "records": 1409
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b03\\chrome-A",
+      "records": 1183
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\code-A",
+      "records": 915
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\code-C",
+      "records": 1137
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\code-B",
+      "records": 1167
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\chrome-C",
+      "records": 1416
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\chrome-B",
+      "records": 1398
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b04\\chrome-A",
+      "records": 1177
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\chrome-C",
+      "records": 1404
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\chrome-A",
+      "records": 1183
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\chrome-B",
+      "records": 1387
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\code-A",
+      "records": 919
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\code-B",
+      "records": 1178
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b05\\code-C",
+      "records": 1143
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\chrome-A",
+      "records": 1170
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\chrome-C",
+      "records": 1426
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\chrome-B",
+      "records": 1393
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\code-C",
+      "records": 1120
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\code-A",
+      "records": 920
+    },
+    {
+      "ok": true,
+      "status": "completed",
+      "kind": "real-app-smoke",
+      "performance_ready": false,
+      "errors": [],
+      "warnings": [],
+      "root": "C:\\Users\\user\\Documents\\Codex\\rfb-36417085\\batch\\b06\\code-B",
+      "records": 1155
+    }
+  ]
+}

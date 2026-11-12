@@ -1,0 +1,52 @@
+TEST test_research_app_batch.py
+{"event": "session-start", "index": 1, "total": 3, "session": "one", "app": "chrome", "condition": "A", "block": 1}
+{"event": "session-end", "index": 1, "status": "completed", "safe_to_continue": true}
+{"event": "session-start", "index": 2, "total": 3, "session": "two", "app": "chrome", "condition": "A", "block": 2}
+{"event": "session-end", "index": 2, "status": "failed", "safe_to_continue": false}
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.032s
+
+OK
+TEST test_research_apps.py
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.051s
+
+OK
+TEST test_research_cpu_preflight.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.175s
+
+OK
+TEST test_research_analyze.py
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 2.848s
+
+OK
+TEST test_research_logcheck.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.214s
+
+OK
+TEST test_research_matrix.py
+............................
+----------------------------------------------------------------------
+Ran 28 tests in 11.368s
+
+OK
+TEST test_benchmark_observer.py
+......................................
+----------------------------------------------------------------------
+Ran 38 tests in 0.055s
+
+OK
+TEST test_research_lab_adapter.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.046s
+
+OK
